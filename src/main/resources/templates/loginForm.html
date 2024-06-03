@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body style="display: flex; align-items: center; justify-content: center; height: 90vh">
+<form action="/member/loginProc" method="post" name="loginForm" style="display: inline-block">
+    <fieldset>
+        <legend><h2>로그인</h2></legend>
+        <input type="text" name="id" placeholder="ID" style="width: 200px"/><br>
+        <input type="password" name="password" placeholder="password" style="width: 200px"/><br>
+        <div style="text-align: right;">
+            <input type="submit" value="login" />
+        </div><br>
+        <div style="text-align: right;">
+            <a href="/member/join">회원가입</a>
+        </div>
+    </fieldset>
+</form><br>
+</body>
+</html>
