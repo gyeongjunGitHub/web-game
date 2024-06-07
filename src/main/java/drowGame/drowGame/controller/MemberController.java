@@ -1,9 +1,7 @@
 package drowGame.drowGame.controller;
 
-import drowGame.drowGame.SocketHandler;
 import drowGame.drowGame.dto.MemberDTO;
 import drowGame.drowGame.service.MemberService;
-import drowGame.drowGame.service.MemberSessionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -11,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.socket.WebSocketSession;
 
 @Controller
 @RequestMapping("/member")
@@ -32,6 +29,12 @@ public class MemberController {
     @PostMapping("/joinProc")
     public String joinProc(@ModelAttribute MemberDTO memberDTO){
         memberService.joinProc(memberDTO);
+        return "loginForm";
+    }
+
+    @GetMapping("/logout")
+    public String logoutProc(HttpSession httpSession){
+        memberService.logoutProc(httpSession);
         return "loginForm";
     }
 
