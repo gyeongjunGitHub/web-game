@@ -20,19 +20,36 @@
         </div>
     </div>
 
-    <div id="chattingArea" style="border: 1px solid black; text-align: center; display:inline-block;">
+    <div id="chattingArea" style="border: 1px solid black; width: 300px;">
+        <div id="memberNameArea" style="border: 1px solid black; text-align: center;"></div>
+        <div id="chatContentArea" style="height: 300px;">
+
+        </div>
+        <div style="display: flex;">
+            <input id="message" type="text" style="width: 240px;">
+            <button onclick="sendMessage()" style="width: 60px;">전송</button>
+        </div>
 
     </div>
 
 <script type="text/javascript">
     const memberListTable = document.getElementById('memberListTable');
     const chattingArea = document.getElementById('chattingArea');
+    const memberNameArea = document.getElementById('memberNameArea');
+    const chatContentArea = document.getElementById('chatContentArea');
+    const message = document.getElementById('message');
+
+    let chattingAreaMemberName = '';
+    let chattingAreaIsTrue = false;
+
+    //채팅창 공강 기본 숨김
     chattingArea.style.display = 'none';
 
     let memberList = [];
     var ws;
-    window.onload = wsOpen;
 
+    //로그인 후 main 페이지 로드 시 소캣 연걸
+    window.onload = wsOpen;
     function wsOpen(){
         ws = new WebSocket("ws://" + location.host + "/start");
         wsEvt();
@@ -40,11 +57,18 @@
 
     function wsEvt() {
         ws.onopen = function(data){
-<!--            ws.send("{\"request\": \"memberLogin\"}");-->
+
         }
 
+
         ws.onmessage = function(data) {
+            console.log(data.data);
             let msg = JSON.parse(data.data);
+
+            // 다른 member 에게 메시지를 받은 경우
+            if(msg.request == 'sendMessage'){
+                chatContentArea.innerHTML += `<p style="text-align: left;">${msg.data}</p>`;
+            }
 
             if(msg.member != undefined){
 
@@ -84,8 +108,49 @@
 <!--        });-->
     }
     function chat(member){
-        chattingArea.style.display = 'block';
-        chattingArea.innerHTML = member +' 과의 채팅 공간';
+        if(chattingAreaMemberName != member){
+            chattingAreaMemberName = member;
+        }else{
+            chattingAreaIsTrue = !chattingAreaIsTrue;
+        }
+
+        if(chattingAreaIsTrue){
+            chattingArea.style.display = 'none';
+        }else{
+            chattingArea.style.display = 'block';
+        }
+
+        memberNameArea.innerHTML = member;
+    }
+    function RequestParam (request, receiver, data, date){
+        this.request = request;
+        this.receiver = receiver;
+        this.data = data;
+        this.date = date;
+    }
+
+    function getCurrentDateTime() {
+        const now = new Date();
+
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 1을 더해줍니다.
+        const day = String(now.getDate()).padStart(2, '0');
+
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        const seconds = String(now.getSeconds()).padStart(2, '0');
+
+        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+    }
+
+    function sendMessage(){
+        console.log(getCurrentDateTime());
+        const requestParam = new RequestParam('sendMessage', memberNameArea.innerHTML, message.value, getCurrentDateTime());
+
+        ws.send(JSON.stringify(requestParam));
+
+        message.value = '';
+        chatContentArea.innerHTML += `<p style="text-align: right;">${requestParam.data}</p>`;
     }
 </script>
 </body>

@@ -27,21 +27,16 @@ public class SocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
         //메시지 발송
         String msg = message.getPayload();
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        RequestDTO requestDTO = new RequestDTO();
-//        requestDTO = objectMapper.readValue(msg, RequestDTO.class);
+        ObjectMapper objectMapper = new ObjectMapper();
+        RequestDTO requestDTO = new RequestDTO();
+        requestDTO = objectMapper.readValue(msg, RequestDTO.class);
+        System.out.println(requestDTO.getDate());
 
-
-        System.out.println(socketSessionAndMemberID.get(session.getId())+" : "+ message);
-        for(String key : sessionMap.keySet()) {
-            WebSocketSession wss = sessionMap.get(key);
-            try {
-                System.out.println("현재 접속중인 유저"+" : "+socketSessionAndMemberID.get(key));
-                wss.sendMessage(new TextMessage(msg));
-            }catch(Exception e) {
-                e.printStackTrace();
-            }
+        if(requestDTO.getRequest().equals("sendMessage")){
+            WebSocketSession receiverSession = socketService.findReceiverSession(requestDTO, sessionMap, socketSessionAndMemberID);
+            socketService.sendMessage(receiverSession, socketService.dtoToJson(requestDTO));
         }
+
     }
 
     @Override
@@ -54,13 +49,14 @@ public class SocketHandler extends TextWebSocketHandler {
 
         //소켓에 연결된 member 의 아이디를 httpSession 에서 가져와 SocketSessionAndMemberID 에 추가
         socketSessionAndMemberID.put(session.getId(), memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
+
         System.out.println("-----------------------------------------------------------------------");
         System.out.println("http session ID -> "+session.getAttributes().get("httpSessionId"));
         System.out.println("member ID -> "+memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
         System.out.println("-----------------------------------------------------------------------");
 
         //소캣 연결 시 현재 소캣에 연결되어 있는 member의 목록을 전송
-        socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID);
+        socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
     }
 
     @Override
