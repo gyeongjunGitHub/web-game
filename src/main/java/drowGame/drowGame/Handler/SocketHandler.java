@@ -1,5 +1,6 @@
 package drowGame.drowGame.Handler;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -30,7 +31,6 @@ public class SocketHandler extends TextWebSocketHandler {
         ObjectMapper objectMapper = new ObjectMapper();
         RequestDTO requestDTO = new RequestDTO();
         requestDTO = objectMapper.readValue(msg, RequestDTO.class);
-        System.out.println(requestDTO.getDate());
 
         if(requestDTO.getRequest().equals("sendMessage")){
             WebSocketSession receiverSession = socketService.findReceiverSession(requestDTO, sessionMap, socketSessionAndMemberID);
@@ -41,8 +41,10 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
+
         //소켓 연결
         super.afterConnectionEstablished(session);
+        System.out.println(LocalDateTime.now());
 
         //소켓에 연결된 member 의 socket session ID 를 sessionMap 에 추가
         sessionMap.put(session.getId(), session);
@@ -51,6 +53,7 @@ public class SocketHandler extends TextWebSocketHandler {
         socketSessionAndMemberID.put(session.getId(), memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
 
         System.out.println("-----------------------------------------------------------------------");
+
         System.out.println("http session ID -> "+session.getAttributes().get("httpSessionId"));
         System.out.println("member ID -> "+memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
         System.out.println("-----------------------------------------------------------------------");

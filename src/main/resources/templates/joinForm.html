@@ -5,30 +5,91 @@
     <title>Title</title>
 </head>
 <body style="display: flex; align-items: center; justify-content: center; height: 90vh">
-<form action="/member/joinProc" method="post" name="loginForm" style="display: inline-block">
-    <fieldset>
-        <legend><h2>회원가입</h2></legend>
-        <input type="text" name="id" placeholder="ID" style="width: 200px"/><br>
-        <input type="password" name="password" placeholder="password" style="width: 200px"/><br>
-        <input type="text" id="name" name="name" placeholder="name" style="width: 200px">
-        <div style="text-align: center;">
-            <div data-togglee="buttons">
-                <label>
-                    <input type="radio" name="gender" autocomplete="off" value="남자" checked>남자
-                </label>
-                <label>
-                    <input type="radio" name="gender" autocomplete="off" value="여자" checked>여자
-                </label>
-            </div>
+
+<fieldset style="text-align:left;">
+    <legend><h2>회원가입</h2></legend>
+    <input type="text" id="id" name="id" placeholder="ID" style="width: 180px"/><button style="width: 70px;" onclick="duplicateCheck()">중복체크</button><br>
+    <input type="password" id="password" name="password" placeholder="password" style="width: 250px;"/><br>
+    <input type="text" id="name" name="name" placeholder="name" style="width: 250px"><br>
+
+    <div style="text-align: center;">
+
+        <div data-togglee="buttons">
+            <label>
+                <input type="radio" name="gender" autocomplete="off" value="남자" checked>남자
+            </label>
+            <label>
+                <input type="radio" name="gender" autocomplete="off" value="여자" checked>여자
+            </label>
         </div>
-        <input type="email" id="email" name="email" placeholder="email" style="width: 200px">
-        <div style="text-align: right;">
-            <input type="submit" value="회원가입" />
-        </div><br>
-        <div style="text-align: right;">
-            <a href="/">로그인</a>
-        </div>
-    </fieldset>
-</form><br>
+    </div>
+
+    <input type="email" id="email" name="email" placeholder="email" style="width: 250px">
+    <div style="text-align: right;">
+        <button onclick="test()">회원가입</button>
+    </div><br>
+    <div style="text-align: right;">
+        <a href="/">로그인</a>
+    </div>
+</fieldset>
+<script>
+    //member 변수
+    const id = document.getElementById('id');
+    const password = document.getElementById('password');
+    const name = document.getElementById('name');
+    const genderRadios = document.querySelectorAll('input[name="gender"]');
+    const email = document.getElementById('email');
+
+    //Member 생성자
+    function Member (id, password, name, gender, email){
+        this.id = id;
+        this.password = password;
+        this.name = name;
+        this.gender = gender;
+        this.email = email;
+    }
+
+    //post 요청
+    async function postRequest(url = '', data = {}){
+        try{
+            const response = await fetch(url, {
+                method : 'POST',
+                headers : { 'Content-Type': 'application/json' },
+                body : JSON.stringify(data)
+            });
+
+            if(!response.ok){
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            // JSON 형식으로 변환된 데이터를 가져옴.
+            const responseData = await response.json();
+
+            console.log(responseData);
+        }catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+
+    function duplicateCheck(){
+        let url = '/member/duplicateCheck';
+        let checkParam = {
+            id : id.value
+        };
+        postRequest(url, checkParam);
+    }
+
+    function test(){
+        let selectedGender;
+        for (const radio of genderRadios) {
+            if (radio.checked) {
+                selectedGender = radio.value;
+                break;
+            }
+        }
+        const member = new Member(id.value, password.value, name.value, selectedGender, email.value);
+        console.log(member);
+    }
+</script>
 </body>
 </html>

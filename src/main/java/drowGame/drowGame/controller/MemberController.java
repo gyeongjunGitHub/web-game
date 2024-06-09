@@ -1,14 +1,13 @@
 package drowGame.drowGame.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import drowGame.drowGame.dto.MemberDTO;
 import drowGame.drowGame.service.MemberService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/member")
@@ -36,6 +35,13 @@ public class MemberController {
     public String logoutProc(HttpSession httpSession){
         memberService.logoutProc(httpSession);
         return "loginForm";
+    }
+
+    @PostMapping("/duplicateCheck")
+    @ResponseBody
+    public ResponseEntity<Void> duplicateCheck(@RequestBody String data) throws JsonProcessingException {
+        memberService.duplicateCheck(data);
+        return ResponseEntity.ok().build();
     }
 
 }

@@ -122,30 +122,15 @@
 
         memberNameArea.innerHTML = member;
     }
-    function RequestParam (request, receiver, data, date){
+    function RequestParam (request, receiver, data){
         this.request = request;
         this.receiver = receiver;
         this.data = data;
-        this.date = date;
     }
 
-    function getCurrentDateTime() {
-        const now = new Date();
-
-        const year = now.getFullYear();
-        const month = String(now.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 1을 더해줍니다.
-        const day = String(now.getDate()).padStart(2, '0');
-
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        const seconds = String(now.getSeconds()).padStart(2, '0');
-
-        return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-    }
 
     function sendMessage(){
-        console.log(getCurrentDateTime());
-        const requestParam = new RequestParam('sendMessage', memberNameArea.innerHTML, message.value, getCurrentDateTime());
+        const requestParam = new RequestParam('sendMessage', memberNameArea.innerHTML, message.value);
 
         ws.send(JSON.stringify(requestParam));
 
