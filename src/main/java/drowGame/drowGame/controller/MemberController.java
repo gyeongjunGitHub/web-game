@@ -2,6 +2,7 @@ package drowGame.drowGame.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import drowGame.drowGame.dto.MemberDTO;
+import drowGame.drowGame.dto.ResultDTO;
 import drowGame.drowGame.service.MemberService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -17,18 +18,21 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping("/loginProc")
-    public String loginProc(@ModelAttribute MemberDTO memberDTO, HttpSession httpSession){
-        memberService.loginProc(memberDTO, httpSession);
-        return "main";
+    @ResponseBody
+    public ResponseEntity<ResultDTO> loginProc(@RequestBody MemberDTO memberDTO, HttpSession httpSession){
+        ResultDTO resultDTO = memberService.loginProc(memberDTO, httpSession);
+        return ResponseEntity.ok(resultDTO);
     }
     @GetMapping("/join")
     public String goJoinForm(){
         return "joinForm";
     }
+
     @PostMapping("/joinProc")
-    public String joinProc(@ModelAttribute MemberDTO memberDTO){
-        memberService.joinProc(memberDTO);
-        return "loginForm";
+    @ResponseBody
+    public ResponseEntity<ResultDTO> joinProc(@RequestBody MemberDTO memberDTO) {
+        ResultDTO resultDTO = memberService.joinProc(memberDTO);
+        return ResponseEntity.ok(resultDTO);
     }
 
     @GetMapping("/logout")
@@ -39,9 +43,9 @@ public class MemberController {
 
     @PostMapping("/duplicateCheck")
     @ResponseBody
-    public ResponseEntity<Void> duplicateCheck(@RequestBody String data) throws JsonProcessingException {
-        memberService.duplicateCheck(data);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<ResultDTO> duplicateCheck(@RequestBody String data) throws JsonProcessingException {
+        ResultDTO resultDTO = memberService.duplicateCheck(data);
+        return ResponseEntity.ok(resultDTO);
     }
 
 }

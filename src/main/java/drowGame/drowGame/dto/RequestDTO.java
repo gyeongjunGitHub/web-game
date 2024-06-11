@@ -11,6 +11,4 @@ public class RequestDTO {
     private String request;
     private String receiver;
     private String data;
-    private LocalDateTime date;
-
 }

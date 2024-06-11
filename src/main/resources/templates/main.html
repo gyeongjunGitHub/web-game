@@ -4,19 +4,32 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <meta charset="UTF-8">
     <title>Chating</title>
+    <style>
+        #chatContentArea{
+            overflow-y: scroll;
+        }
+
+    </style>
 </head>
 
 <body>
-    <div>
+    <!--상단 바-->
+    <div style="text-align: right; border: 1px solid black; height: 5vh;">
+        <span id="myIdArea"></span>
         <a href="/member/logout">로그아웃</a>
         <span></span>
     </div>
 
-    <div id="container" class="container">
-        <div style="border: 1px solid black; text-align: center; display:inline-block;">
-            <table id="memberListTable" style="text-align: center;">
+    <!--중단 바-->
+    <div style="display: flex;">
+        <div style="width: 85%; height:30vh; border: 1px solid black;"></div>
+        <!--현재 접속중인 유저-->
+        <div style="text-align: center; width: 15%;">
+            <div style="border: 1px solid black; text-align: center;">
+                <table id="memberListTable" style="text-align: center;">
 
-            </table>
+                </table>
+            </div>
         </div>
     </div>
 
@@ -27,7 +40,7 @@
         </div>
         <div style="display: flex;">
             <input id="message" type="text" style="width: 240px;">
-            <button onclick="sendMessage()" style="width: 60px;">전송</button>
+            <button onclick="setMessage()" style="width: 60px;">전송</button>
         </div>
 
     </div>
@@ -38,9 +51,12 @@
     const memberNameArea = document.getElementById('memberNameArea');
     const chatContentArea = document.getElementById('chatContentArea');
     const message = document.getElementById('message');
+    const myIdArea = document.getElementById('myIdArea');
+    let myId = '';
 
     let chattingAreaMemberName = '';
     let chattingAreaIsTrue = false;
+    let chattingData = [];
 
     //채팅창 공강 기본 숨김
     chattingArea.style.display = 'none';
@@ -57,17 +73,30 @@
 
     function wsEvt() {
         ws.onopen = function(data){
-
+            //
         }
 
 
         ws.onmessage = function(data) {
-            console.log(data.data);
             let msg = JSON.parse(data.data);
 
             // 다른 member 에게 메시지를 받은 경우
             if(msg.request == 'sendMessage'){
-                chatContentArea.innerHTML += `<p style="text-align: left;">${msg.data}</p>`;
+                chattingData.push(msg);
+                if(msg.sender == myId){
+                    chatContentArea.innerHTML += `<p style="text-align: right; margin: 0px;">${msg.content}</p>`;
+                }else{
+                    chatContentArea.innerHTML += `<p style="text-align: left; margin: 0px;">${msg.content}</p>`;
+                }
+                chatContentArea.scrollTop = chatContentArea.scrollHeight;
+            }
+            if(Array.isArray(msg)){
+                chattingData = msg;
+            }
+
+            if(msg.myId != undefined){
+                myIdArea.innerHTML = `${msg.myId}`;
+                myId = msg.myId;
             }
 
             if(msg.member != undefined){
@@ -85,7 +114,7 @@
                     memberList.push(msg.member);
                     memberListTable.innerHTML = `
                         <tr>
-                            <th>현재 접속중이 유저</th>
+                            <th>접속중</th>
                         </tr>
                     `;
                     for(let i = 0; i < memberList.length; i++){
@@ -97,45 +126,58 @@
                     }
                 }
             }
-
-
         }
 
-<!--        document.addEventListener("keypress", function(e){-->
-<!--            if(e.keyCode == 13){ //enter press-->
-<!--                send();-->
-<!--            }-->
-<!--        });-->
+
     }
     function chat(member){
+        memberNameArea.innerHTML = member;
+
         if(chattingAreaMemberName != member){
             chattingAreaMemberName = member;
         }else{
             chattingAreaIsTrue = !chattingAreaIsTrue;
         }
 
-        if(chattingAreaIsTrue){
+        if (chattingAreaIsTrue) {
             chattingArea.style.display = 'none';
-        }else{
+        } else {
+            chatContentArea.innerHTML = '';
+            inputAllChattingData(member);
             chattingArea.style.display = 'block';
+            chatContentArea.scrollTop = chatContentArea.scrollHeight;
         }
-
-        memberNameArea.innerHTML = member;
     }
-    function RequestParam (request, receiver, data){
+    function RequestParam (request, receiver, data = ''){
         this.request = request;
         this.receiver = receiver;
         this.data = data;
     }
 
+    function inputAllChattingData(member){
+        for(let i = 0; i < chattingData.length; i++){
+            if( (chattingData[i].sender == member && chattingData[i].receiver == myId)
+                || (chattingData[i].sender == myId && chattingData[i].receiver == member) ){
 
-    function sendMessage(){
+                if(chattingData[i].sender == myId){
+                    chatContentArea.innerHTML += `<p style="text-align: right; margin: 0px;">${chattingData[i].content}</p>`;
+                }else{
+                    chatContentArea.innerHTML += `<p style="text-align: left; margin: 0px;">${chattingData[i].content}</p>`;
+                }
+            }
+        }
+    }
+
+
+
+    function setMessage(){
         const requestParam = new RequestParam('sendMessage', memberNameArea.innerHTML, message.value);
-
-        ws.send(JSON.stringify(requestParam));
-
+        send(requestParam);
         message.value = '';
-        chatContentArea.innerHTML += `<p style="text-align: right;">${requestParam.data}</p>`;
+    }
+
+    function send(requestParam){
+        ws.send(JSON.stringify(requestParam));
     }
 </script>
 </body>

@@ -1,12 +1,16 @@
 package drowGame.drowGame.Handler;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import drowGame.drowGame.dto.ChattingDTO;
 import drowGame.drowGame.dto.RequestDTO;
+import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.service.MemberSessionService;
 import drowGame.drowGame.service.SocketService;
 import lombok.RequiredArgsConstructor;
@@ -31,10 +35,20 @@ public class SocketHandler extends TextWebSocketHandler {
         ObjectMapper objectMapper = new ObjectMapper();
         RequestDTO requestDTO = new RequestDTO();
         requestDTO = objectMapper.readValue(msg, RequestDTO.class);
+        String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
 
-        if(requestDTO.getRequest().equals("sendMessage")){
-            WebSocketSession receiverSession = socketService.findReceiverSession(requestDTO, sessionMap, socketSessionAndMemberID);
-            socketService.sendMessage(receiverSession, socketService.dtoToJson(requestDTO));
+        if (requestDTO.getRequest().equals("sendMessage")) {
+            ChattingDTO chattingDTO = new ChattingDTO();
+            chattingDTO.setSender(myId);
+            chattingDTO.setReceiver(requestDTO.getReceiver());
+            chattingDTO.setContent(requestDTO.getData());
+            ChattingDTO result = socketService.chatContentSave(chattingDTO);
+            result.setRequest(requestDTO.getRequest());
+
+            WebSocketSession receiverSession = socketService.findReceiverSession(result.getReceiver(), sessionMap, socketSessionAndMemberID);
+            WebSocketSession senderSession = socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID);
+            socketService.sendMessage(receiverSession, socketService.dtoToJson(result));
+            socketService.sendMessage(senderSession, socketService.dtoToJson(result));
         }
 
     }
@@ -42,9 +56,9 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
 
+        String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
         //소켓 연결
         super.afterConnectionEstablished(session);
-        System.out.println(LocalDateTime.now());
 
         //소켓에 연결된 member 의 socket session ID 를 sessionMap 에 추가
         sessionMap.put(session.getId(), session);
@@ -53,13 +67,21 @@ public class SocketHandler extends TextWebSocketHandler {
         socketSessionAndMemberID.put(session.getId(), memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
 
         System.out.println("-----------------------------------------------------------------------");
-
         System.out.println("http session ID -> "+session.getAttributes().get("httpSessionId"));
         System.out.println("member ID -> "+memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
         System.out.println("-----------------------------------------------------------------------");
 
         //소캣 연결 시 현재 소캣에 연결되어 있는 member의 목록을 전송
-        socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
+        socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
+
+        //채팅 데이터 전송
+        List<ChattingDTO> result = socketService.getChattingData(myId);
+        List<String> chattingData = new ArrayList<>();
+        for(ChattingDTO c : result){
+            //request : getChattingData 로 세팅
+            chattingData.add(socketService.dtoToJson(c));
+        }
+        socketService.sendMessage(socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID), chattingData.toString());
     }
 
     @Override

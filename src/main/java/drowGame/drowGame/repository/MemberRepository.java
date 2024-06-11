@@ -17,7 +17,8 @@ public class MemberRepository {
         return Optional.ofNullable(memberEntity);
     }
 
-    public void memberSave(MemberEntity memberEntity) {
+    public String memberSave(MemberEntity memberEntity) {
         em.persist(memberEntity);
+        return memberEntity.getId();
     }
 }
