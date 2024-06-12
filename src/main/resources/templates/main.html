@@ -64,6 +64,13 @@
     let memberList = [];
     var ws;
 
+    //생성자
+    function RequestParam (request, receiver, data = ''){
+        this.request = request;
+        this.receiver = receiver;
+        this.data = data;
+    }
+
     //로그인 후 main 페이지 로드 시 소캣 연걸
     window.onload = wsOpen;
     function wsOpen(){
@@ -71,74 +78,104 @@
         wsEvt();
     }
 
+    //소캣 이벤트
     function wsEvt() {
+        //소캣 오픈 이벤트
         ws.onopen = function(data){
             //
         }
 
-
+        //소캣 메시지 이벤트
         ws.onmessage = function(data) {
             let msg = JSON.parse(data.data);
+            receiveMessageHandler(msg);
+        }
+    }
 
-            // 다른 member 에게 메시지를 받은 경우
-            if(msg.request == 'sendMessage'){
-                chattingData.push(msg);
-                if(msg.sender == myId){
-                    chatContentArea.innerHTML += `<p style="text-align: right; margin: 0px;">${msg.content}</p>`;
-                }else{
+    //메시지 처리 핸들러
+    function receiveMessageHandler(msg){
+
+        // 다른 member 에게 메시지를 받은 경우
+        if(msg.request == 'sendMessage'){
+
+            //chattingData 배열에 msg 추가
+            chattingData.push(msg);
+
+            //내가 보낸 메시지 일 경우
+            if(msg.sender == myId){
+                chatContentArea.innerHTML += `<p style="text-align: right; margin: 0px;">${msg.content}</p>`;
+            }
+            //상대가 보낸 메시지 일 경우
+            else{
+                // receiver 와 myId 동일해야함
+                // getMember() 와 sender 가 동일해야함
+                if(myId == msg.receiver && getMember() == msg.sender){
                     chatContentArea.innerHTML += `<p style="text-align: left; margin: 0px;">${msg.content}</p>`;
                 }
-                chatContentArea.scrollTop = chatContentArea.scrollHeight;
-            }
-            if(Array.isArray(msg)){
-                chattingData = msg;
             }
 
-            if(msg.myId != undefined){
-                myIdArea.innerHTML = `${msg.myId}`;
-                myId = msg.myId;
-            }
+            //스크롤 위치 조정
+            chatContentArea.scrollTop = chatContentArea.scrollHeight;
+        }
 
-            if(msg.member != undefined){
+        //chattingData 배열형식으로 넘어옴
+        if(Array.isArray(msg)){
+            chattingData = msg;
+        }
 
-                //중복 검사
-                let isMemberExist=0;
+        //myId
+        if(msg.myId != undefined){
+            myIdArea.innerHTML = `${msg.myId}`;
+            myId = msg.myId;
+        }
+
+        //memberList 처리
+        if(msg.member != undefined){
+            let isMemberExist=0;
+
+            //중복 검사
+            isMemberExist = duplicateCheck(msg, isMemberExist);
+
+            //memberList 에 member 추가
+            if(isMemberExist == 0){
+                memberList.push(msg.member);
+                memberListTable.innerHTML = `
+                    <tr>
+                        <th>접속중</th>
+                    </tr>
+                `;
                 for(let i = 0; i < memberList.length; i++){
-                    if(memberList[i] == msg.member){
-                        isMemberExist++;
-                    }
-                }
-
-                //memberList 에 member 추가
-                if(isMemberExist == 0){
-                    memberList.push(msg.member);
-                    memberListTable.innerHTML = `
+                    memberListTable.innerHTML += `
                         <tr>
-                            <th>접속중</th>
+                            <td onclick="chat('${memberList[i]}')">${memberList[i]}</td>
                         </tr>
                     `;
-                    for(let i = 0; i < memberList.length; i++){
-                        memberListTable.innerHTML += `
-                            <tr>
-                                <td onclick="chat('${memberList[i]}')">${memberList[i]}</td>
-                            </tr>
-                        `;
-                    }
                 }
             }
         }
-
-
     }
+
+    //현재 열려있는 채팅창의 member 를 저장
+    let member;
+    function getMember(){
+        return member;
+    }
+    function setMember(m){
+        member = m;
+    }
+
     function chat(member){
+        setMember(member);
         memberNameArea.innerHTML = member;
 
+        //채팅 공간 토글 처리
         if(chattingAreaMemberName != member){
             chattingAreaMemberName = member;
         }else{
             chattingAreaIsTrue = !chattingAreaIsTrue;
         }
 
+        //채팅 공간이 열려있을 때
         if (chattingAreaIsTrue) {
             chattingArea.style.display = 'none';
         } else {
@@ -148,12 +185,30 @@
             chatContentArea.scrollTop = chatContentArea.scrollHeight;
         }
     }
-    function RequestParam (request, receiver, data = ''){
-        this.request = request;
-        this.receiver = receiver;
-        this.data = data;
+
+    //메시지 set
+    function setMessage(){
+        const requestParam = new RequestParam('sendMessage', memberNameArea.innerHTML, message.value);
+        send(requestParam);
+        message.value = '';
     }
 
+    //메시지 전송
+    function send(requestParam){
+        ws.send(JSON.stringify(requestParam));
+    }
+
+    //멤버 중복체크
+    function duplicateCheck(msg, isMemberExist){
+        for(let i = 0; i < memberList.length; i++){
+            if(memberList[i] == msg.member){
+                isMemberExist++;
+            }
+        }
+        return isMemberExist;
+    }
+
+    //채팅공간에 채팅 데이터 입력
     function inputAllChattingData(member){
         for(let i = 0; i < chattingData.length; i++){
             if( (chattingData[i].sender == member && chattingData[i].receiver == myId)
@@ -166,18 +221,6 @@
                 }
             }
         }
-    }
-
-
-
-    function setMessage(){
-        const requestParam = new RequestParam('sendMessage', memberNameArea.innerHTML, message.value);
-        send(requestParam);
-        message.value = '';
-    }
-
-    function send(requestParam){
-        ws.send(JSON.stringify(requestParam));
     }
 </script>
 </body>
