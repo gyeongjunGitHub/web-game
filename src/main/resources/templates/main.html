@@ -22,7 +22,15 @@
 
     <!--중단 바-->
     <div style="display: flex;">
-        <div style="width: 85%; height:30vh; border: 1px solid black;"></div>
+        <div style="width: 85%; height:80vh; border: 1px solid black;">
+            <div style="display: flex; align-items: center; justify-content: center; border: 1px solid black; width: 50%;">
+                <button id="matchingStartBtn" onclick="matching('drowGameStart')">매칭 시작</button>
+                <button id="matchingCancleBtn" style="display: none;" onclick="matching('drowGameCancle')">매칭 취소</button>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; border: 1px solid black; width: 50%;">
+                <a href="#">bbbbnbb</a>
+            </div>
+        </div>
         <!--현재 접속중인 유저-->
         <div style="text-align: center; width: 15%;">
             <div style="border: 1px solid black; text-align: center;">
@@ -52,6 +60,8 @@
     const chatContentArea = document.getElementById('chatContentArea');
     const message = document.getElementById('message');
     const myIdArea = document.getElementById('myIdArea');
+    const matchingStartBtn = document.getElementById('matchingStartBtn');
+    const matchingCancleBtn = document.getElementById('matchingCancleBtn');
     let myId = '';
 
     let chattingAreaMemberName = '';
@@ -64,8 +74,27 @@
     let memberList = [];
     var ws;
 
+    function matching(request){
+        if(request == 'drowGameStart'){
+            const requestParam = new RequestParam('matchingStartDrowGame');
+            send(requestParam);
+
+            matchingStartBtn.style.display = 'none';
+            matchingCancleBtn.style.display = 'block';
+        }
+
+        if(request == 'drowGameCancle'){
+            const requestParam = new RequestParam('matchingCancleDrowGame');
+            send(requestParam);
+
+            matchingStartBtn.style.display = 'block';
+            matchingCancleBtn.style.display = 'none';
+        }
+
+    }
+
     //생성자
-    function RequestParam (request, receiver, data = ''){
+    function RequestParam (request, receiver = '', data = ''){
         this.request = request;
         this.receiver = receiver;
         this.data = data;
@@ -129,6 +158,11 @@
             myId = msg.myId;
         }
 
+        //logOutMember
+        if(msg.logOutMember != undefined){
+            console.log(msg.logOutMember);
+        }
+
         //memberList 처리
         if(msg.member != undefined){
             let isMemberExist=0;
@@ -147,7 +181,7 @@
                 for(let i = 0; i < memberList.length; i++){
                     memberListTable.innerHTML += `
                         <tr>
-                            <td onclick="chat('${memberList[i]}')">${memberList[i]}</td>
+                            <td id="member_${i}" onclick="chat('${memberList[i]}')">${memberList[i]}</td>
                         </tr>
                     `;
                 }

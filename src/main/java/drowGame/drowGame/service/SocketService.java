@@ -23,6 +23,28 @@ public class SocketService {
 
     private final ChattingRepository chattingRepository;
 
+
+    public void sendLogoutMember(WebSocketSession webSocketSession,
+                                 HashMap<String, WebSocketSession> sessionMap,
+                                 ConcurrentHashMap<String, String> socketSessionAndMemberID,
+                                 String myId) {
+
+        // socket sessionMap 순회
+        for(String memberKey : sessionMap.keySet()){
+            WebSocketSession wss = sessionMap.get(memberKey);
+
+            // 소캣에 등록된 Member 아이디와 myId가 같지 않으면 (자기 자신 제외)
+            if(!myId.equals(socketSessionAndMemberID.get(memberKey))){
+                for (String membersKey : sessionMap.keySet()) {
+                    // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
+                    if (!socketSessionAndMemberID.get(memberKey).equals(socketSessionAndMemberID.get(membersKey))) {
+                        String memberInfo = "{\"logOutMember\" : \"" + socketSessionAndMemberID.get(membersKey) + "\"}";
+                        sendMessage(wss, memberInfo);
+                    }
+                }
+            }
+        }
+    }
     //로그인 시 각 member 들은 자기 자신을 제외한 member 의 로그인 정보를 가지고 있어야 함
     public void sendLoginMemberList(WebSocketSession webSocketSession,
                                     HashMap<String, WebSocketSession> sessionMap,
@@ -102,5 +124,10 @@ public class SocketService {
             chattingDTOList.add(chattingDTO);
         }
         return chattingDTOList;
+    }
+
+
+    public void matching(ConcurrentHashMap<String, String> drowGameMatchingInfo) {
+        System.out.println("drowGame matching member size : " + drowGameMatchingInfo.size());
     }
 }

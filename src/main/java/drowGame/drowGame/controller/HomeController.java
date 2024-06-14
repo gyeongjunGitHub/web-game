@@ -25,4 +25,9 @@ public class HomeController {
         }
         return "main";
     }
+
+    @GetMapping("/drowGame")
+    public String goDrowGame(){
+        return "drowGame";
+    }
 }

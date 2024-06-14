@@ -25,8 +25,15 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class SocketHandler extends TextWebSocketHandler {
     private final SocketService socketService;
     private final MemberSessionService memberSessionService;
-    HashMap<String, WebSocketSession> sessionMap = new HashMap<>(); //웹소켓 세션을 담아둘 맵
+
+    //웹소켓 세션을 담아둘 맵
+    HashMap<String, WebSocketSession> sessionMap = new HashMap<>();
+
+    //웹소켓 세션과 MemberId를 담아둘 맵
     ConcurrentHashMap<String, String> socketSessionAndMemberID = new ConcurrentHashMap<>();
+
+    //게임 종류와 MemberId를 담아둘 맵
+    ConcurrentHashMap<String, String> drowGameMatchingInfo = new ConcurrentHashMap<>();
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
@@ -37,6 +44,15 @@ public class SocketHandler extends TextWebSocketHandler {
         requestDTO = objectMapper.readValue(msg, RequestDTO.class);
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
 
+        if(requestDTO.getRequest().equals("matchingStartDrowGame")){
+            drowGameMatchingInfo.put(myId, "drowGame");
+            socketService.matching(drowGameMatchingInfo);
+        }
+        if(requestDTO.getRequest().equals("matchingCancleDrowGame")){
+            drowGameMatchingInfo.remove(myId);
+            socketService.matching(drowGameMatchingInfo);
+        }
+        
         if (requestDTO.getRequest().equals("sendMessage")) {
             ChattingDTO chattingDTO = new ChattingDTO();
             chattingDTO.setSender(myId);
@@ -50,7 +66,6 @@ public class SocketHandler extends TextWebSocketHandler {
             socketService.sendMessage(receiverSession, socketService.dtoToJson(result));
             socketService.sendMessage(senderSession, socketService.dtoToJson(result));
         }
-
     }
 
     @Override
@@ -86,6 +101,8 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
+        socketService.sendLogoutMember(session, sessionMap, socketSessionAndMemberID, myId);
         //소켓 종료
         sessionMap.remove(session.getId());
         socketSessionAndMemberID.remove(session.getId());
