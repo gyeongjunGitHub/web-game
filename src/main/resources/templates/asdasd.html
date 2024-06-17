@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+        body {
+          margin: 0;
+        }
+        div {
+          box-sizing: border-box;
+        }
+
+        /* ============== */
+        /* ===채팅박스=== */
+        /* ============== */
+        #chattingArea {
+          width: 300px;
+          background: #eee;
+          border-radius: 5px;
+          padding: 10px 20px;
+          position: fixed;
+          bottom: 5px;
+          right: 5px;
+          border: 1px solid #ccc;
+          display: none;
+        }
+        /* ( 축소버튼 눌렀을때 ) */
+        .chatDownShow {
+          display: none;
+          text-align: center;
+        }
+        .chatUserName {
+          cursor: pointer;
+          padding: 10px 20px;
+        }
+        .chatUserName:hover {
+          background-color: rgba(255, 166, 0, 0.58);
+          border-radius: 5px;
+        }
+        /* ( 유저 이름 ) */
+        #memberNameArea {
+          border-bottom: 1px solid #aaa;
+
+          text-align: center;
+        }
+        /* ( 채팅창 ) */
+        #chatContentArea {
+          margin: 10px 0;
+          height: 300px;
+          font-size: 13px;
+        }
+        .chatBallonArea::after {
+          clear: both;
+          content: '';
+          display: block;
+        }
+        #chatContentArea::after {
+          content: '';
+          display: block;
+          clear: both;
+        }
+
+        .chattingBtn {
+          margin-bottom: 10px;
+        }
+        .chattingBtn::after {
+          content: '';
+          clear: both;
+          display: block;
+        }
+
+        .chat-ballon1 {
+          max-width: 70%;
+          background-color: yellow;
+          padding: 5px 10px;
+          border-radius: 5px;
+          border: 1px solid transparent;
+          margin: 5px 0;
+          position: relative;
+          float: right;
+          margin-right: 10px;
+        }
+        .chat-ballon1::after {
+          content: '';
+          display: inline-block;
+          border-top: 10px solid yellow;
+          border-left: 10px solid yellow;
+          border-right: 10px solid transparent;
+          border-bottom: 10px solid transparent;
+          position: absolute;
+          right: -10px;
+          top: 0;
+          z-index: -1;
+        }
+        .chat-ballon2 {
+          max-width: 70%;
+          background-color: white;
+          padding: 5px 10px;
+          border-radius: 5px;
+          border: 1px solid transparent;
+          margin: 5px 0;
+          position: relative;
+          float: left;
+          margin-left: 10px;
+        }
+        .chat-ballon2::after {
+          content: '';
+          display: inline-block;
+          border-top: 10px solid white;
+          border-left: 10px solid transparent;
+          border-right: 10px solid white;
+          border-bottom: 10px solid transparent;
+          position: absolute;
+          left: -10px;
+          top: 0;
+          z-index: -1;
+        }
+        #message {
+          border: none;
+          margin: 0;
+          border-bottom-left-radius: 5px;
+          flex-grow: 1;
+        }
+        #message:focus {
+          outline: none;
+        }
+        .send-btn {
+          background-color: #ccc;
+          border: none;
+          width: 50px;
+          padding: 10px;
+        }
+        .send-btn:hover {
+          background-color: #aaa;
+        }
+        /* ( 축소, 닫기버튼 ) */
+        .close,
+        .down {
+          width: 20px;
+          height: 20px;
+          padding: 5px;
+          float: right;
+          position: relative;
+          cursor: pointer;
+          box-sizing: content-box;
+        }
+        .close:hover,
+        .down:hover {
+          background-color: red;
+        }
+        .close:hover .close-bar,
+        .down:hover .down-bar {
+          background-color: white;
+        }
+        .close-bar {
+          background-color: gray;
+          height: 2px;
+          width: 50%;
+          position: absolute;
+        }
+        .close-bar:first-child {
+          top: 50%;
+          transform: translate(-50%, -50%) rotate(45deg);
+          left: 50%;
+        }
+        .close-bar:last-child {
+          top: 50%;
+          transform: translate(-50%, -50%) rotate(-45deg);
+          left: 50%;
+        }
+
+        .down-bar {
+          background-color: gray;
+          height: 2px;
+          width: 50%;
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+        }
+
+        /* ============ */
+        /* ===상단바=== */
+        /* ============ */
+        .nav {
+          box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          padding: 15px;
+          font-size: 13px;
+        }
+        .nav > * {
+          color: gray;
+        }
+        .nav > *::after {
+          content: '|';
+          padding: 0 10px;
+        }
+        .nav a {
+          text-decoration: none;
+          color: gray;
+          font-size: 13px;
+        }
+
+        /* =============== */
+        /* ===게임 영역=== */
+        /* =============== */
+        .container {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+        }
+
+        .game-area {
+          width: 80%;
+          padding: 50px;
+        }
+
+        .game1,
+        .game2 {
+          width: 100%;
+          min-height: 500px;
+          margin: 0 auto;
+          padding: 20px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          border-radius: 5px;
+          border: 1px solid gray;
+        }
+        .game1 {
+          margin-bottom: 50px;
+        }
+
+        #matchingStartBtn,
+        #matchingCancleBtn {
+          background: #0c6428aa;
+          padding: 5px 10px;
+          border-radius: 5px;
+          border: 1px solid transparent;
+          cursor: pointer;
+          color: white;
+        }
+        #matchingStartBtn:hover,
+        #matchingCancleBtn:hover {
+          background-color: rgb(216, 163, 63);
+          border: none;
+        }
+
+        #matchingCancleBtn {
+          display: none;
+        }
+
+        /* ============== */
+        /* ===유저상태=== */
+        /* ============== */
+        .user-area {
+          min-width: 200px;
+          width: 15%;
+          margin-top: 20px;
+          padding: 10px;
+        }
+        .user-shadow {
+          box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
+            rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+          padding: 20px;
+          position: sticky;
+          top: 20px;
+        }
+        .user-menu {
+          margin: 0;
+          padding: 0;
+          list-style: none;
+        }
+        .user-list {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          border: 1px solid green;
+          border-radius: 5px;
+          padding: 5px 10px;
+        }
+        .user-list:hover {
+          background-color: #eee;
+          cursor: pointer;
+        }
+        .user-name {
+          color: #333;
+        }
+        .user-online {
+          background-color: rgba(62, 157, 62, 0.6);
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+        }
+        .message-area {
+          display: flex;
+          margin: 0 -20px;
+          margin-bottom: -10px;
+        }
+    </style>
+</head>
+
+<body>
+<div id="chattingArea">
+    <div class="chatDownShow">
+        <div class="chatUserName">username</div>
+    </div>
+    <div class="chattingBig">
+        <div class="chattingBtn">
+            <div class="close">
+                <div class="close-bar"></div>
+                <div class="close-bar"></div>
+            </div>
+            <div class="down">
+                <div class="down-bar"></div>
+            </div>
+        </div>
+        <div id="memberNameArea"></div>
+        <div id="chatContentArea">
+            <div class="chatBallonArea">
+                <p class="chat-ballon1">말풍선1</p>
+            </div>
+            <div class="chatBallonArea">
+                <p class="chat-ballon2">말풍선2</p>
+            </div>
+        </div>
+        <div class="message-area">
+            <input id="message" type="text" />
+            <button onclick="setMessage()" class="send-btn">전송</button>
+        </div>
+    </div>
+</div>
+<!-- 상단바 -->
+<div class="nav">
+    <span id="myIdArea"></span>
+    <a href="/member/logout">로그아웃</a>
+</div>
+<!-- 메인바 -->
+<div class="container">
+    <div class="game-area">
+        <div class="game1">
+            <button id="matchingStartBtn" onclick="matching('drowGameStart')">
+                매칭 시작
+            </button>
+            <button id="matchingCancleBtn" onclick="matching('drowGameCancle')">
+                매칭 취소
+            </button>
+        </div>
+        <div class="game2">
+            <a href="#">aaaa</a>
+        </div>
+    </div>
+    <!-- 유저 바 -->
+    <div class="user-area">
+        <div class="user-shadow">
+            <ul class="user-menu">
+                <li class="user-list">
+                    <div id="memberListTable" class="user-name">유저</div>
+                    <div class="user-online"></div>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    document
+      .querySelector('.user-area')
+      .addEventListener('click', function (e) {
+        if (e.target == document.querySelector('.user-list')) {
+          document.querySelector('#chattingArea').style.display = 'block';
+        }
+      });
+    document
+      .querySelector('#chattingArea')
+      .addEventListener('click', function (e) {
+        console.log(e.target);
+        if (e.target == document.querySelector('.down')) {
+          document.querySelector('.chattingBig').style.display = 'none';
+          document.querySelector('.chatDownShow').style.display = 'block';
+          document.querySelector('#chattingArea').style.padding = '0';
+        } else if (e.target == document.querySelector('.close')) {
+          document.querySelector('#chattingArea').style.display = 'none';
+        } else if (e.target == document.querySelector('.chatUserName')) {
+          document.querySelector('.chattingBig').style.display = 'block';
+          document.querySelector('.chatDownShow').style.display = 'none';
+          document.querySelector('#chattingArea').style.padding = '10px 20px';
+        }
+      });
+</script>
+</body>
+</html>

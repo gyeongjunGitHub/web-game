@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -29,11 +30,13 @@ public class SocketHandler extends TextWebSocketHandler {
     //웹소켓 세션을 담아둘 맵
     HashMap<String, WebSocketSession> sessionMap = new HashMap<>();
 
-    //웹소켓 세션과 MemberId를 담아둘 맵
+    //웹소켓 세션Id와 MemberId를 담아둘 맵
     ConcurrentHashMap<String, String> socketSessionAndMemberID = new ConcurrentHashMap<>();
 
-    //게임 종류와 MemberId를 담아둘 맵
-    ConcurrentHashMap<String, String> drowGameMatchingInfo = new ConcurrentHashMap<>();
+    //매칭 대기열 que
+    ConcurrentLinkedQueue<String> drowGameMatchingInfo = new ConcurrentLinkedQueue<>();
+
+    //drow game room Info
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
@@ -45,7 +48,7 @@ public class SocketHandler extends TextWebSocketHandler {
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
 
         if(requestDTO.getRequest().equals("matchingStartDrowGame")){
-            drowGameMatchingInfo.put(myId, "drowGame");
+            drowGameMatchingInfo.add(myId);
             socketService.matching(drowGameMatchingInfo);
         }
         if(requestDTO.getRequest().equals("matchingCancleDrowGame")){

@@ -2,8 +2,8 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import drowGame.drowGame.Handler.GameRoomHandler;
 import drowGame.drowGame.dto.ChattingDTO;
-import drowGame.drowGame.dto.RequestDTO;
 import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.repository.ChattingRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service
 @RequiredArgsConstructor
@@ -127,7 +128,11 @@ public class SocketService {
     }
 
 
-    public void matching(ConcurrentHashMap<String, String> drowGameMatchingInfo) {
+    public void matching(ConcurrentLinkedQueue<String> drowGameMatchingInfo) {
         System.out.println("drowGame matching member size : " + drowGameMatchingInfo.size());
+        if(drowGameMatchingInfo.size() == 2){
+            System.out.println("매치 인원 충족!");
+        }
+
     }
 }
