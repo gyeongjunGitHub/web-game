@@ -1,5 +1,6 @@
 package drowGame.drowGame.dto;
 
+import drowGame.drowGame.entity.MemberEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,4 +12,14 @@ public class MemberDTO {
     private String name;
     private String gender;
     private String email;
+
+    public MemberDTO(){}
+    public MemberDTO(MemberEntity memberEntity){
+        this.id = memberEntity.getId();
+        this.password = memberEntity.getPassword();
+        this.name = memberEntity.getName();
+        this.gender = memberEntity.getGender();
+        this.email = memberEntity.getEmail();
+
+    }
 }

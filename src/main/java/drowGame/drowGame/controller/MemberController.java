@@ -48,4 +48,10 @@ public class MemberController {
         return ResponseEntity.ok(resultDTO);
     }
 
+    @GetMapping("/searchMember")
+    @ResponseBody
+    public MemberDTO searchMember(@RequestParam(name = "id") String id) {
+        return memberService.findById(id);
+    }
+
 }

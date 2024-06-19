@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.dto.MemberDTO;
 import drowGame.drowGame.dto.ResultDTO;
 import drowGame.drowGame.entity.MemberEntity;
+import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.MemberRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
+    private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
     private final MemberSessionService memberSessionService;
 
@@ -25,17 +27,17 @@ public class MemberService {
         Optional<MemberEntity> OptionalById = memberRepository.findById(memberDTO.getId());
         ResultDTO resultDTO = new ResultDTO();
 
-        if(OptionalById.isPresent()){
+        if (OptionalById.isPresent()) {
             MemberEntity byId = OptionalById.get();
             if (byId.getPassword().equals(memberDTO.getPassword())) {
                 memberSessionService.addSession(httpSession.getId(), byId.getId());
                 resultDTO.setResult(1);
                 return resultDTO;
-            }else {
+            } else {
                 resultDTO.setResult(0);
                 return resultDTO;
             }
-        }else{
+        } else {
             resultDTO.setResult(0);
             return resultDTO;
         }
@@ -53,9 +55,9 @@ public class MemberService {
         memberEntity.setRole("ROLE_USER");
         String result = memberRepository.memberSave(memberEntity);
         ResultDTO resultDTO = new ResultDTO();
-        if(result == null){
+        if (result == null) {
             resultDTO.setResult(0);
-        }else{
+        } else {
             resultDTO.setResult(1);
         }
         return resultDTO;
@@ -73,12 +75,24 @@ public class MemberService {
 
         ResultDTO resultDTO = new ResultDTO();
 
-        if(byId.isPresent()){
+        if (byId.isPresent()) {
             System.out.println("아이디가 존재합니다.");
             resultDTO.setResult(0);
-        }else{
+        } else {
             resultDTO.setResult(1);
         }
         return resultDTO;
+    }
+
+    public MemberDTO findById(String id) {
+        Optional<MemberEntity> byId = memberRepository.findById(id);
+        if(byId.isPresent()){
+            MemberDTO memberDTO = new MemberDTO(byId.get());
+            System.out.println(memberDTO.getId());
+            return memberDTO;
+        }else {
+            MemberDTO memberDTO = new MemberDTO();
+            return memberDTO;
+        }
     }
 }

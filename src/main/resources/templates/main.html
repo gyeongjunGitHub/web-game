@@ -327,6 +327,17 @@
     </div>
     <!-- 유저 바 -->
     <div class="user-area">
+
+        <!-- 유저 검색-->
+        <div>
+            <input id="searchMemberValue" type="text" placeholder="유저 이름">
+            <button onclick="searchMember()">유저 검색</button>
+            <div id="searchResult">
+
+            </div>
+        </div>
+
+
         <div class="user-shadow">
             <ul class="user-menu"></ul>
         </div>
@@ -357,6 +368,65 @@
 </div>
 
 <script type="text/javascript">
+
+<!--    let result = await postRequest(url, loginParam);-->
+
+    //post 요청
+    async function postRequest(url = '', data = {}) {
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            'Network response was not ok ' + response.statusText
+          );
+        }
+
+        // JSON 형식으로 변환된 데이터를 가져옴.
+        const responseData = await response.json();
+
+        return responseData.result;
+      } catch (error) {
+        console.error('Fetch operation failed:', error);
+      }
+    }
+
+    //GET 요청
+    async function getRequest(url = '') {
+      try {
+        const response = await fetch(url, { method: 'GET' });
+
+        if (!response.ok) {
+          throw new Error(
+            'Network response was not ok ' + response.statusText
+          );
+        }
+
+        // JSON 형식으로 변환된 데이터를 가져옴.
+        const responseData = await response.json();
+
+        return responseData;
+      } catch (error) {
+        console.error('Fetch operation failed:', error);
+      }
+    }
+    async function searchMember(){
+        const url = `/member/searchMember?id=${searchMemberValue.value}`;
+        let result = await getRequest(url);
+        if(result.id != null){
+            searchResult.innerHTML = `<p>${result.id}<button onclick="addFriend('${result.id}')">+</button></p>`;
+        }
+    }
+    function addFriend(id){
+        //
+        console.log(id, '친구추가하기!');
+    }
+    const searchMemberValue = document.getElementById('searchMemberValue');
+    const searchResult = document.getElementById('searchResult');
     const memberListTable = document.getElementById('memberListTable');
     const chattingArea = document.getElementById('chattingArea');
     const memberNameArea = document.getElementById('memberNameArea');

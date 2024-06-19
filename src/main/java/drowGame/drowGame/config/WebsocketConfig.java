@@ -16,7 +16,6 @@ public class WebsocketConfig implements WebSocketConfigurer {
     private final Intercepter intercepter;
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        System.out.println("add handler : /start");
         registry.addHandler(webSocketHandler, "/start")
                 .setAllowedOriginPatterns("*")
                 .addInterceptors(intercepter);
