@@ -47,6 +47,14 @@ public class SocketHandler extends TextWebSocketHandler {
         requestDTO = objectMapper.readValue(msg, RequestDTO.class);
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
 
+        if(requestDTO.getRequest().equals("addFriendRequest")){
+            requestDTO.setSender(myId);
+            WebSocketSession receiverSession = socketService.findReceiverSession(requestDTO.getReceiver(), sessionMap, socketSessionAndMemberID);
+            socketService.sendMessage(receiverSession, socketService.dtoToJson(requestDTO));
+        }
+        if (requestDTO.getRequest().equals("addFriendResponse")){
+            socketService.addFriend(requestDTO, myId);
+        }
         if(requestDTO.getRequest().equals("matchingStartDrowGame")){
             drowGameMatchingInfo.add(myId);
             socketService.matching(drowGameMatchingInfo);
@@ -91,6 +99,9 @@ public class SocketHandler extends TextWebSocketHandler {
 
         //소캣 연결 시 현재 소캣에 연결되어 있는 member의 목록을 전송
         socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
+
+        //소캣 연결 시 친구 목록 전송
+        //socketService.sendFriendList(myId);
 
         //채팅 데이터 전송
         List<ChattingDTO> result = socketService.getChattingData(myId);

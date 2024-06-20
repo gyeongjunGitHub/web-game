@@ -2,14 +2,125 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Chating</title>
+    <link
+            rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+    />
     <style>
         body {
           margin: 0;
         }
         div {
           box-sizing: border-box;
+        }
+        /* ============== */
+        /* ===검색결과=== */
+        /* ============== */
+
+        .black-area {
+          width: 100vw;
+          height: 100vh;
+          background-color: rgba(0, 0, 0, 0.687);
+          position: fixed;
+          display: none;
+          z-index: 5;
+        }
+        .black-flex {
+          width: 100%;
+          height: 100%;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+
+        .result-area {
+          width: 800px;
+          min-height: 400px;
+          max-height: 500px;
+          background-color: white;
+          border-radius: 5px;
+          padding: 30px;
+        }
+
+        .black-close {
+          width: 20px;
+          height: 20px;
+          padding: 5px;
+          float: right;
+          position: relative;
+          cursor: pointer;
+          box-sizing: content-box;
+          margin-bottom: 30px;
+        }
+        .black-close-area::after {
+          content: '';
+          display: block;
+          clear: both;
+        }
+        .black-close-bar {
+          background-color: gray;
+          height: 2px;
+          width: 50%;
+          position: absolute;
+        }
+        .black-close-bar:first-child {
+          top: 50%;
+          transform: translate(-50%, -50%) rotate(45deg);
+          left: 50%;
+        }
+        .black-close-bar:last-child {
+          top: 50%;
+          transform: translate(-50%, -50%) rotate(-45deg);
+          left: 50%;
+        }
+        .user-search {
+          display: flex;
+          width: 90%;
+          margin: 0 auto;
+          margin-bottom: 30px;
+        }
+        .search-input {
+          display: block;
+          width: 100%;
+          border-radius: 0;
+          border: 1px solid gray;
+          padding: 5px 16px;
+          border-top-left-radius: 25px;
+          border-bottom-left-radius: 25px;
+        }
+        .search-icon {
+          flex-grow: 1;
+
+          border: 1px solid gray;
+
+          cursor: pointer;
+          border-top-right-radius: 25px;
+          border-bottom-right-radius: 25px;
+        }
+        .search-icon i {
+          padding: 10px 20px;
+          margin-left: -5px;
+        }
+
+        .search-result {
+          display: flex;
+          margin: 0 auto;
+          width: 90%;
+          justify-content: space-between;
+          align-items: center;
+          border-bottom: 1px solid #ccc;
+          padding: 10px;
+        }
+        .result-name {
+          width: 95%;
+        }
+
+        .plus-btn {
+          display: inline-block;
+          font-size: 1rem;
+          cursor: pointer;
         }
 
         /* ============== */
@@ -38,6 +149,12 @@
         .chatUserName:hover {
           background-color: rgba(255, 166, 0, 0.58);
           border-radius: 5px;
+        }
+        .black-close:hover {
+          background-color: red;
+        }
+        .black-close:hover .black-close-bar {
+          background-color: white;
         }
         /* ( 유저 이름 ) */
         #memberNameArea {
@@ -216,7 +333,7 @@
         }
 
         .game-area {
-          width: 80%;
+          flex-grow: 1;
           padding: 50px;
         }
 
@@ -259,10 +376,8 @@
         /* ===유저상태=== */
         /* ============== */
         .user-area {
-          min-width: 200px;
-          width: 15%;
           margin-top: 20px;
-          padding: 10px;
+          padding: 30px;
         }
         .user-shadow {
           box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
@@ -270,7 +385,60 @@
           padding: 20px;
           position: sticky;
           top: 20px;
+          border-radius: 5px;
+          width: 250px;
         }
+        .add-area {
+          color: gray;
+          font-size: 12px;
+          text-align: right;
+        }
+
+        .add-friends {
+          cursor: pointer;
+        }
+        .add-friends:hover {
+          color: red;
+        }
+        .accept-area {
+        text-align: center;
+        margin: 20px 0;
+        display: none;
+      }
+      .accept-msg-area {
+        padding-top: 10px;
+        font-size: 12px;
+        border-left: 20px solid #ccc;
+        background-color: #eee;
+        border-radius: 5px;
+      }
+      .accept-msg {
+        margin: 10px 0;
+      }
+      .accept-check {
+        display: flex;
+        width: 100%;
+      }
+      .yes,
+      .no {
+        width: 50%;
+        padding: 10px 0;
+        cursor: pointer;
+      }
+      .no {
+        background-color: lightsalmon;
+        border-bottom-right-radius: 5px;
+      }
+      .no:hover {
+        background-color: rgb(202, 117, 94);
+      }
+      .yes {
+        background-color: rgb(134, 216, 134);
+      }
+      .yes:hover {
+        background-color: rgb(64, 148, 64);
+      }
+
         .user-menu {
           margin: 0;
           padding: 0;
@@ -302,10 +470,42 @@
           margin: 0 -20px;
           margin-bottom: -10px;
         }
+
     </style>
 </head>
 
 <body>
+<!-- 검색 창 -->
+<div class="black-area">
+    <div class="black-flex">
+        <div class="result-area">
+            <div class="black-close-area">
+                <div class="black-close">
+                    <div class="black-close-bar"></div>
+                    <div class="black-close-bar"></div>
+                </div>
+            </div>
+
+            <!-- 유저 검색-->
+            <div class="user-search">
+                <input
+                        id="searchMemberValue"
+                        class="search-input"
+                        type="text"
+                        placeholder="유저 검색"
+                />
+                <div class="search-icon">
+                    <i
+                            class="fa-solid fa-magnifying-glass"
+                            onclick="searchMember()"
+                    ></i>
+                </div>
+            </div>
+
+            <div class="search-result"></div>
+        </div>
+    </div>
+</div>
 
 <!--상단 바-->
 <div class="nav">
@@ -327,18 +527,21 @@
     </div>
     <!-- 유저 바 -->
     <div class="user-area">
-
-        <!-- 유저 검색-->
-        <div>
-            <input id="searchMemberValue" type="text" placeholder="유저 이름">
-            <button onclick="searchMember()">유저 검색</button>
-            <div id="searchResult">
-
-            </div>
-        </div>
-
-
         <div class="user-shadow">
+            <div class="add-area">
+                <span class="add-friends">친구 추가</span>
+            </div>
+            <div class="accept-area">
+                <div class="accept-msg-area">
+                    <p class="accept-msg">요청이 왔습니다.</p>
+                    <p class="accept-msg">수락하시겠습니까?</p>
+                    <div class="accept-check">
+                        <div class="yes">yes</div>
+                        <div class="no">no</div>
+                    </div>
+                </div>
+            </div>
+
             <ul class="user-menu"></ul>
         </div>
     </div>
@@ -368,8 +571,7 @@
 </div>
 
 <script type="text/javascript">
-
-<!--    let result = await postRequest(url, loginParam);-->
+    <!--    let result = await postRequest(url, loginParam);-->
 
     //post 요청
     async function postRequest(url = '', data = {}) {
@@ -414,19 +616,24 @@
         console.error('Fetch operation failed:', error);
       }
     }
-    async function searchMember(){
-        const url = `/member/searchMember?id=${searchMemberValue.value}`;
-        let result = await getRequest(url);
-        if(result.id != null){
-            searchResult.innerHTML = `<p>${result.id}<button onclick="addFriend('${result.id}')">+</button></p>`;
-        }
+    async function searchMember() {
+      const url = `/member/searchMember?id=${searchMemberValue.value}`;
+      let result = await getRequest(url);
+      if (result.id != null) {
+        searchResult.innerHTML = `
+          <div class="result-name">${result.id}</div>
+          <button class="plus-btn" onclick="addFriendRequest('${result.id}')">+</button>
+      `;
+      }
     }
-    function addFriend(id){
-        //
-        console.log(id, '친구추가하기!');
-    }
-    const searchMemberValue = document.getElementById('searchMemberValue');
-    const searchResult = document.getElementById('searchResult');
+
+
+    //className
+    const searchInput = document.querySelector('.search-input');
+    const searchResult = document.querySelector('.search-result');
+    const acceptArea = document.querySelector('.accept-area');
+
+    //id name
     const memberListTable = document.getElementById('memberListTable');
     const chattingArea = document.getElementById('chattingArea');
     const memberNameArea = document.getElementById('memberNameArea');
@@ -444,76 +651,95 @@
     let memberList = [];
     var ws;
 
-    function matching(request){
-        if(request == 'drowGameStart'){
-            const requestParam = new RequestParam('matchingStartDrowGame');
-            send(requestParam);
+    function matching(request) {
+      if (request == 'drowGameStart') {
+        const requestParam = new RequestParam('matchingStartDrowGame');
+        send(requestParam);
 
-            matchingStartBtn.style.display = 'none';
-            matchingCancleBtn.style.display = 'block';
-        }
+        matchingStartBtn.style.display = 'none';
+        matchingCancleBtn.style.display = 'block';
+      }
 
-        if(request == 'drowGameCancle'){
-            const requestParam = new RequestParam('matchingCancleDrowGame');
-            send(requestParam);
+      if (request == 'drowGameCancle') {
+        const requestParam = new RequestParam('matchingCancleDrowGame');
+        send(requestParam);
 
-            matchingStartBtn.style.display = 'block';
-            matchingCancleBtn.style.display = 'none';
-        }
-
+        matchingStartBtn.style.display = 'block';
+        matchingCancleBtn.style.display = 'none';
+      }
     }
 
     //생성자
-    function RequestParam (request, receiver = '', data = ''){
-        this.request = request;
-        this.receiver = receiver;
-        this.data = data;
+    function RequestParam(request, receiver = '', data = '') {
+      this.request = request;
+      this.receiver = receiver;
+      this.data = data;
+    }
+
+    function addFriendRequest(id) {
+      const requestParam = new RequestParam('addFriendRequest', id);
+      ws.send(JSON.stringify(requestParam));
+    }
+    function addFriendResponse(response, receiver){
+        const requestParam = new RequestParam('addFriendResponse', receiver, response);
+        ws.send(JSON.stringify(requestParam));
     }
 
     //로그인 후 main 페이지 로드 시 소캣 연걸
     window.onload = wsOpen;
-    function wsOpen(){
-        ws = new WebSocket("ws://" + location.host + "/start");
-        wsEvt();
+    function wsOpen() {
+      ws = new WebSocket('ws://' + location.host + '/start');
+      wsEvt();
     }
 
     //소캣 이벤트
     function wsEvt() {
-        //소캣 오픈 이벤트
-        ws.onopen = function(data){
-            //
-        }
+      //소캣 오픈 이벤트
+      ws.onopen = function (data) {
+        //
+      };
 
-        //소캣 메시지 이벤트
-        ws.onmessage = function(data) {
-            let msg = JSON.parse(data.data);
-            receiveMessageHandler(msg);
-        }
+      //소캣 메시지 이벤트
+      ws.onmessage = function (data) {
+        let msg = JSON.parse(data.data);
+        receiveMessageHandler(msg);
+      };
     }
 
     //메시지 처리 핸들러
-    function receiveMessageHandler(msg){
-
-        // 다른 member 에게 메시지를 받은 경우
-        if(msg.request == 'sendMessage'){
-
-            //chattingData 배열에 msg 추가
-            chattingData.push(msg);
-
-            //내가 보낸 메시지 일 경우
-            if(msg.sender == myId){
-                chatContentArea.innerHTML += `
-                    <div class="chatBallonArea">
-                        <p class="chat-ballon1">${msg.content}</p>
+    function receiveMessageHandler(msg) {
+        if(msg.request == 'addFriendRequest'){
+            acceptArea.innerHTML = `
+                <div class="accept-msg-area">
+                    <p class="accept-msg">${msg.sender} 님이</p>
+                    <p class="accept-msg">친구추가 요청을 보냈습니다.</p>
+                    <div class="accept-check">
+                        <div class="yes" onclick="addFriendResponse(true, ${msg.sender})">yes</div>
+                        <div class="no" onclick="addFriendResponse(false, ${msg.sender})">no</div>
                     </div>
-                `;
-            }
-            //상대가 보낸 메시지 일 경우
-            else{
-                // receiver 와 myId 동일해야함
-                // getMember() 와 sender 가 동일해야함
-                if(myId == msg.receiver && getMember() == msg.sender){
-                    chatContentArea.innerHTML += `
+                </div>
+            `;
+            acceptArea.style.display = 'block';
+        }
+        // 다른 member 에게 메시지를 받은 경우
+        if (msg.request == 'sendMessage') {
+        //chattingData 배열에 msg 추가
+        chattingData.push(msg);
+
+        //내가 보낸 메시지 일 경우
+        if (msg.sender == myId) {
+            chatContentArea.innerHTML += `
+                <div class="chatBallonArea">
+                    <p class="chat-ballon1">${msg.content}</p>
+                </div>
+            `;
+        }
+        //상대가 보낸 메시지 일 경우
+        else {
+            // receiver 와 myId 동일해야함
+            // getMember() 와 sender 가 동일해야함
+            if (myId == msg.receiver && getMember() == msg.sender) {
+                chatContentArea.innerHTML += `
                         <div class="chatBallonArea">
                             <p class="chat-ballon2">${msg.content}</p>
                         </div>
@@ -526,141 +752,157 @@
         }
 
         //chattingData 배열형식으로 넘어옴
-        if(Array.isArray(msg)){
+        if (Array.isArray(msg)) {
             chattingData = msg;
         }
 
         //myId
-        if(msg.myId != undefined){
+        if (msg.myId != undefined) {
             myIdArea.innerHTML = `${msg.myId}`;
             myId = msg.myId;
         }
 
         //logOutMember
-        if(msg.logOutMember != undefined){
+        if (msg.logOutMember != undefined) {
             console.log(msg.logOutMember);
         }
 
         //memberList 처리
-        if(msg.member != undefined){
-            let isMemberExist=0;
+        if (msg.member != undefined) {
+        let isMemberExist = 0;
 
-            //중복 검사
-            isMemberExist = duplicateCheck(msg, isMemberExist);
+        //중복 검사
+        isMemberExist = duplicateCheck(msg, isMemberExist);
 
-            //memberList 에 member 추가
-            if(isMemberExist == 0){
-                memberList.push(msg.member);
-                for(let i = 0; i < memberList.length; i++){
-                    document
-                    .querySelector('.user-menu')
-                    .insertAdjacentHTML('beforeend', `
-                        <li class="user-list" onclick="chat('${memberList[i]}')">
-                            <div class="user-name">${memberList[i]}</div>
-                            <div class="user-online"></div>
-                        </li>
-                    `);
+        //memberList 에 member 추가
+        if (isMemberExist == 0) {
+          memberList.push(msg.member);
+          for (let i = 0; i < memberList.length; i++) {
+            document.querySelector('.user-menu').insertAdjacentHTML(
+              'beforeend',
+              `
+                    <li class="user-list" onclick="chat('${memberList[i]}')">
+                        <div class="user-name">${memberList[i]}</div>
+                        <div class="user-online"></div>
+                    </li>
+                `
+            );
 
-                    //<span id="member_${i}"></span>
-                }
-            }
+            //<span id="member_${i}"></span>
+          }
+        }
         }
     }
 
     //현재 열려있는 채팅창의 member 를 저장
     let member;
-    function getMember(){
-        return member;
+    function getMember() {
+      return member;
     }
-    function setMember(m){
-        member = m;
+    function setMember(m) {
+      member = m;
     }
 
-    function chat(member){
-        setMember(member);
-        memberNameArea.innerHTML = member;
+    function chat(member) {
+      setMember(member);
+      memberNameArea.innerHTML = member;
 
-        //채팅 공간 토글 처리
-        if(chattingAreaMemberName != member){
-            chattingAreaMemberName = member;
-        }else{
-            chattingAreaIsTrue = !chattingAreaIsTrue;
-        }
+      //채팅 공간 토글 처리
+      if (chattingAreaMemberName != member) {
+        chattingAreaMemberName = member;
+      } else {
+        chattingAreaIsTrue = !chattingAreaIsTrue;
+      }
 
-        //채팅 공간이 열려있을 때
-        if (chattingAreaIsTrue) {
-            chattingArea.style.display = 'none';
-        } else {
-            chatContentArea.innerHTML = '';
-            inputAllChattingData(member);
-            chattingArea.style.display = 'block';
-            chatContentArea.scrollTop = chatContentArea.scrollHeight;
-        }
+      //채팅 공간이 열려있을 때
+      if (chattingAreaIsTrue) {
+        chattingArea.style.display = 'none';
+      } else {
+        chatContentArea.innerHTML = '';
+        inputAllChattingData(member);
+        chattingArea.style.display = 'block';
+        chatContentArea.scrollTop = chatContentArea.scrollHeight;
+      }
     }
 
     //메시지 set
-    function setMessage(){
-        const requestParam = new RequestParam('sendMessage', memberNameArea.innerHTML, message.value);
-        send(requestParam);
-        message.value = '';
+    function setMessage() {
+      const requestParam = new RequestParam(
+        'sendMessage',
+        memberNameArea.innerHTML,
+        message.value
+      );
+      send(requestParam);
+      message.value = '';
     }
 
     //메시지 전송
-    function send(requestParam){
-        ws.send(JSON.stringify(requestParam));
+    function send(requestParam) {
+      ws.send(JSON.stringify(requestParam));
     }
 
     //멤버 중복체크
-    function duplicateCheck(msg, isMemberExist){
-        for(let i = 0; i < memberList.length; i++){
-            if(memberList[i] == msg.member){
-                isMemberExist++;
-            }
+    function duplicateCheck(msg, isMemberExist) {
+      for (let i = 0; i < memberList.length; i++) {
+        if (memberList[i] == msg.member) {
+          isMemberExist++;
         }
-        return isMemberExist;
+      }
+      return isMemberExist;
     }
 
     //채팅공간에 채팅 데이터 입력
-    function inputAllChattingData(member){
-        chatContentArea.innerHTML = '';
-        for(let i = 0; i < chattingData.length; i++){
-            if( (chattingData[i].sender == member && chattingData[i].receiver == myId)
-                || (chattingData[i].sender == myId && chattingData[i].receiver == member) ){
-
-                if(chattingData[i].sender == myId){
-                    chatContentArea.innerHTML += `
-                        <div class="chatBallonArea">
-                            <p class="chat-ballon1">${chattingData[i].content}</p>
-                        </div>
-                    `;
-                }else{
-
-                    chatContentArea.innerHTML += `
-                        <div class="chatBallonArea">
-                            <p class="chat-ballon2">${chattingData[i].content}</p>
-                        </div>
-                    `;
-                }
-            }
+    function inputAllChattingData(member) {
+      chatContentArea.innerHTML = '';
+      for (let i = 0; i < chattingData.length; i++) {
+        if (
+          (chattingData[i].sender == member &&
+            chattingData[i].receiver == myId) ||
+          (chattingData[i].sender == myId &&
+            chattingData[i].receiver == member)
+        ) {
+          if (chattingData[i].sender == myId) {
+            chatContentArea.innerHTML += `
+                    <div class="chatBallonArea">
+                        <p class="chat-ballon1">${chattingData[i].content}</p>
+                    </div>
+                `;
+          } else {
+            chatContentArea.innerHTML += `
+                    <div class="chatBallonArea">
+                        <p class="chat-ballon2">${chattingData[i].content}</p>
+                    </div>
+                `;
+          }
         }
+      }
     }
-    document.querySelector('#chattingArea').addEventListener('click', function (e) {
+    document
+      .querySelector('#chattingArea')
+      .addEventListener('click', function (e) {
         if (e.target == document.querySelector('.down')) {
-            document.querySelector('.chattingBig').style.display = 'none';
-            document.querySelector('.chatDownShow').style.display = 'block';
-            document.querySelector('#chattingArea').style.padding = '0';
+          document.querySelector('.chattingBig').style.display = 'none';
+          document.querySelector('.chatDownShow').style.display = 'block';
+          document.querySelector('#chattingArea').style.padding = '0';
+        } else if (e.target == document.querySelector('.close')) {
+          document.querySelector('#chattingArea').style.display = 'none';
+        } else if (e.target == document.querySelector('.chatUserName')) {
+          document.querySelector('.chatUserName').innerHTML = getMember();
+          document.querySelector('.chattingBig').style.display = 'block';
+          document.querySelector('.chatDownShow').style.display = 'none';
+          document.querySelector('#chattingArea').style.padding = '10px 20px';
         }
-
-        else if (e.target == document.querySelector('.close')) {
-            document.querySelector('#chattingArea').style.display = 'none';
-        }
-
-        else if (e.target == document.querySelector('.chatUserName')) {
-            document.querySelector('.chatUserName').innerHTML = getMember();
-            document.querySelector('.chattingBig').style.display = 'block';
-            document.querySelector('.chatDownShow').style.display = 'none';
-            document.querySelector('#chattingArea').style.padding = '10px 20px';
-        }
+      });
+    //=============//
+    //===모달창====//
+    //============//
+    document.querySelector('.add-friends').addEventListener('click', () => {
+      document.querySelector('.black-area').style.display = 'block';
+    });
+    document.querySelector('.black-area').addEventListener('click', (e) => {
+      if (e.target == document.querySelector('.black-close')) {
+        document.querySelector('.black-area').style.display = 'none';
+      }
     });
 </script>
 </body>

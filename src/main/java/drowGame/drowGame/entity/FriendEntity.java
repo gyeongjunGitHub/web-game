@@ -1,9 +1,6 @@
 package drowGame.drowGame.entity;
 
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
-import jakarta.persistence.UniqueConstraint;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -18,4 +15,7 @@ import lombok.Setter;
 public class FriendEntity {
     @EmbeddedId
     private FriendId id;
+
+    @Column(name = "acceptance_status")
+    private boolean acceptance_status;
 }

@@ -17,7 +17,6 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class MemberService {
-    private final FriendRepository friendRepository;
     private final MemberRepository memberRepository;
     private final MemberSessionService memberSessionService;
 
@@ -88,7 +87,6 @@ public class MemberService {
         Optional<MemberEntity> byId = memberRepository.findById(id);
         if(byId.isPresent()){
             MemberDTO memberDTO = new MemberDTO(byId.get());
-            System.out.println(memberDTO.getId());
             return memberDTO;
         }else {
             MemberDTO memberDTO = new MemberDTO();

@@ -4,9 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.Handler.GameRoomHandler;
 import drowGame.drowGame.dto.ChattingDTO;
+import drowGame.drowGame.dto.RequestDTO;
 import drowGame.drowGame.entity.ChattingEntity;
+import drowGame.drowGame.entity.FriendEntity;
+import drowGame.drowGame.entity.FriendId;
 import drowGame.drowGame.repository.ChattingRepository;
+import drowGame.drowGame.repository.FriendRepository;
+import drowGame.drowGame.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.coyote.Request;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
@@ -21,8 +27,11 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 @Service
 @RequiredArgsConstructor
 public class SocketService {
-
+    
+    //나중에 정리 필요
+    private final FriendRepository friendRepository;
     private final ChattingRepository chattingRepository;
+    private final MemberRepository memberRepository;
 
 
     public void sendLogoutMember(WebSocketSession webSocketSession,
@@ -45,6 +54,10 @@ public class SocketService {
                 }
             }
         }
+    }
+
+    public void sendFriendList(String myId) {
+        memberRepository.findFriendList(myId);
     }
     //로그인 시 각 member 들은 자기 자신을 제외한 member 의 로그인 정보를 가지고 있어야 함
     public void sendLoginMemberList(WebSocketSession webSocketSession,
@@ -108,6 +121,14 @@ public class SocketService {
             throw new RuntimeException(e);
         }
     }
+    public String dtoToJson(RequestDTO requestDTO){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(requestDTO);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Transactional
     public ChattingDTO chatContentSave(ChattingDTO chattingDTO) {
@@ -134,5 +155,16 @@ public class SocketService {
             System.out.println("매치 인원 충족!");
         }
 
+    }
+
+    @Transactional
+    public void addFriend(RequestDTO requestDTO, String myId) {
+        FriendId friendId = new FriendId();
+        FriendEntity friendEntity = new FriendEntity();
+        friendId.setRequest_member_id(requestDTO.getReceiver());
+        friendId.setRequested_member_id(myId);
+        friendEntity.setId(friendId);
+        friendEntity.setAcceptance_status(Boolean.parseBoolean(requestDTO.getData()));
+//        friendRepository.addFriend();
     }
 }

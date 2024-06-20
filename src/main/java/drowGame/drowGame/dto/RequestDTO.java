@@ -10,5 +10,7 @@ import java.time.LocalDateTime;
 public class RequestDTO {
     private String request;
     private String receiver;
+    private String sender;
     private String data;
+
 }
