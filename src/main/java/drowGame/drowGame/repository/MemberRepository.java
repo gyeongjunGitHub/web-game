@@ -22,13 +22,4 @@ public class MemberRepository {
         em.persist(memberEntity);
         return memberEntity.getId();
     }
-
-    public void findFriendList(String myId) {
-        FriendEntity myId1 = em.createQuery("select f from FriendEntity as f where f.id.request_member_id=:myId", FriendEntity.class)
-                .setParameter("myId", myId)
-                .getSingleResult();
-//        System.out.println(myId1.getId().getRequest_member_id());
-//        System.out.println(myId1.getId().getRequested_member_id());
-//        System.out.println(myId1.isAcceptance_status());
-    }
 }

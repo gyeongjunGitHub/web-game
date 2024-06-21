@@ -9,13 +9,10 @@ import lombok.Setter;
 @Setter
 @Table(name = "friend", uniqueConstraints = {
         @UniqueConstraint(columnNames = {
-                "request_member_id", "requested_member_id"
+                "member_id", "friend_id"
         })
 })
 public class FriendEntity {
     @EmbeddedId
     private FriendId id;
-
-    @Column(name = "acceptance_status")
-    private boolean acceptance_status;
 }

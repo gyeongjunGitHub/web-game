@@ -10,6 +10,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.dto.ChattingDTO;
+import drowGame.drowGame.dto.FriendDTO;
 import drowGame.drowGame.dto.RequestDTO;
 import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.service.MemberSessionService;
@@ -81,7 +82,6 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
         //소켓 연결
         super.afterConnectionEstablished(session);
@@ -98,16 +98,29 @@ public class SocketHandler extends TextWebSocketHandler {
         System.out.println("-----------------------------------------------------------------------");
 
         //소캣 연결 시 현재 소캣에 연결되어 있는 member의 목록을 전송
-        socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
+        //안씀 나중에 정리 시 제거
+        //socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
+
+        //접속 시 자기 자신 제외 접속중인 친구들에게 login 정보 알리기
 
         //소캣 연결 시 친구 목록 전송
-        //socketService.sendFriendList(myId);
+        List<FriendDTO> friendDTOList = socketService.getFriendList(myId);
+        List<String> friendList = new ArrayList<>();
+
+        //친구 리스트 순회
+        for (FriendDTO f : friendDTOList) {
+            //친구 ID가 socketSessionAndMemberID안에 존재한다면
+            if(socketSessionAndMemberID.values().contains(f.getFriend_id())){
+                f.setStatus("online");
+            }
+            friendList.add(socketService.dtoToJson(f));
+        }
+        socketService.sendMessage(socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID), friendList.toString());
 
         //채팅 데이터 전송
         List<ChattingDTO> result = socketService.getChattingData(myId);
         List<String> chattingData = new ArrayList<>();
         for(ChattingDTO c : result){
-            //request : getChattingData 로 세팅
             chattingData.add(socketService.dtoToJson(c));
         }
         socketService.sendMessage(socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID), chattingData.toString());

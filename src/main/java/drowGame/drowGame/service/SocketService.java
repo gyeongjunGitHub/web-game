@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.Handler.GameRoomHandler;
 import drowGame.drowGame.dto.ChattingDTO;
+import drowGame.drowGame.dto.FriendDTO;
 import drowGame.drowGame.dto.RequestDTO;
 import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.entity.FriendEntity;
@@ -56,10 +57,21 @@ public class SocketService {
         }
     }
 
-    public void sendFriendList(String myId) {
-        memberRepository.findFriendList(myId);
+    public List<FriendDTO> getFriendList(String myId) {
+        List<FriendEntity> friendList = friendRepository.findFriendList(myId);
+        List<FriendDTO> friendDTOList = new ArrayList<>();
+        for (FriendEntity f : friendList){
+            FriendDTO friendDTO = new FriendDTO();
+            friendDTO.setMember_id(f.getId().getMember_id());
+            friendDTO.setFriend_id(f.getId().getFriend_id());
+            friendDTOList.add(friendDTO);
+        }
+        return friendDTOList;
     }
-    //로그인 시 각 member 들은 자기 자신을 제외한 member 의 로그인 정보를 가지고 있어야 함
+
+    ////////////////////////
+    //안쓰는 함수 나중에 제거//
+    ////////////////////////
     public void sendLoginMemberList(WebSocketSession webSocketSession,
                                     HashMap<String, WebSocketSession> sessionMap,
                                     ConcurrentHashMap<String, String> socketSessionAndMemberID,
@@ -74,7 +86,7 @@ public class SocketService {
                 for (String membersKey : sessionMap.keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
                     if (!socketSessionAndMemberID.get(loginMemberKey).equals(socketSessionAndMemberID.get(membersKey))) {
-                        String memberInfo = "{\"member\" : \"" + socketSessionAndMemberID.get(membersKey) + "\"}";
+                        String memberInfo = "{\"loginMember\" : \"" + socketSessionAndMemberID.get(membersKey) + "\"}";
                         sendMessage(wss, memberInfo);
                     }
                 }
@@ -82,7 +94,7 @@ public class SocketService {
                 for(String membersKey : sessionMap.keySet()){
                     // 자기 자신 ID 제외 전송
                     if (!myId.equals(socketSessionAndMemberID.get(membersKey))){
-                        String memberInfo = "{\"member\" : \"" + socketSessionAndMemberID.get(membersKey) + "\"}";
+                        String memberInfo = "{\"loginMember\" : \"" + socketSessionAndMemberID.get(membersKey) + "\"}";
                         sendMessage(wss, memberInfo);
                     }else{
                         String myIdInfo = "{\"myId\" : \"" + myId + "\"}";
@@ -129,6 +141,14 @@ public class SocketService {
             throw new RuntimeException(e);
         }
     }
+    public String dtoToJson(FriendDTO friendDTO){
+        ObjectMapper objectMapper = new ObjectMapper();
+        try {
+            return objectMapper.writeValueAsString(friendDTO);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     @Transactional
     public ChattingDTO chatContentSave(ChattingDTO chattingDTO) {
@@ -159,12 +179,21 @@ public class SocketService {
 
     @Transactional
     public void addFriend(RequestDTO requestDTO, String myId) {
-        FriendId friendId = new FriendId();
-        FriendEntity friendEntity = new FriendEntity();
-        friendId.setRequest_member_id(requestDTO.getReceiver());
-        friendId.setRequested_member_id(myId);
-        friendEntity.setId(friendId);
-        friendEntity.setAcceptance_status(Boolean.parseBoolean(requestDTO.getData()));
-//        friendRepository.addFriend();
+        if(Boolean.parseBoolean(requestDTO.getData())){
+            FriendId friendId = new FriendId();
+            FriendId friendId1 = new FriendId();
+            FriendEntity friendEntity = new FriendEntity();
+            FriendEntity friendEntity1 = new FriendEntity();
+
+            friendId.setMember_id(myId);
+            friendId.setFriend_id(requestDTO.getReceiver());
+            friendEntity.setId(friendId);
+
+            friendId1.setMember_id(requestDTO.getReceiver());
+            friendId1.setFriend_id(myId);
+            friendEntity1.setId(friendId1);
+
+            friendRepository.addFriend(friendEntity, friendEntity1);
+        }
     }
 }

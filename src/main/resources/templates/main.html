@@ -465,6 +465,12 @@
           height: 15px;
           border-radius: 50%;
         }
+        .user-offline {
+          background-color: red;
+          width: 15px;
+          height: 15px;
+          border-radius: 50%;
+        }
         .message-area {
           display: flex;
           margin: 0 -20px;
@@ -647,8 +653,9 @@
     let chattingAreaMemberName = '';
     let chattingAreaIsTrue = false;
     let chattingData = [];
-
     let memberList = [];
+    let friendList = [];
+
     var ws;
 
     function matching(request) {
@@ -681,6 +688,7 @@
       ws.send(JSON.stringify(requestParam));
     }
     function addFriendResponse(response, receiver){
+        console.log(response, receiver);
         const requestParam = new RequestParam('addFriendResponse', receiver, response);
         ws.send(JSON.stringify(requestParam));
     }
@@ -688,8 +696,8 @@
     //로그인 후 main 페이지 로드 시 소캣 연걸
     window.onload = wsOpen;
     function wsOpen() {
-      ws = new WebSocket('ws://' + location.host + '/start');
-      wsEvt();
+        ws = new WebSocket('ws://' + location.host + '/start');
+        wsEvt();
     }
 
     //소캣 이벤트
@@ -708,34 +716,35 @@
 
     //메시지 처리 핸들러
     function receiveMessageHandler(msg) {
+
+        //친구추가 요청
         if(msg.request == 'addFriendRequest'){
             acceptArea.innerHTML = `
                 <div class="accept-msg-area">
                     <p class="accept-msg">${msg.sender} 님이</p>
                     <p class="accept-msg">친구추가 요청을 보냈습니다.</p>
                     <div class="accept-check">
-                        <div class="yes" onclick="addFriendResponse(true, ${msg.sender})">yes</div>
-                        <div class="no" onclick="addFriendResponse(false, ${msg.sender})">no</div>
+                        <div class="yes" onclick="addFriendResponse(true, '${msg.sender}')">yes</div>
+                        <div class="no" onclick="addFriendResponse(false, '${msg.sender}')">no</div>
                     </div>
                 </div>
             `;
             acceptArea.style.display = 'block';
         }
+
         // 다른 member 에게 메시지를 받은 경우
         if (msg.request == 'sendMessage') {
-        //chattingData 배열에 msg 추가
-        chattingData.push(msg);
+            //chattingData 배열에 msg 추가
+            chattingData.push(msg);
 
-        //내가 보낸 메시지 일 경우
-        if (msg.sender == myId) {
-            chatContentArea.innerHTML += `
-                <div class="chatBallonArea">
-                    <p class="chat-ballon1">${msg.content}</p>
-                </div>
-            `;
-        }
-        //상대가 보낸 메시지 일 경우
-        else {
+            //내가 보낸 메시지 일 경우
+            if (msg.sender == myId) {
+                chatContentArea.innerHTML += `
+                    <div class="chatBallonArea">
+                        <p class="chat-ballon1">${msg.content}</p>
+                    </div>
+                `;
+        }else{ //상대가 보낸 메시지 일 경우
             // receiver 와 myId 동일해야함
             // getMember() 와 sender 가 동일해야함
             if (myId == msg.receiver && getMember() == msg.sender) {
@@ -746,14 +755,24 @@
                     `;
                 }
             }
-
             //스크롤 위치 조정
             chatContentArea.scrollTop = chatContentArea.scrollHeight;
         }
 
-        //chattingData 배열형식으로 넘어옴
+
+
+        //배열을 받았을 경우
         if (Array.isArray(msg)) {
-            chattingData = msg;
+            //채팅 데이터
+            if(msg[0].request == 'chattingData'){
+                chattingData = msg;
+            }
+
+            //친구 목록
+            if(msg[0].request == 'friendList'){
+                friendList = msg;
+                inputFriendList(friendList);
+            }
         }
 
         //myId
@@ -762,35 +781,43 @@
             myId = msg.myId;
         }
 
+        //loginMember
+        if(msg.loginMember != undefined){
+            //console.log(msg.loginMember);
+        }
+
         //logOutMember
         if (msg.logOutMember != undefined) {
-            console.log(msg.logOutMember);
+            //console.log(msg.logOutMember);
         }
+    }
 
-        //memberList 처리
-        if (msg.member != undefined) {
-        let isMemberExist = 0;
+    //친구목록 입력
+    function inputFriendList(friendList){
+        for(let i = 0; i < friendList.length; i++){
+            if(friendList[i].status == 'online'){
+                document.querySelector('.user-menu').insertAdjacentHTML(
+                    'beforeend',
+                    `
+                        <li class="user-list" onclick="chat('${friendList[i].friend_id}')">
+                            <div class="user-name">${friendList[i].friend_id}</div>
+                            <div class="user-online"></div>
+                        </li>
+                    `
+                );
+            }
 
-        //중복 검사
-        isMemberExist = duplicateCheck(msg, isMemberExist);
-
-        //memberList 에 member 추가
-        if (isMemberExist == 0) {
-          memberList.push(msg.member);
-          for (let i = 0; i < memberList.length; i++) {
-            document.querySelector('.user-menu').insertAdjacentHTML(
-              'beforeend',
-              `
-                    <li class="user-list" onclick="chat('${memberList[i]}')">
-                        <div class="user-name">${memberList[i]}</div>
-                        <div class="user-online"></div>
-                    </li>
-                `
-            );
-
-            //<span id="member_${i}"></span>
-          }
-        }
+            if(friendList[i].status == 'offline'){
+                document.querySelector('.user-menu').insertAdjacentHTML(
+                    'beforeend',
+                    `
+                        <li class="user-list" onclick="chat('${friendList[i].friend_id}')">
+                            <div class="user-name">${friendList[i].friend_id}</div>
+                            <div class="user-offline"></div>
+                        </li>
+                    `
+                );
+            }
         }
     }
 
@@ -839,16 +866,6 @@
     //메시지 전송
     function send(requestParam) {
       ws.send(JSON.stringify(requestParam));
-    }
-
-    //멤버 중복체크
-    function duplicateCheck(msg, isMemberExist) {
-      for (let i = 0; i < memberList.length; i++) {
-        if (memberList[i] == msg.member) {
-          isMemberExist++;
-        }
-      }
-      return isMemberExist;
     }
 
     //채팅공간에 채팅 데이터 입력

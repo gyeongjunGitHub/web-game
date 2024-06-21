@@ -11,9 +11,9 @@ import java.io.Serializable;
 @Setter
 @Embeddable
 public class FriendId implements Serializable {
-    @Column(name = "request_member_id")
-    private String request_member_id;
+    @Column(name = "member_id")
+    private String member_id;
 
-    @Column(name = "requested_member_id")
-    private String requested_member_id;
+    @Column(name = "friend_id")
+    private String friend_id;
 }
