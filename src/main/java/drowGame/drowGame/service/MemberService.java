@@ -2,8 +2,11 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import drowGame.drowGame.dto.FriendDTO;
 import drowGame.drowGame.dto.MemberDTO;
 import drowGame.drowGame.dto.ResultDTO;
+import drowGame.drowGame.entity.FriendEntity;
+import drowGame.drowGame.entity.FriendId;
 import drowGame.drowGame.entity.MemberEntity;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.MemberRepository;
@@ -11,6 +14,7 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.ui.Model;
 
 import java.util.Optional;
 
@@ -19,6 +23,7 @@ import java.util.Optional;
 public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberSessionService memberSessionService;
+    private final FriendRepository friendRepository;
 
     public ResultDTO loginProc(MemberDTO memberDTO, HttpSession httpSession) {
         // 유효성 검사
@@ -91,6 +96,35 @@ public class MemberService {
         }else {
             MemberDTO memberDTO = new MemberDTO();
             return memberDTO;
+        }
+    }
+
+    public ResultDTO alreadyFriendCheck(String id, String myId) {
+        FriendId friendId = new FriendId();
+        ResultDTO resultDTO = new ResultDTO();
+        friendId.setMember_id(myId);
+        friendId.setFriend_id(id);
+        Optional<FriendEntity> byId = friendRepository.findById(friendId);
+        if(byId.isPresent()){
+            resultDTO.setResult(1); //친구 존재
+        }else {
+            resultDTO.setResult(0); // 존재하지 않음
+        }
+        return resultDTO;
+    }
+
+    public String goMyPage(HttpSession httpSession, Model model) {
+        String myId = memberSessionService.getMemberId(httpSession.getId());
+        if (myId == null){
+            return "loginForm";
+        }else{
+            Optional<MemberEntity> byId = memberRepository.findById(myId);
+            if(byId.isPresent()){
+                MemberEntity memberEntity = byId.get();
+                MemberDTO memberDTO = new MemberDTO(memberEntity);
+                model.addAttribute("myInfo", memberDTO);
+            }
+            return "myPage";
         }
     }
 }

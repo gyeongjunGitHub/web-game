@@ -7,6 +7,7 @@ import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class FriendRepository {
@@ -22,5 +23,10 @@ public class FriendRepository {
         return em.createQuery("select f from FriendEntity as f where f.id.member_id = :myId", FriendEntity.class)
                 .setParameter("myId", myId)
                 .getResultList();
+    }
+
+    public Optional<FriendEntity> findById(FriendId friendId) {
+        FriendEntity friendEntity = em.find(FriendEntity.class, friendId);
+        return Optional.ofNullable(friendEntity);
     }
 }

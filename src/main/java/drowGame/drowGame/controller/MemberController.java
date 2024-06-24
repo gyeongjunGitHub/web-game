@@ -4,10 +4,12 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import drowGame.drowGame.dto.MemberDTO;
 import drowGame.drowGame.dto.ResultDTO;
 import drowGame.drowGame.service.MemberService;
+import drowGame.drowGame.service.MemberSessionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
@@ -52,6 +54,12 @@ public class MemberController {
     @ResponseBody
     public MemberDTO searchMember(@RequestParam(name = "id") String id) {
         return memberService.findById(id);
+    }
+
+    @GetMapping("/isAlreadyFriend")
+    @ResponseBody
+    public ResultDTO alreadyFriendCheck(@RequestParam(name = "id") String id, @RequestParam(name = "myId") String myId) {
+        return memberService.alreadyFriendCheck(id, myId);
     }
 
 }

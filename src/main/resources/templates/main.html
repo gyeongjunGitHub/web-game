@@ -8,479 +8,40 @@
             rel="stylesheet"
             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
-    <style>
-        body {
-          margin: 0;
-        }
-        div {
-          box-sizing: border-box;
-        }
-        /* ============== */
-        /* ===검색결과=== */
-        /* ============== */
-
-        .black-area {
-          width: 100vw;
-          height: 100vh;
-          background-color: rgba(0, 0, 0, 0.687);
-          position: fixed;
-          display: none;
-          z-index: 5;
-        }
-        .black-flex {
-          width: 100%;
-          height: 100%;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-        }
-
-        .result-area {
-          width: 800px;
-          min-height: 400px;
-          max-height: 500px;
-          background-color: white;
-          border-radius: 5px;
-          padding: 30px;
-        }
-
-        .black-close {
-          width: 20px;
-          height: 20px;
-          padding: 5px;
-          float: right;
-          position: relative;
-          cursor: pointer;
-          box-sizing: content-box;
-          margin-bottom: 30px;
-        }
-        .black-close-area::after {
-          content: '';
-          display: block;
-          clear: both;
-        }
-        .black-close-bar {
-          background-color: gray;
-          height: 2px;
-          width: 50%;
-          position: absolute;
-        }
-        .black-close-bar:first-child {
-          top: 50%;
-          transform: translate(-50%, -50%) rotate(45deg);
-          left: 50%;
-        }
-        .black-close-bar:last-child {
-          top: 50%;
-          transform: translate(-50%, -50%) rotate(-45deg);
-          left: 50%;
-        }
-        .user-search {
-          display: flex;
-          width: 90%;
-          margin: 0 auto;
-          margin-bottom: 30px;
-        }
-        .search-input {
-          display: block;
-          width: 100%;
-          border-radius: 0;
-          border: 1px solid gray;
-          padding: 5px 16px;
-          border-top-left-radius: 25px;
-          border-bottom-left-radius: 25px;
-        }
-        .search-icon {
-          flex-grow: 1;
-
-          border: 1px solid gray;
-
-          cursor: pointer;
-          border-top-right-radius: 25px;
-          border-bottom-right-radius: 25px;
-        }
-        .search-icon i {
-          padding: 10px 20px;
-          margin-left: -5px;
-        }
-
-        .search-result {
-          display: flex;
-          margin: 0 auto;
-          width: 90%;
-          justify-content: space-between;
-          align-items: center;
-          border-bottom: 1px solid #ccc;
-          padding: 10px;
-        }
-        .result-name {
-          width: 95%;
-        }
-
-        .plus-btn {
-          display: inline-block;
-          font-size: 1rem;
-          cursor: pointer;
-        }
-
-        /* ============== */
-        /* ===채팅박스=== */
-        /* ============== */
-        #chattingArea {
-          width: 300px;
-          background: #eee;
-          border-radius: 5px;
-          padding: 10px 20px;
-          position: fixed;
-          bottom: 5px;
-          right: 5px;
-          border: 1px solid #ccc;
-          display: none;
-        }
-        /* ( 축소버튼 눌렀을때 ) */
-        .chatDownShow {
-          display: none;
-          text-align: center;
-        }
-        .chatUserName {
-          cursor: pointer;
-          padding: 10px 20px;
-        }
-        .chatUserName:hover {
-          background-color: rgba(255, 166, 0, 0.58);
-          border-radius: 5px;
-        }
-        .black-close:hover {
-          background-color: red;
-        }
-        .black-close:hover .black-close-bar {
-          background-color: white;
-        }
-        /* ( 유저 이름 ) */
-        #memberNameArea {
-          border-bottom: 1px solid #aaa;
-
-          text-align: center;
-        }
-        /* ( 채팅창 ) */
-        #chatContentArea {
-          margin: 10px 0;
-          height: 300px;
-          font-size: 13px;
-          overflow-y: scroll;
-        }
-        .chatBallonArea::after {
-          clear: both;
-          content: '';
-          display: block;
-        }
-        #chatContentArea::after {
-          content: '';
-          display: block;
-          clear: both;
-        }
-
-        .chattingBtn {
-          margin-bottom: 10px;
-        }
-        .chattingBtn::after {
-          content: '';
-          clear: both;
-          display: block;
-        }
-
-        .chat-ballon1 {
-          max-width: 70%;
-          background-color: yellow;
-          padding: 5px 10px;
-          border-radius: 5px;
-          border: 1px solid transparent;
-          margin: 5px 0;
-          position: relative;
-          float: right;
-          margin-right: 10px;
-        }
-        .chat-ballon1::after {
-          content: '';
-          display: inline-block;
-          border-top: 10px solid yellow;
-          border-left: 10px solid yellow;
-          border-right: 10px solid transparent;
-          border-bottom: 10px solid transparent;
-          position: absolute;
-          right: -10px;
-          top: 0;
-          z-index: -1;
-        }
-        .chat-ballon2 {
-          max-width: 70%;
-          background-color: white;
-          padding: 5px 10px;
-          border-radius: 5px;
-          border: 1px solid transparent;
-          margin: 5px 0;
-          position: relative;
-          float: left;
-          margin-left: 10px;
-        }
-        .chat-ballon2::after {
-          content: '';
-          display: inline-block;
-          border-top: 10px solid white;
-          border-left: 10px solid transparent;
-          border-right: 10px solid white;
-          border-bottom: 10px solid transparent;
-          position: absolute;
-          left: -10px;
-          top: 0;
-          z-index: -1;
-        }
-        #message {
-          border: none;
-          margin: 0;
-          border-bottom-left-radius: 5px;
-          flex-grow: 1;
-        }
-        #message:focus {
-          outline: none;
-        }
-        .send-btn {
-          background-color: #ccc;
-          border: none;
-          width: 50px;
-          padding: 10px;
-        }
-        .send-btn:hover {
-          background-color: #aaa;
-        }
-        /* ( 축소, 닫기버튼 ) */
-        .close,
-        .down {
-          width: 20px;
-          height: 20px;
-          padding: 5px;
-          float: right;
-          position: relative;
-          cursor: pointer;
-          box-sizing: content-box;
-        }
-        .close:hover,
-        .down:hover {
-          background-color: red;
-        }
-        .close:hover .close-bar,
-        .down:hover .down-bar {
-          background-color: white;
-        }
-        .close-bar {
-          background-color: gray;
-          height: 2px;
-          width: 50%;
-          position: absolute;
-        }
-        .close-bar:first-child {
-          top: 50%;
-          transform: translate(-50%, -50%) rotate(45deg);
-          left: 50%;
-        }
-        .close-bar:last-child {
-          top: 50%;
-          transform: translate(-50%, -50%) rotate(-45deg);
-          left: 50%;
-        }
-
-        .down-bar {
-          background-color: gray;
-          height: 2px;
-          width: 50%;
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-        }
-
-        /* ============ */
-        /* ===상단바=== */
-        /* ============ */
-        .nav {
-          box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
-          display: flex;
-          justify-content: flex-end;
-          align-items: center;
-          padding: 15px;
-          font-size: 13px;
-        }
-        .nav > * {
-          color: gray;
-        }
-        .nav > *::after {
-          content: '|';
-          padding: 0 10px;
-        }
-        .nav a {
-          text-decoration: none;
-          color: gray;
-          font-size: 13px;
-        }
-
-        /* =============== */
-        /* ===게임 영역=== */
-        /* =============== */
-        .container {
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-        }
-
-        .game-area {
-          flex-grow: 1;
-          padding: 50px;
-        }
-
-        .game1,
-        .game2 {
-          width: 100%;
-          min-height: 500px;
-          margin: 0 auto;
-          padding: 20px;
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          border-radius: 5px;
-          border: 1px solid gray;
-        }
-        .game1 {
-          margin-bottom: 50px;
-        }
-
-        #matchingStartBtn,
-        #matchingCancleBtn {
-          background: #0c6428aa;
-          padding: 5px 10px;
-          border-radius: 5px;
-          border: 1px solid transparent;
-          cursor: pointer;
-          color: white;
-        }
-        #matchingStartBtn:hover,
-        #matchingCancleBtn:hover {
-          background-color: rgb(216, 163, 63);
-          border: none;
-        }
-
-        #matchingCancleBtn {
-          display: none;
-        }
-
-        /* ============== */
-        /* ===유저상태=== */
-        /* ============== */
-        .user-area {
-          margin-top: 20px;
-          padding: 30px;
-        }
-        .user-shadow {
-          box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px,
-            rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
-          padding: 20px;
-          position: sticky;
-          top: 20px;
-          border-radius: 5px;
-          width: 250px;
-        }
-        .add-area {
-          color: gray;
-          font-size: 12px;
-          text-align: right;
-        }
-
-        .add-friends {
-          cursor: pointer;
-        }
-        .add-friends:hover {
-          color: red;
-        }
-        .accept-area {
-        text-align: center;
-        margin: 20px 0;
-        display: none;
-      }
-      .accept-msg-area {
-        padding-top: 10px;
-        font-size: 12px;
-        border-left: 20px solid #ccc;
-        background-color: #eee;
-        border-radius: 5px;
-      }
-      .accept-msg {
-        margin: 10px 0;
-      }
-      .accept-check {
-        display: flex;
-        width: 100%;
-      }
-      .yes,
-      .no {
-        width: 50%;
-        padding: 10px 0;
-        cursor: pointer;
-      }
-      .no {
-        background-color: lightsalmon;
-        border-bottom-right-radius: 5px;
-      }
-      .no:hover {
-        background-color: rgb(202, 117, 94);
-      }
-      .yes {
-        background-color: rgb(134, 216, 134);
-      }
-      .yes:hover {
-        background-color: rgb(64, 148, 64);
-      }
-
-        .user-menu {
-          margin: 0;
-          padding: 0;
-          list-style: none;
-        }
-        .user-list {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          border: 1px solid green;
-          border-radius: 5px;
-          padding: 5px 10px;
-        }
-        .user-list:hover {
-          background-color: #eee;
-          cursor: pointer;
-        }
-        .user-name {
-          color: #333;
-        }
-        .user-online {
-          background-color: rgba(62, 157, 62, 0.6);
-          width: 15px;
-          height: 15px;
-          border-radius: 50%;
-        }
-        .user-offline {
-          background-color: red;
-          width: 15px;
-          height: 15px;
-          border-radius: 50%;
-        }
-        .message-area {
-          display: flex;
-          margin: 0 -20px;
-          margin-bottom: -10px;
-        }
-
-    </style>
+    <link rel="stylesheet" href="/static/main.css">
 </head>
-
 <body>
+<!--회원정보-->
+<div class="profile-black none">
+    <div class="profile-flex">
+        <div class="profile-white">
+            <h2>회원정보</h2>
+            <ul>
+                <li>
+                    <p>아이디 : id</p>
+                    <input type="text" placeholder="아이디" />
+                </li>
+                <li>
+                    <p>비밀번호 : pw</p>
+                    <input type="text" placeholder="비밀번호" />
+                </li>
+                <li>
+                    <p>이름</p>
+                    <input type="text" placeholder="이름" />
+                </li>
+                <li>
+                    <p>이메일</p>
+                    <input type="email" placeholder="email@naver.com" />
+                </li>
+            </ul>
+            <div class="profile-btn">
+                <button>수정</button>
+                <button>닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- 검색 창 -->
 <div class="black-area">
     <div class="black-flex">
@@ -517,12 +78,14 @@
 <div class="nav">
     <span id="myIdArea"></span>
     <a href="/member/logout">로그아웃</a>
+    <a href="#">회원정보</a>
 </div>
 
 <!-- 메인바 -->
 <div class="container">
     <div class="game-area">
-        <div class="game1">
+        <!-- 매칭 박스 -->
+        <div class="matchingArea">
             <button id="matchingStartBtn" onclick="matching('drowGameStart')">
                 매칭 시작
             </button>
@@ -530,6 +93,22 @@
                 매칭 취소
             </button>
         </div>
+
+        <!-- 그림판 -->
+        <div class="gameArea" style="border: 1px solid black;">
+            <div class="quizBox">퀴즈 문제 자리</div>
+            <div class="timeBox">남은 시간 출력자리</div>
+            <canvas class="myCanvas" width="800px" height="300" style="border: 1px solid black;"></canvas>
+            <div class="inGameMenu">
+                <button class="black" style="height: 20px; width: 20px; background-color: black;"></button>
+                <button class="blue" style="height: 20px; width: 20px; background-color: blue;"></button>
+                <button class="red" style="height: 20px; width: 20px; background-color: red;"></button>
+                <button class="rollBackBtn">뒤로가기</button>
+                <button class="clearBtn">clear</button><br>
+                <input class="chatBox"><button id="chatBtn">제출</button>
+            </div>
+        </div>
+
     </div>
     <!-- 유저 바 -->
     <div class="user-area">
@@ -575,10 +154,9 @@
         </div>
     </div>
 </div>
-
 <script type="text/javascript">
-    <!--    let result = await postRequest(url, loginParam);-->
 
+    <!--    let result = await postRequest(url, loginParam);-->
     //post 요청
     async function postRequest(url = '', data = {}) {
       try {
@@ -623,23 +201,44 @@
       }
     }
     async function searchMember() {
-      const url = `/member/searchMember?id=${searchMemberValue.value}`;
-      let result = await getRequest(url);
-      if (result.id != null) {
-        searchResult.innerHTML = `
-          <div class="result-name">${result.id}</div>
-          <button class="plus-btn" onclick="addFriendRequest('${result.id}')">+</button>
-      `;
-      }
+        if(searchMemberValue.value != myId){
+            const url1 = `/member/isAlreadyFriend?id=${searchMemberValue.value}&myId=${myId}`;
+            let isAlreadyFriend = await getRequest(url1);
+
+            // result == 0 친구 아님, result == 1 이미 친구
+            if(isAlreadyFriend.result == 0){
+                const url = `/member/searchMember?id=${searchMemberValue.value}`;
+                let result = await getRequest(url);
+                if (result.id != null) {
+                    searchResult.innerHTML = `
+                        <div class="result-name">${result.id}</div>
+                        <button class="plus-btn" onclick="addFriendRequest('${result.id}')">+</button>
+                    `;
+                }
+            }
+            if(isAlreadyFriend.result == 1){
+                const url = `/member/searchMember?id=${searchMemberValue.value}`;
+                let result = await getRequest(url);
+                if (result.id != null) {
+                    searchResult.innerHTML = `
+                        <div class="result-name">${result.id}</div>
+                        <div style="color: red; font-size:10px;">이미친구입니다.</div>
+                    `;
+                }
+            }
+        }
     }
 
 
-    //className
+    //className 변수
     const searchInput = document.querySelector('.search-input');
     const searchResult = document.querySelector('.search-result');
     const acceptArea = document.querySelector('.accept-area');
+    const matchingArea = document.querySelector('.matchingArea');
 
-    //id name
+
+
+    //id 변수
     const memberListTable = document.getElementById('memberListTable');
     const chattingArea = document.getElementById('chattingArea');
     const memberNameArea = document.getElementById('memberNameArea');
@@ -648,8 +247,8 @@
     const myIdArea = document.getElementById('myIdArea');
     const matchingStartBtn = document.getElementById('matchingStartBtn');
     const matchingCancleBtn = document.getElementById('matchingCancleBtn');
-    let myId = '';
 
+    let myId = '';
     let chattingAreaMemberName = '';
     let chattingAreaIsTrue = false;
     let chattingData = [];
@@ -657,25 +256,6 @@
     let friendList = [];
 
     var ws;
-
-    function matching(request) {
-      if (request == 'drowGameStart') {
-        const requestParam = new RequestParam('matchingStartDrowGame');
-        send(requestParam);
-
-        matchingStartBtn.style.display = 'none';
-        matchingCancleBtn.style.display = 'block';
-      }
-
-      if (request == 'drowGameCancle') {
-        const requestParam = new RequestParam('matchingCancleDrowGame');
-        send(requestParam);
-
-        matchingStartBtn.style.display = 'block';
-        matchingCancleBtn.style.display = 'none';
-      }
-    }
-
     //생성자
     function RequestParam(request, receiver = '', data = '') {
       this.request = request;
@@ -683,18 +263,9 @@
       this.data = data;
     }
 
-    function addFriendRequest(id) {
-      const requestParam = new RequestParam('addFriendRequest', id);
-      ws.send(JSON.stringify(requestParam));
-    }
-    function addFriendResponse(response, receiver){
-        console.log(response, receiver);
-        const requestParam = new RequestParam('addFriendResponse', receiver, response);
-        ws.send(JSON.stringify(requestParam));
-    }
+    window.onload = wsOpen; //로그인 후 main 페이지 로드 시 소캣 연걸
 
-    //로그인 후 main 페이지 로드 시 소캣 연걸
-    window.onload = wsOpen;
+    // websocket open
     function wsOpen() {
         ws = new WebSocket('ws://' + location.host + '/start');
         wsEvt();
@@ -717,36 +288,100 @@
     //메시지 처리 핸들러
     function receiveMessageHandler(msg) {
 
-        //친구추가 요청
-        if(msg.request == 'addFriendRequest'){
-            acceptArea.innerHTML = `
-                <div class="accept-msg-area">
-                    <p class="accept-msg">${msg.sender} 님이</p>
-                    <p class="accept-msg">친구추가 요청을 보냈습니다.</p>
-                    <div class="accept-check">
-                        <div class="yes" onclick="addFriendResponse(true, '${msg.sender}')">yes</div>
-                        <div class="no" onclick="addFriendResponse(false, '${msg.sender}')">no</div>
-                    </div>
-                </div>
-            `;
-            acceptArea.style.display = 'block';
+        if(msg.request == 'rollBack'){
+            rollBack_no_send();
+        }
+        if(msg.request == 'push'){
+            superRam.push(ram);
+            console.log(superRam);
+            ram = [];
         }
 
-        // 다른 member 에게 메시지를 받은 경우
-        if (msg.request == 'sendMessage') {
-            //chattingData 배열에 msg 추가
-            chattingData.push(msg);
+        if(msg.request == 'clear'){
+            clear_no_send();
+        }
 
-            //내가 보낸 메시지 일 경우
-            if (msg.sender == myId) {
-                chatContentArea.innerHTML += `
-                    <div class="chatBallonArea">
-                        <p class="chat-ballon1">${msg.content}</p>
-                    </div>
-                `;
-        }else{ //상대가 보낸 메시지 일 경우
-            // receiver 와 myId 동일해야함
-            // getMember() 와 sender 가 동일해야함
+        if(msg.request == 'sendCoordinate'){
+            draw(msg.x, msg.y, msg.lastX, msg.lastY, msg.color);
+            ram.push(msg);
+        }
+
+        if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
+            matchingArea.style.display = 'none';
+            gameArea.style.display = 'block';
+            addListener();
+        }
+
+        if(msg.request == 'addFriendRequest'){      //친구추가 요청
+            addFriendProc(msg);
+        }
+
+        if (msg.request == 'sendMessage') {         // 다른 유저에게 메시지를 받은 경우
+            sendMessageProc(msg);
+        }
+
+        if (Array.isArray(msg)) {                       //배열을 받았을 경우
+            if(msg[0].request == 'chattingData'){       //채팅 데이터인지 확인
+                chattingData = msg;
+            }
+            if(msg[0].request == 'friendList'){         //친구 목록
+                friendList = msg;
+                inputFriendList(friendList);
+            }
+        }
+
+        if (msg.myId != undefined) {                    //myId
+            myIdArea.innerHTML = `${msg.myId}`;
+            myId = msg.myId;
+        }
+
+        if(msg.loginMember != undefined){               //다른 유저 로그인 status 수정
+            for(let i = 0; i<friendList.length; i++){
+                if(msg.loginMember == friendList[i].friend_id){
+                    friendList[i].status = 'online';
+                    document.querySelector('.user-menu').innerHTML = '';
+                    inputFriendList(friendList)
+                }
+            }
+        }
+
+        if (msg.logOutMember != undefined) {            //다른 유저 로그아웃 status 수정
+            for(let i = 0; i<friendList.length; i++){
+                if(msg.logOutMember == friendList[i].friend_id){
+                    friendList[i].status = 'offline';
+                    document.querySelector('.user-menu').innerHTML = '';
+                    inputFriendList(friendList)
+                }
+            }
+        }
+    }
+
+    //친구추가 요청 처리 함수
+    function addFriendProc(msg){
+        acceptArea.innerHTML = `
+            <div class="accept-msg-area">
+                <p class="accept-msg">${msg.sender} 님이</p>
+                <p class="accept-msg">친구추가 요청을 보냈습니다.</p>
+                <div class="accept-check">
+                    <div class="yes" onclick="addFriendResponse(true, '${msg.sender}')">yes</div>
+                    <div class="no" onclick="addFriendResponse(false, '${msg.sender}')">no</div>
+                </div>
+            </div>
+        `;
+        acceptArea.style.display = 'block';
+    }
+
+    // 채팅 메시지 처리 함수
+    function sendMessageProc(msg){
+        chattingData.push(msg);         //chattingData 배열에 msg 추가
+
+        if (msg.sender == myId) {       //내가 보낸 메시지 일 경우
+            chatContentArea.innerHTML += `
+                <div class="chatBallonArea">
+                    <p class="chat-ballon1">${msg.content}</p>
+                </div>
+            `;
+        }else{                          //상대가 보낸 메시지 일 경우 (receiver 와 myId 동일해야함, getMember() 와 sender 가 동일해야함)
             if (myId == msg.receiver && getMember() == msg.sender) {
                 chatContentArea.innerHTML += `
                         <div class="chatBallonArea">
@@ -755,101 +390,106 @@
                     `;
                 }
             }
-            //스크롤 위치 조정
-            chatContentArea.scrollTop = chatContentArea.scrollHeight;
-        }
-
-
-
-        //배열을 받았을 경우
-        if (Array.isArray(msg)) {
-            //채팅 데이터
-            if(msg[0].request == 'chattingData'){
-                chattingData = msg;
-            }
-
-            //친구 목록
-            if(msg[0].request == 'friendList'){
-                friendList = msg;
-                inputFriendList(friendList);
-            }
-        }
-
-        //myId
-        if (msg.myId != undefined) {
-            myIdArea.innerHTML = `${msg.myId}`;
-            myId = msg.myId;
-        }
-
-        //loginMember
-        if(msg.loginMember != undefined){
-            //console.log(msg.loginMember);
-        }
-
-        //logOutMember
-        if (msg.logOutMember != undefined) {
-            //console.log(msg.logOutMember);
-        }
+        chatContentArea.scrollTop = chatContentArea.scrollHeight;       //스크롤 위치 조정
     }
 
-    //친구목록 입력
+    // 매칭 함수
+    function matching(request) {
+      if (request == 'drowGameStart') {
+        const requestParam = new RequestParam('matchingStartDrowGame');
+        send(requestParam);
+
+        matchingStartBtn.style.display = 'none';
+        matchingCancleBtn.style.display = 'block';
+      }
+
+      if (request == 'drowGameCancle') {
+        const requestParam = new RequestParam('matchingCancleDrowGame');
+        send(requestParam);
+
+        matchingStartBtn.style.display = 'block';
+        matchingCancleBtn.style.display = 'none';
+      }
+    }
+
+    // 친구 추가 요청 전송
+    function addFriendRequest(id) {
+      const requestParam = new RequestParam('addFriendRequest', id);
+      ws.send(JSON.stringify(requestParam));
+    }
+    // 친구 추가 요청 응답 전송
+    function addFriendResponse(response, receiver){
+        const requestParam = new RequestParam('addFriendResponse', receiver, response);
+        ws.send(JSON.stringify(requestParam));
+    }
+
+    //친구목록 출력
     function inputFriendList(friendList){
         for(let i = 0; i < friendList.length; i++){
             if(friendList[i].status == 'online'){
-                document.querySelector('.user-menu').insertAdjacentHTML(
-                    'beforeend',
-                    `
-                        <li class="user-list" onclick="chat('${friendList[i].friend_id}')">
-                            <div class="user-name">${friendList[i].friend_id}</div>
-                            <div class="user-online"></div>
-                        </li>
-                    `
-                );
+                setMemberStateOnline(friendList[i].friend_id);
             }
 
             if(friendList[i].status == 'offline'){
-                document.querySelector('.user-menu').insertAdjacentHTML(
-                    'beforeend',
-                    `
-                        <li class="user-list" onclick="chat('${friendList[i].friend_id}')">
-                            <div class="user-name">${friendList[i].friend_id}</div>
-                            <div class="user-offline"></div>
-                        </li>
-                    `
-                );
+                setMemberStateOffline(friendList[i].friend_id);
             }
         }
+    }
+
+    //유저 온라인 상태 set
+    function setMemberStateOnline(id){
+        document.querySelector('.user-menu').insertAdjacentHTML(
+            'beforeend',
+            `
+                <li class="user-list" onclick="chat('${id}')">
+                    <div class="user-name">${id}</div>
+                    <div class="user-online"></div>
+                </li>
+            `
+        );
+    }
+    //유저 오프라인 상태 set
+    function setMemberStateOffline(id){
+        document.querySelector('.user-menu').insertAdjacentHTML(
+            'beforeend',
+            `
+                <li class="user-list" onclick="chat('${id}')">
+                    <div class="user-name">${id}</div>
+                    <div class="user-offline"></div>
+                </li>
+            `
+        );
     }
 
     //현재 열려있는 채팅창의 member 를 저장
     let member;
     function getMember() {
-      return member;
+        return member;
     }
     function setMember(m) {
-      member = m;
+        member = m;
     }
 
     function chat(member) {
-      setMember(member);
-      memberNameArea.innerHTML = member;
+        setMember(member);
+        memberNameArea.innerHTML = member;
 
-      //채팅 공간 토글 처리
-      if (chattingAreaMemberName != member) {
-        chattingAreaMemberName = member;
-      } else {
-        chattingAreaIsTrue = !chattingAreaIsTrue;
-      }
+        //채팅 공간 토글 처리
+        if (chattingAreaMemberName != member) {
+            chattingAreaMemberName = member;
+        } else {
+            chattingAreaIsTrue = !chattingAreaIsTrue;
+        }
 
-      //채팅 공간이 열려있을 때
-      if (chattingAreaIsTrue) {
-        chattingArea.style.display = 'none';
-      } else {
-        chatContentArea.innerHTML = '';
-        inputAllChattingData(member);
-        chattingArea.style.display = 'block';
-        chatContentArea.scrollTop = chatContentArea.scrollHeight;
-      }
+        //채팅 공간이 열려있을 때
+        if (chattingAreaIsTrue) {
+            chattingArea.style.display = 'none';
+        } else {
+            chatContentArea.innerHTML = '';
+            inputAllChattingData(member);
+            chattingArea.style.display = 'block';
+            chatContentArea.scrollTop = chatContentArea.scrollHeight;
+        }
     }
 
     //메시지 set
@@ -865,7 +505,7 @@
 
     //메시지 전송
     function send(requestParam) {
-      ws.send(JSON.stringify(requestParam));
+        ws.send(JSON.stringify(requestParam));
     }
 
     //채팅공간에 채팅 데이터 입력
@@ -921,6 +561,192 @@
         document.querySelector('.black-area').style.display = 'none';
       }
     });
+    //===============//
+    //===회원정보====//
+    //===============//
+    let show = false;
+        document.querySelectorAll('.nav a')[1].addEventListener('click', () => {
+        document.querySelector('.profile-black').style.display = 'block';
+    });
+
+    document
+        .querySelector('.profile-black')
+        .addEventListener('click', (e) => {
+            if (e.target == document.querySelectorAll('.profile-btn button')[1]) {
+                document.querySelector('.profile-black').style.display = 'none';
+            }
+            if (e.target == document.querySelectorAll('.profile-btn button')[0]) {
+                show = !show;
+                let input = document.querySelectorAll('.profile-white input');
+                if (show == true) {
+                    input.forEach((a, i) => {
+                        input[i].style.display = 'block';
+                    });
+            } else {
+                input.forEach((a, i) => {
+                    input[i].style.display = 'none';
+                });
+            }
+        }
+    });
+
+
+    //===================================== 게임 자바스크립트 모음 =====================================//
+    const gameArea = document.querySelector('.gameArea');
+    gameArea.style.display = 'none';
+
+    const quizBox = document.querySelector('.quizBox'); // 퀴즈 출력 공간
+    const timeBox = document.querySelector('.timeBox'); // 남은 시간초 출력 공간
+    const canvas = document.querySelector('.myCanvas'); // 캔버스
+    const clearBtn = document.querySelector('.clearBtn'); // clearBtn
+    const rollBackBtn = document.querySelector('.rollBackBtn'); // rollBackBtn
+    const ctx = canvas.getContext("2d");
+
+    const inGameMenu = document.querySelector('.inGameMenu');
+
+    let color = 'black'; //색깔 변수 기본 black
+    let turn = 0;
+    let timeCount = 0;
+    let xy = [];
+    let ram = [];
+    let superRam = [];
+
+    let lastXY={
+        lastX: 0,
+        lastY: 0
+    };
+
+    let mouseState = {
+        mouse : false,
+        isout : false
+    };
+
+    function GameRequestParam(request='', x=0, y=0, lastX=0, lastY=0, color=''){
+        this.request = request;
+        this.x = x;
+        this.y = y;
+        this.lastX = lastX;
+        this.lastY = lastY;
+        this.color = color;
+    }
+
+    //이벤트 리스너 추가 함수
+    function addListener(){
+<!--        blackBtn.addEventListener('click', blackBtnClickHandler);-->
+<!--        blueBtn.addEventListener('click', blueBtnClickHandler);-->
+<!--        redBtn.addEventListener('click', redBtnClickHandler);-->
+        clearBtn.addEventListener('click', clear);
+        rollBackBtn.addEventListener('click', rollBack);
+        canvas.addEventListener('mousedown', canvasMouseDownHandler);
+    }
+
+    function canvasMouseDownHandler(event) {
+        mouseState.mouse = true;        // 마우스 클릭 상태 true
+        mouseState.isout = false;       // 마우스가 캔버스 위에 위치
+        mouseHandler(event);
+    };
+    function mouseHandler(event){
+
+        if(mouseState.isout==true){
+            ram=[];     //ram 배열 초기화
+        }else{
+            //마우스를 누른 상태
+            if(mouseState.mouse == true){
+                ram = [];
+                lastXY.lastX = event.clientX - ctx.canvas.offsetLeft;
+                lastXY.lastY = event.clientY - ctx.canvas.offsetTop;
+
+                //마우스 무브 이벤트리스너 추가
+                canvas.addEventListener('mousemove', mouseMoveHandler);
+            }
+            //마우스를 누르지 않은 상태(마우스를 눌러 선을 긋고 땠을 때)
+            else{
+                superRam.push(ram);
+
+                //push 요청 전송
+                const gameRequestParam = new GameRequestParam('push');
+                ws.send(JSON.stringify(gameRequestParam));
+                mouseState.isout=true;
+            }
+        }
+    }
+    function mouseMoveHandler(event){
+        getCanvasXY(event.clientX, event.clientY);
+        draw(xy[0], xy[1], lastXY.lastX, lastXY.lastY, color);
+        ram.push({ x: xy[0], y: xy[1], lastX: lastXY.lastX, lastY: lastXY.lastY, color: color });
+
+        //좌표전송
+        const gameRequestParam = new GameRequestParam('sendCoordinate', xy[0], xy[1], lastXY.lastX, lastXY.lastY, color);
+        ws.send(JSON.stringify(gameRequestParam));
+
+        setLastXY(xy[0], xy[1]);
+        canvas.addEventListener('mouseout', out);
+    }
+    function getCanvasXY(x, y){
+        xy[0] = x - ctx.canvas.offsetLeft;
+        xy[1] = y - ctx.canvas.offsetTop;
+    }
+    function draw(x, y, lastX, lastY, color){
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = color;
+        ctx.beginPath();
+        ctx.moveTo(lastX, lastY);
+        ctx.lineTo(x, y);
+        ctx.stroke();
+    }
+    function setLastXY(xy0, xy1){
+        lastXY.lastX=xy0;
+        lastXY.lastY=xy1;
+    }
+    if(mouseState.isout == false){
+        canvas.addEventListener('mouseup', function(event){
+            canvas.removeEventListener('mousemove', mouseMoveHandler);
+            canvas.removeEventListener('mouseout', out);
+            mouseState.mouse = false;
+            mouseHandler(event);
+        });
+    }
+    function out (){
+        mouseState.mouse = false;
+        mouseState.isout = true;
+        superRam.push(ram);
+        ram=[];
+        canvas.removeEventListener('mousemove', mouseMoveHandler);
+        canvas.removeEventListener('mouseout', out);
+    }
+    function clear(){
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        //clear 요청 전송
+        const gameRequestParam = new GameRequestParam('clear');
+        ws.send(JSON.stringify(gameRequestParam));
+    }
+    function clear_no_send(){
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+    }
+
+    function rollBack(){
+        superRam.pop();
+        clear_no_send();
+        for(let i = 0; i<superRam.length; i++){
+            for(let j = 0; j<superRam[i].length; j++){
+                draw(superRam[i][j].x, superRam[i][j].y, superRam[i][j].lastX, superRam[i][j].lastY, superRam[i][j].color);
+            }
+        }
+
+        //rollBack 요청 전송
+        const gameRequestParam = new GameRequestParam('rollBack');
+        ws.send(JSON.stringify(gameRequestParam));
+    }
+    function rollBack_no_send(){
+        superRam.pop();
+        clear_no_send();
+        for(let i = 0; i<superRam.length; i++){
+            for(let j = 0; j<superRam[i].length; j++){
+                draw(superRam[i][j].x, superRam[i][j].y, superRam[i][j].lastX, superRam[i][j].lastY, superRam[i][j].color);
+            }
+        }
+    }
+    //======================================================================================//
 </script>
 </body>
 </html>

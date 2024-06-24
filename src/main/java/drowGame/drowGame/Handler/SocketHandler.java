@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -37,7 +38,20 @@ public class SocketHandler extends TextWebSocketHandler {
     //매칭 대기열 que
     ConcurrentLinkedQueue<String> drowGameMatchingInfo = new ConcurrentLinkedQueue<>();
 
-    //drow game room Info
+    //gameRoom 정보를 담을 Map
+    private final ConcurrentHashMap<WebSocketSession, Integer> gameRooms = new ConcurrentHashMap<WebSocketSession, Integer>();
+
+    //room id
+    private final AtomicInteger roomIdGenerator = new AtomicInteger();
+
+    public void createGameRoom(List<WebSocketSession> player_session) {
+        // roomId 생성
+        int roomId = roomIdGenerator.incrementAndGet();
+
+        for (WebSocketSession ws : player_session){
+            gameRooms.put(ws, roomId);
+        }
+    }
 
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
@@ -48,7 +62,52 @@ public class SocketHandler extends TextWebSocketHandler {
         requestDTO = objectMapper.readValue(msg, RequestDTO.class);
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
 
+
+        if(requestDTO.getRequest().equals("rollBack")){
+            //자기 자신 제외 같은 roomId를 가진 유저에게 전송
+            int myRoomId = gameRooms.get(session);
+            for (WebSocketSession wss : gameRooms.keySet()){
+                //roomId는 같고 자기 자신 제외
+                if(gameRooms.get(wss) == myRoomId && !wss.equals(session)){
+                    socketService.sendMessage(wss, socketService.dtoToJson(requestDTO));
+                }
+            }
+        }
+        if(requestDTO.getRequest().equals("push")){
+            //자기 자신 제외 같은 roomId를 가진 유저에게 전송
+            int myRoomId = gameRooms.get(session);
+            for (WebSocketSession wss : gameRooms.keySet()){
+                //roomId는 같고 자기 자신 제외
+                if(gameRooms.get(wss) == myRoomId && !wss.equals(session)){
+                    socketService.sendMessage(wss, socketService.dtoToJson(requestDTO));
+                }
+            }
+        }
+        if(requestDTO.getRequest().equals("clear")){
+            //자기 자신 제외 같은 roomId를 가진 유저에게 전송
+            int myRoomId = gameRooms.get(session);
+            for (WebSocketSession wss : gameRooms.keySet()){
+                //roomId는 같고 자기 자신 제외
+                if(gameRooms.get(wss) == myRoomId && !wss.equals(session)){
+                    socketService.sendMessage(wss, socketService.dtoToJson(requestDTO));
+                }
+            }
+        }
+        if(requestDTO.getRequest().equals("sendCoordinate")){
+            //자기 자신 제외 같은 roomId를 가진 유저에게 전송
+            int myRoomId = gameRooms.get(session);
+            for (WebSocketSession wss : gameRooms.keySet()){
+                //roomId는 같고 자기 자신 제외
+                if(gameRooms.get(wss) == myRoomId && !wss.equals(session)){
+                    socketService.sendMessage(wss, socketService.dtoToJson(requestDTO));
+                }
+            }
+        }
+
+
         if(requestDTO.getRequest().equals("addFriendRequest")){
+            System.out.println(requestDTO.getReceiver());
+
             requestDTO.setSender(myId);
             WebSocketSession receiverSession = socketService.findReceiverSession(requestDTO.getReceiver(), sessionMap, socketSessionAndMemberID);
             socketService.sendMessage(receiverSession, socketService.dtoToJson(requestDTO));
@@ -57,12 +116,39 @@ public class SocketHandler extends TextWebSocketHandler {
             socketService.addFriend(requestDTO, myId);
         }
         if(requestDTO.getRequest().equals("matchingStartDrowGame")){
+            //매칭 대기열에 추가
+            // 소캣 연결 종료시 제거 필요
             drowGameMatchingInfo.add(myId);
-            socketService.matching(drowGameMatchingInfo);
+
+            //매치 인원 충족
+            if(drowGameMatchingInfo.size()==2){
+                List<WebSocketSession> player_session = new ArrayList<>();
+
+                for(int i = 0; i<2; i++){
+                    String player = drowGameMatchingInfo.poll();
+
+                    for(String sessionId : socketSessionAndMemberID.keySet()){
+                        if(socketSessionAndMemberID.get(sessionId).equals(player)){
+                            player_session.add(sessionMap.get(sessionId));
+                        }
+                    }
+                }
+
+                //roomId와 session 저장
+                createGameRoom(player_session);
+                requestDTO.setResponse("success");
+
+                for(WebSocketSession wss : player_session){
+                    socketService.sendMessage(wss, socketService.dtoToJson(requestDTO));
+                }
+                System.out.println("========= gameRooms Info =========");
+                for(WebSocketSession wss : gameRooms.keySet()){
+                    System.out.println(socketSessionAndMemberID.get(wss.getId()) + " : " + gameRooms.get(wss));
+                }
+            }
         }
         if(requestDTO.getRequest().equals("matchingCancleDrowGame")){
             drowGameMatchingInfo.remove(myId);
-            socketService.matching(drowGameMatchingInfo);
         }
         
         if (requestDTO.getRequest().equals("sendMessage")) {
@@ -99,7 +185,7 @@ public class SocketHandler extends TextWebSocketHandler {
 
         //소캣 연결 시 현재 소캣에 연결되어 있는 member의 목록을 전송
         //안씀 나중에 정리 시 제거
-        //socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
+        socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
 
         //접속 시 자기 자신 제외 접속중인 친구들에게 login 정보 알리기
 
@@ -128,7 +214,8 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
+        //httpSession이 이미 제거되었기 때문에 memberSessionService 사용 불가
+        String myId = socketSessionAndMemberID.get(session.getId());
         socketService.sendLogoutMember(session, sessionMap, socketSessionAndMemberID, myId);
         //소켓 종료
         sessionMap.remove(session.getId());

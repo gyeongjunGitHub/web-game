@@ -2,7 +2,6 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import drowGame.drowGame.Handler.GameRoomHandler;
 import drowGame.drowGame.dto.ChattingDTO;
 import drowGame.drowGame.dto.FriendDTO;
 import drowGame.drowGame.dto.RequestDTO;
@@ -13,7 +12,6 @@ import drowGame.drowGame.repository.ChattingRepository;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.apache.coyote.Request;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
@@ -23,7 +21,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 @Service
 @RequiredArgsConstructor
@@ -33,7 +30,6 @@ public class SocketService {
     private final FriendRepository friendRepository;
     private final ChattingRepository chattingRepository;
     private final MemberRepository memberRepository;
-
 
     public void sendLogoutMember(WebSocketSession webSocketSession,
                                  HashMap<String, WebSocketSession> sessionMap,
@@ -69,9 +65,6 @@ public class SocketService {
         return friendDTOList;
     }
 
-    ////////////////////////
-    //안쓰는 함수 나중에 제거//
-    ////////////////////////
     public void sendLoginMemberList(WebSocketSession webSocketSession,
                                     HashMap<String, WebSocketSession> sessionMap,
                                     ConcurrentHashMap<String, String> socketSessionAndMemberID,
@@ -168,14 +161,6 @@ public class SocketService {
         return chattingDTOList;
     }
 
-
-    public void matching(ConcurrentLinkedQueue<String> drowGameMatchingInfo) {
-        System.out.println("drowGame matching member size : " + drowGameMatchingInfo.size());
-        if(drowGameMatchingInfo.size() == 2){
-            System.out.println("매치 인원 충족!");
-        }
-
-    }
 
     @Transactional
     public void addFriend(RequestDTO requestDTO, String myId) {
