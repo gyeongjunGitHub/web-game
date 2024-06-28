@@ -20,4 +20,9 @@ public class RequestDTO {
     private int lastY;  //lsatY좌표
     private String color;
 
+    private int yourTurn;
+    private String quiz;
+    private String answer;
+    private int cycle;
+
 }

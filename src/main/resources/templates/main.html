@@ -105,7 +105,7 @@
                 <button class="red" style="height: 20px; width: 20px; background-color: red;"></button>
                 <button class="rollBackBtn">뒤로가기</button>
                 <button class="clearBtn">clear</button><br>
-                <input class="chatBox"><button id="chatBtn">제출</button>
+                <input class="answerBox"><button class="sendBtn">제출</button>
             </div>
         </div>
 
@@ -126,7 +126,6 @@
                     </div>
                 </div>
             </div>
-
             <ul class="user-menu"></ul>
         </div>
     </div>
@@ -254,6 +253,10 @@
     let chattingData = [];
     let memberList = [];
     let friendList = [];
+    let myTurn;
+    let cycle = 0;
+    let isCorrect = false;
+    let time = 0;
 
     var ws;
     //생성자
@@ -287,6 +290,67 @@
 
     //메시지 처리 핸들러
     function receiveMessageHandler(msg) {
+        if(msg.request == 'answer'){
+            console.log(answer);
+            if(msg.data == answer){
+                quizBox.innerHTML = `정답!!! -> ${answer}`;
+                time = 5;
+            }
+        }
+        if(msg.request == 'gameOver'){
+            matchingArea.style.display = 'block';
+            gameArea.style.display = 'none';
+        }
+        if(msg.request == 'timeCount'){
+            timeBox.innerHTML = `${msg.data}`;
+        }
+
+        if(msg.request == 'gameStart' || msg.request == 'nextTurn'){
+            console.log(msg);
+            quiz = msg.quiz;
+            answer = msg.answer;
+
+            if(msg.yourTurn == myTurn){
+                sendBtn.removeEventListener('click', sendAnswer);
+                if(myTurn == 2){
+                    cycle++;
+                }
+
+                addListener();
+                quizBox.innerHTML = `${msg.answer}`;
+
+                time = 20;
+
+                const requestParam = new RequestParam('timeCount', '', time);
+                timeCalculation1();
+                function timeCalculation1(){
+                    setTimeout(function() {
+                        if(time > 1){
+                            time--;
+                            requestParam.data = time;
+                            send(requestParam);
+                            timeCalculation1();
+                        }else{
+                            if(cycle == 2 && myTurn == 2){
+                                requestParam.request = 'gameOver';
+                                send(requestParam);
+                                cycle = 0;
+                            }else{
+                                removeListener();
+                                requestParam.request = 'nextTurn';
+                                requestParam.data = myTurn;
+                                send(requestParam);
+                                clear();
+                                clear_no_send();
+                            }
+                        }
+                    }, 1000);
+                }
+            }else{
+                sendBtn.addEventListener('click', sendAnswer);
+                quizBox.innerHTML = `${msg.quiz}`;
+            }
+        }
 
         if(msg.request == 'rollBack'){
             rollBack_no_send();
@@ -307,10 +371,30 @@
         }
 
         if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
+            myTurn = msg.yourTurn;
+            console.log(myTurn);
+
             matchingArea.style.display = 'none';
             gameArea.style.display = 'block';
-            addListener();
+            quizBox.innerHTML = `잠시 후 게임이 시작됩니다.`;
+
+            time = 3;
+            timeCalculation(time, timeBox)
+            function timeCalculation(time, box){
+                box.innerHTML = time;
+                setTimeout(function() {
+                    if(time > 1){
+                        time--;
+                        timeCalculation(time, box);
+                    }
+                    else{
+                        const requestParam = new RequestParam('gameStart');
+                        send(requestParam);
+                    }
+                }, 1000);
+            }
         }
+
 
         if(msg.request == 'addFriendRequest'){      //친구추가 요청
             addFriendProc(msg);
@@ -415,12 +499,12 @@
     // 친구 추가 요청 전송
     function addFriendRequest(id) {
       const requestParam = new RequestParam('addFriendRequest', id);
-      ws.send(JSON.stringify(requestParam));
+      send(requestParam);
     }
     // 친구 추가 요청 응답 전송
     function addFriendResponse(response, receiver){
         const requestParam = new RequestParam('addFriendResponse', receiver, response);
-        ws.send(JSON.stringify(requestParam));
+        send(requestParam);
     }
 
     //친구목록 출력
@@ -505,7 +589,7 @@
 
     //메시지 전송
     function send(requestParam) {
-        ws.send(JSON.stringify(requestParam));
+       ws.send(JSON.stringify(requestParam));
     }
 
     //채팅공간에 채팅 데이터 입력
@@ -601,15 +685,18 @@
     const clearBtn = document.querySelector('.clearBtn'); // clearBtn
     const rollBackBtn = document.querySelector('.rollBackBtn'); // rollBackBtn
     const ctx = canvas.getContext("2d");
+    const answerBox = document.querySelector('.answerBox');
+    const sendBtn = document.querySelector('.sendBtn');
 
     const inGameMenu = document.querySelector('.inGameMenu');
 
     let color = 'black'; //색깔 변수 기본 black
     let turn = 0;
-    let timeCount = 0;
     let xy = [];
     let ram = [];
     let superRam = [];
+    let quiz = '';
+    let answer = '';
 
     let lastXY={
         lastX: 0,
@@ -639,6 +726,15 @@
         rollBackBtn.addEventListener('click', rollBack);
         canvas.addEventListener('mousedown', canvasMouseDownHandler);
     }
+    function removeListener(){
+<!--    // 이벤트 리스너 제거-->
+<!--    blackBtn.removeEventListener('click', blackBtnClickHandler);-->
+<!--    blueBtn.removeEventListener('click', blueBtnClickHandler);-->
+<!--    redBtn.removeEventListener('click', redBtnClickHandler);-->
+    clearBtn.removeEventListener('click', clear);
+    rollBackBtn.removeEventListener('click', rollBack);
+    canvas.removeEventListener('mousedown', canvasMouseDownHandler);
+}
 
     function canvasMouseDownHandler(event) {
         mouseState.mouse = true;        // 마우스 클릭 상태 true
@@ -665,7 +761,7 @@
 
                 //push 요청 전송
                 const gameRequestParam = new GameRequestParam('push');
-                ws.send(JSON.stringify(gameRequestParam));
+                send(gameRequestParam);
                 mouseState.isout=true;
             }
         }
@@ -677,7 +773,7 @@
 
         //좌표전송
         const gameRequestParam = new GameRequestParam('sendCoordinate', xy[0], xy[1], lastXY.lastX, lastXY.lastY, color);
-        ws.send(JSON.stringify(gameRequestParam));
+        send(gameRequestParam);
 
         setLastXY(xy[0], xy[1]);
         canvas.addEventListener('mouseout', out);
@@ -716,17 +812,20 @@
     }
     function clear(){
         ctx.clearRect(0,0,canvas.width, canvas.height);
+        superRam=[];
         //clear 요청 전송
         const gameRequestParam = new GameRequestParam('clear');
-        ws.send(JSON.stringify(gameRequestParam));
+        send(gameRequestParam);
     }
     function clear_no_send(){
         ctx.clearRect(0,0,canvas.width, canvas.height);
+        superRam = [];
     }
+
 
     function rollBack(){
         superRam.pop();
-        clear_no_send();
+        ctx.clearRect(0,0,canvas.width, canvas.height);
         for(let i = 0; i<superRam.length; i++){
             for(let j = 0; j<superRam[i].length; j++){
                 draw(superRam[i][j].x, superRam[i][j].y, superRam[i][j].lastX, superRam[i][j].lastY, superRam[i][j].color);
@@ -739,13 +838,19 @@
     }
     function rollBack_no_send(){
         superRam.pop();
-        clear_no_send();
+        ctx.clearRect(0,0,canvas.width, canvas.height);
         for(let i = 0; i<superRam.length; i++){
             for(let j = 0; j<superRam[i].length; j++){
                 draw(superRam[i][j].x, superRam[i][j].y, superRam[i][j].lastX, superRam[i][j].lastY, superRam[i][j].color);
             }
         }
     }
+    function sendAnswer(){
+        const requestParam = new RequestParam('answer', '', answerBox.value);
+        send(requestParam);
+    }
+
+
     //======================================================================================//
 </script>
 </body>

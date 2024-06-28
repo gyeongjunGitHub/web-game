@@ -4,13 +4,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.dto.ChattingDTO;
 import drowGame.drowGame.dto.FriendDTO;
+import drowGame.drowGame.dto.QuizDTO;
 import drowGame.drowGame.dto.RequestDTO;
 import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.entity.FriendEntity;
 import drowGame.drowGame.entity.FriendId;
+import drowGame.drowGame.entity.QuizEntity;
 import drowGame.drowGame.repository.ChattingRepository;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.MemberRepository;
+import drowGame.drowGame.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +34,7 @@ public class SocketService {
     private final FriendRepository friendRepository;
     private final ChattingRepository chattingRepository;
     private final MemberRepository memberRepository;
+    private final QuizRepository quizRepository;
 
     public void sendLogoutMember(WebSocketSession webSocketSession,
                                  HashMap<String, WebSocketSession> sessionMap,
@@ -180,5 +185,19 @@ public class SocketService {
 
             friendRepository.addFriend(friendEntity, friendEntity1);
         }
+    }
+
+    public QuizDTO getQuiz() {
+        int min = 1;
+        int max = 7955;
+        int randomQuizNumber = ThreadLocalRandom.current().nextInt(min, max + 1);
+
+        QuizEntity quiz = quizRepository.getQuiz(randomQuizNumber);
+
+        QuizDTO quizDTO = new QuizDTO();
+        quizDTO.setNum(quiz.getNum());
+        quizDTO.setQuiz(quiz.getQuiz());
+        quizDTO.setAnswer(quiz.getAnswer());
+        return quizDTO;
     }
 }
