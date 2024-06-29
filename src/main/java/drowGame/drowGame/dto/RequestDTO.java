@@ -5,6 +5,7 @@ import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter @Setter
 public class RequestDTO {
@@ -24,5 +25,7 @@ public class RequestDTO {
     private String quiz;
     private String answer;
     private int cycle;
+
+    private List<String> roomUsers;
 
 }

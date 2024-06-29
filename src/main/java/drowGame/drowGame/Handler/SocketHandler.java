@@ -65,6 +65,7 @@ public class SocketHandler extends TextWebSocketHandler {
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
 
         if(requestDTO.getRequest().equals("answer")){
+            requestDTO.setSender(myId);
             //같은 roomId를 가진 유저에게 전송
             int myRoomId = gameRooms.get(session).getRoomId();
             for (WebSocketSession wss : gameRooms.keySet()){
@@ -183,18 +184,20 @@ public class SocketHandler extends TextWebSocketHandler {
             //매치 인원 충족
             if(drowGameMatchingInfo.size()==2){
                 List<WebSocketSession> player_session = new ArrayList<>();
-
-                for(int i = 0; i<2; i++){
+                List<String> memebers = new ArrayList<>();
+                for (int i = 0; i < 2; i++) {
                     //memberId
                     String player = drowGameMatchingInfo.poll();
+                    memebers.add(player);
 
                     //memberSession
-                    for(String sessionId : socketSessionAndMemberID.keySet()){
-                        if(socketSessionAndMemberID.get(sessionId).equals(player)){
+                    for (String sessionId : socketSessionAndMemberID.keySet()) {
+                        if (socketSessionAndMemberID.get(sessionId).equals(player)) {
                             player_session.add(sessionMap.get(sessionId));
                         }
                     }
                 }
+                requestDTO.setRoomUsers(memebers);
 
                 //roomId와 session 저장
                 createGameRoom(player_session);
@@ -288,6 +291,7 @@ public class SocketHandler extends TextWebSocketHandler {
         //소켓 종료
         sessionMap.remove(session.getId());
         socketSessionAndMemberID.remove(session.getId());
+        System.out.println(drowGameMatchingInfo.toString());
         super.afterConnectionClosed(session, status);
     }
 }

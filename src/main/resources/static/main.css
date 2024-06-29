@@ -506,3 +506,141 @@ div {
   margin: 0 -20px;
   margin-bottom: -10px;
 }
+
+/* 그림판 */
+.gameArea {
+  padding: 20px;
+  border: 1px solid black;
+}
+.gameArea-flex {
+  display: flex;
+  gap: 20px;
+  text-align: center;
+  justify-content: center;
+}
+.user1_area,
+.user2_area {
+  width: 20%;
+  border-radius: 10px;
+  font-size: 20px;
+}
+.user1_area {
+  border: 1px solid green;
+}
+.user2_area {
+  border: 1px solid orange;
+}
+.user1_name,
+.user2_name {
+  border-bottom: 1px solid #ccc;
+}
+.user1_answer,
+.user2_answer {
+  padding: 10px;
+}
+.quizBox{
+    text-align: center;
+    font-size: 20px;
+    font-weight: 600;
+    padding-top: 20px;
+}
+.timeBox {
+  text-align: center;
+  font-size: 20px;
+  font-weight: 600;
+}
+.quizBox {
+
+}
+.timeBox {
+
+}
+.inGameMenu {
+  margin-top: 20px;
+  position: relative;
+}
+.inGameMenu > .btn {
+  position: absolute;
+  top: 0;
+  left: 0;
+  text-align: center;
+  height: 100%;
+}
+.btn-wrap1,
+.btn-wrap2 {
+  width: 100%;
+  padding-top: 20px;
+  height: 50%;
+}
+
+.inGameMenu > .input {
+  text-align: center;
+}
+
+.answerBox {
+  display: block;
+  margin: 0 auto;
+  width: 200px;
+  font-size: 20px;
+  padding: 5px;
+  border-radius: 5px;
+  border: 2px solid gray;
+  text-align: center;
+}
+.answerBox:focus {
+  outline: none;
+  border: 2px solid #0c6428aa;
+  width: 25%;
+  transition: width 0.5s;
+}
+.sendBtn {
+  margin-left: 10px;
+  background-color: #0c6428aa;
+  border: none;
+  color: white;
+  width: 150px;
+  padding: 5px 0;
+  display: block;
+  margin: 0 auto;
+  margin-top: 30px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+.sendBtn:hover {
+  background-color: orange;
+}
+
+.color-btn {
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.color-btn:hover {
+  transform: scale(1.1);
+  transition: transform 0.5s;
+}
+
+.blackBtn {
+  background-color: black;
+}
+.redBtn {
+  background-color: red;
+}
+.blueBtn {
+  background-color: blue;
+}
+.rollBackBtn,
+.clearBtn {
+  background-color: #333;
+  color: white;
+  width: 70px;
+  height: 25px;
+  vertical-align: top;
+}
+
+.rollBackBtn:hover,
+.clearBtn:hover {
+  background-color: red;
+  border: none;
+}
