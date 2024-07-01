@@ -326,6 +326,12 @@
     //메시지 처리 핸들러 함수
     function receiveMessageHandler(msg) {
 
+        //request -> leaveOtherMember
+        if(msg.request == 'leaveOtherMember'){
+            console.log(msg);
+            alert('다른 유저가 게임을 떠났습니다.');
+            location.href = '/main';
+        }
         //request -> answer
         if(msg.request == 'answer'){
             for(let i = 0; i < userList.length; i++){

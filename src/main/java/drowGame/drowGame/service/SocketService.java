@@ -2,10 +2,7 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import drowGame.drowGame.dto.ChattingDTO;
-import drowGame.drowGame.dto.FriendDTO;
-import drowGame.drowGame.dto.QuizDTO;
-import drowGame.drowGame.dto.RequestDTO;
+import drowGame.drowGame.dto.*;
 import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.entity.FriendEntity;
 import drowGame.drowGame.entity.FriendId;
@@ -123,26 +120,30 @@ public class SocketService {
         }
     }
 
-    public String dtoToJson(ChattingDTO chattingDTO){
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(chattingDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+    public void sendMessageSameRoomId(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, RequestDTO requestDTO){
+        //같은 roomId를 가진 유저에게 전송
+        int myRoomId = gameRooms.get(session).getRoomId();
+        for (WebSocketSession wss : gameRooms.keySet()){
+            if(myRoomId == gameRooms.get(wss).getRoomId()){
+                sendMessage(wss, dtoToJson(requestDTO));
+            }
         }
     }
-    public String dtoToJson(RequestDTO requestDTO){
-        ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            return objectMapper.writeValueAsString(requestDTO);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+    public void sendMessageSameRoomIdNotMe(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, RequestDTO requestDTO){
+        //자기 자신 제외 같은 roomId를 가진 유저에게 전송
+        int myRoomId = gameRooms.get(session).getRoomId();
+        for (WebSocketSession wss : gameRooms.keySet()){
+            //roomId는 같고 자기 자신 제외
+            if(gameRooms.get(wss).getRoomId() == myRoomId && !wss.equals(session)){
+                sendMessage(wss, dtoToJson(requestDTO));
+            }
         }
     }
-    public String dtoToJson(FriendDTO friendDTO){
+
+    public String dtoToJson(Object object){
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.writeValueAsString(friendDTO);
+            return objectMapper.writeValueAsString(object);
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
