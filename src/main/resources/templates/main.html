@@ -326,6 +326,18 @@
     //메시지 처리 핸들러 함수
     function receiveMessageHandler(msg) {
 
+        if(msg.request == 'duplicateLogin'){
+            alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
+            location.href = '/';
+        }
+
+        //request -> addFriendResponse
+        if(msg.request == 'addFriendResponse'){
+            if(msg.data == 'true'){
+                //
+            }
+        }
+
         //request -> leaveOtherMember
         if(msg.request == 'leaveOtherMember'){
             console.log(msg);
@@ -494,6 +506,7 @@
             }
             if(msg[0].request == 'friendList'){         //친구 목록
                 friendList = msg;
+                document.querySelector('.user-menu').innerHTML = '';
                 inputFriendList(friendList);
             }
         }
@@ -563,32 +576,32 @@
 
     // 매칭 함수
     function matching(request) {
-      if (request == 'drowGameStart') {
-        const requestParam = new RequestParam('matchingStartDrowGame');
-        send(requestParam);
+        if (request == 'drowGameStart') {
+            const requestParam = new RequestParam('matchingStartDrowGame');
+            send(requestParam);
+            matchingStartBtn.style.display = 'none';
+            matchingCancleBtn.style.display = 'block';
+        }
 
-        matchingStartBtn.style.display = 'none';
-        matchingCancleBtn.style.display = 'block';
-      }
+        if (request == 'drowGameCancle') {
+            const requestParam = new RequestParam('matchingCancleDrowGame');
+            send(requestParam);
 
-      if (request == 'drowGameCancle') {
-        const requestParam = new RequestParam('matchingCancleDrowGame');
-        send(requestParam);
-
-        matchingStartBtn.style.display = 'block';
-        matchingCancleBtn.style.display = 'none';
-      }
+            matchingStartBtn.style.display = 'block';
+            matchingCancleBtn.style.display = 'none';
+        }
     }
 
     // 친구 추가 요청 전송
     function addFriendRequest(id) {
-      const requestParam = new RequestParam('addFriendRequest', id);
-      send(requestParam);
+        const requestParam = new RequestParam('addFriendRequest', id);
+        send(requestParam);
     }
-    // 친구 추가 요청 응답 전송
+    // 친구 추가 요청 응답 전송 -> 수락 및 거절 이후 화면 처리 필요
     function addFriendResponse(response, receiver){
         const requestParam = new RequestParam('addFriendResponse', receiver, response);
         send(requestParam);
+        acceptArea.style.display='none';
     }
 
     //친구목록 출력
@@ -662,13 +675,13 @@
 
     //메시지 set
     function setMessage() {
-      const requestParam = new RequestParam(
-        'sendMessage',
-        memberNameArea.innerHTML,
-        message.value
-      );
-      send(requestParam);
-      message.value = '';
+        const requestParam = new RequestParam(
+            'sendMessage',
+            memberNameArea.innerHTML,
+            message.value
+        );
+        send(requestParam);
+        message.value = '';
     }
 
     //메시지 전송
@@ -678,29 +691,26 @@
 
     //채팅공간에 채팅 데이터 입력
     function inputAllChattingData(member) {
-      chatContentArea.innerHTML = '';
-      for (let i = 0; i < chattingData.length; i++) {
-        if (
-          (chattingData[i].sender == member &&
-            chattingData[i].receiver == myId) ||
-          (chattingData[i].sender == myId &&
-            chattingData[i].receiver == member)
-        ) {
-          if (chattingData[i].sender == myId) {
-            chatContentArea.innerHTML += `
-                    <div class="chatBallonArea">
-                        <p class="chat-ballon1">${chattingData[i].content}</p>
-                    </div>
-                `;
-          } else {
-            chatContentArea.innerHTML += `
+        chatContentArea.innerHTML = '';
+        for (let i = 0; i < chattingData.length; i++) {
+            if ((chattingData[i].sender == member && chattingData[i].receiver == myId)
+                || (chattingData[i].sender == myId && chattingData[i].receiver == member)
+                ) {
+                if (chattingData[i].sender == myId) {
+                    chatContentArea.innerHTML += `
+                        <div class="chatBallonArea">
+                            <p class="chat-ballon1">${chattingData[i].content}</p>
+                        </div>
+                    `;
+                } else {
+                chatContentArea.innerHTML += `
                     <div class="chatBallonArea">
                         <p class="chat-ballon2">${chattingData[i].content}</p>
                     </div>
-                `;
-          }
+                    `;
+                }
+            }
         }
-      }
     }
     document
       .querySelector('#chattingArea')

@@ -13,8 +13,12 @@ public class HomeController {
 
     private final MemberSessionService memberSessionService;
     @GetMapping("/")
-    public String home() {
-        return "loginForm";
+    public String home(HttpSession httpSession) {
+        String myId = memberSessionService.getMemberId(httpSession.getId());
+        if(myId == null){
+            return "loginForm";
+        }
+        return "main";
     }
 
     @GetMapping("/main")

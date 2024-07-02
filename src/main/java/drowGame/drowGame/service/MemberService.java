@@ -26,22 +26,31 @@ public class MemberService {
     private final FriendRepository friendRepository;
 
     public ResultDTO loginProc(MemberDTO memberDTO, HttpSession httpSession) {
-        // 유효성 검사
 
+        // 유효성 검사
         Optional<MemberEntity> OptionalById = memberRepository.findById(memberDTO.getId());
         ResultDTO resultDTO = new ResultDTO();
 
+        // 아이디가 존재
         if (OptionalById.isPresent()) {
             MemberEntity byId = OptionalById.get();
+
+            // 비밀번호 일치
             if (byId.getPassword().equals(memberDTO.getPassword())) {
+                //세션에 추가
                 memberSessionService.addSession(httpSession.getId(), byId.getId());
+
                 resultDTO.setResult(1);
                 return resultDTO;
-            } else {
+            }
+            // 비밀번호 불일치
+            else {
                 resultDTO.setResult(0);
                 return resultDTO;
             }
-        } else {
+        }
+        //아이디 존재 X
+        else {
             resultDTO.setResult(0);
             return resultDTO;
         }

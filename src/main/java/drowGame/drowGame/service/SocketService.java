@@ -9,7 +9,6 @@ import drowGame.drowGame.entity.FriendId;
 import drowGame.drowGame.entity.QuizEntity;
 import drowGame.drowGame.repository.ChattingRepository;
 import drowGame.drowGame.repository.FriendRepository;
-import drowGame.drowGame.repository.MemberRepository;
 import drowGame.drowGame.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
@@ -30,11 +28,10 @@ public class SocketService {
     //나중에 정리 필요
     private final FriendRepository friendRepository;
     private final ChattingRepository chattingRepository;
-    private final MemberRepository memberRepository;
     private final QuizRepository quizRepository;
 
     public void sendLogoutMember(WebSocketSession webSocketSession,
-                                 HashMap<String, WebSocketSession> sessionMap,
+                                 ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                  ConcurrentHashMap<String, String> socketSessionAndMemberID,
                                  String myId) {
 
@@ -68,7 +65,7 @@ public class SocketService {
     }
 
     public void sendLoginMemberList(WebSocketSession webSocketSession,
-                                    HashMap<String, WebSocketSession> sessionMap,
+                                    ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                     ConcurrentHashMap<String, String> socketSessionAndMemberID,
                                     String myId) {
 
@@ -101,8 +98,8 @@ public class SocketService {
     }
 
     public WebSocketSession findReceiverSession(String receiver,
-                             HashMap<String, WebSocketSession> sessionMap,
-                             ConcurrentHashMap<String, String> socketSessionAndMemberID){
+                                                ConcurrentHashMap<String, WebSocketSession> sessionMap,
+                                                ConcurrentHashMap<String, String> socketSessionAndMemberID){
 
         for(String key : sessionMap.keySet()){
             if(receiver.equals(socketSessionAndMemberID.get(key))){
@@ -153,8 +150,7 @@ public class SocketService {
     public ChattingDTO chatContentSave(ChattingDTO chattingDTO) {
         ChattingEntity chattingEntity = new ChattingEntity(chattingDTO);
         ChattingEntity saveResult = chattingRepository.chatContentSave(chattingEntity);
-        ChattingDTO result = new ChattingDTO(saveResult);
-        return result;
+        return new ChattingDTO(saveResult);
     }
 
     public List<ChattingDTO> getChattingData(String myId) {

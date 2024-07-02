@@ -19,8 +19,8 @@ public class Intercepter implements HandshakeInterceptor {
             HttpServletRequest servletRequest = ((ServletServerHttpRequest) request).getServletRequest();
             HttpSession session = servletRequest.getSession(false);
             if (session != null) {
-                System.out.println("Interceptor : session ID -> "+session.getId());
-                System.out.println("-----------------------------------------------------------------------");
+//                System.out.println("Interceptor : session ID -> "+session.getId());
+//                System.out.println("-----------------------------------------------------------------------");
                 attributes.put("httpSessionId", session.getId());
             }else{
                 System.out.println("세션이 존재하지 않습니다.");
