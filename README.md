@@ -14,6 +14,7 @@
 ![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/64d52593-fb1d-4407-8c06-fc05fc5127f0)
 
 친구추가
-![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/2bad0812-678f-4f32-8490-1e6c1be71883)
-![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/7104196a-23b9-4f4b-8d2a-d4b408b17f18)
-![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/473d592c-c591-4046-b8dd-0ebd739ecfa3)
+![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/13c04685-cf86-4783-a843-176499956b0d)
+![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/bfcc48b8-f483-4ccc-802e-698ec36cd11d)
+![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/8bce254d-3c67-44f2-ae5b-b945b280606b)
+
