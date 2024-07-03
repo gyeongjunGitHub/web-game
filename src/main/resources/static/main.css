@@ -170,19 +170,6 @@ div {
   border: 1px solid #ccc;
   display: none;
 }
-/* ( 축소버튼 눌렀을때 ) */
-.chatDownShow {
-  display: none;
-  text-align: center;
-}
-.chatUserName {
-  cursor: pointer;
-  padding: 10px 20px;
-}
-.chatUserName:hover {
-  background-color: rgba(255, 166, 0, 0.58);
-  border-radius: 5px;
-}
 .black-close:hover {
   background-color: red;
 }

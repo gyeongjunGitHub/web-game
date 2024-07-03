@@ -38,15 +38,11 @@ public class SocketHandler extends TextWebSocketHandler {
 
     //gameRoom 정보를 담을 Map
     private final ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms = new ConcurrentHashMap<WebSocketSession, GameRoom>();
-
     //room id
     private final AtomicInteger roomIdGenerator = new AtomicInteger();
-
     public void createGameRoom(List<WebSocketSession> player_session) {
-        // roomId 생성
         int roomId = roomIdGenerator.incrementAndGet();
         int turn = 1;
-
         for (WebSocketSession ws : player_session){
             GameRoom gameRoom = new GameRoom();
             gameRoom.setRoomId(roomId);
@@ -54,16 +50,11 @@ public class SocketHandler extends TextWebSocketHandler {
             gameRooms.put(ws, gameRoom);
         }
     }
-
-
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
-        //메시지 발송
         String msg = message.getPayload();
-        ObjectMapper objectMapper = new ObjectMapper();
-        RequestDTO requestDTO = new RequestDTO();
-        requestDTO = objectMapper.readValue(msg, RequestDTO.class);
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
+        RequestDTO requestDTO = socketService.requestDTOMapping(msg);
 
         if(requestDTO.getRequest().equals("answer") || requestDTO.getRequest().equals("gameOver") || requestDTO.getRequest().equals("timeCount")){
             requestDTO.setSender(myId);
@@ -81,7 +72,6 @@ public class SocketHandler extends TextWebSocketHandler {
             requestDTO.setAnswer(quiz.getAnswer());
             requestDTO.setQuiz(quiz.getQuiz());
             requestDTO.setYourTurn(turn);
-
             socketService.sendMessageSameRoomId(session, gameRooms, requestDTO);
         }
         if(requestDTO.getRequest().equals("gameStart") && gameRooms.get(session).getTurn() == 1){
@@ -89,7 +79,6 @@ public class SocketHandler extends TextWebSocketHandler {
             requestDTO.setAnswer(quiz.getAnswer());
             requestDTO.setQuiz(quiz.getQuiz());
             requestDTO.setYourTurn(1);
-
             socketService.sendMessageSameRoomId(session, gameRooms, requestDTO);
         }
         if(requestDTO.getRequest().equals("addFriendRequest")){
@@ -100,35 +89,7 @@ public class SocketHandler extends TextWebSocketHandler {
         if (requestDTO.getRequest().equals("addFriendResponse")){
             socketService.addFriend(requestDTO, myId);
             if (Boolean.parseBoolean(requestDTO.getData())){
-                //친구 목록 전송
-                List<FriendDTO> friendDTOList = socketService.getFriendList(myId);
-                List<FriendDTO> receiverFriendDTOList = socketService.getFriendList(requestDTO.getReceiver());
-
-                List<String> friendList = new ArrayList<>();
-                List<String> receiverFriendList = new ArrayList<>();
-
-                //친구 리스트 순회
-                for (FriendDTO f : friendDTOList) {
-                    //친구 ID가 socketSessionAndMemberID안에 존재한다면
-                    if(socketSessionAndMemberID.containsValue(f.getFriend_id())){
-                        f.setStatus("online");
-                    }
-                    friendList.add(socketService.dtoToJson(f));
-                }
-                for (FriendDTO f : receiverFriendDTOList) {
-                    //친구 ID가 socketSessionAndMemberID안에 존재한다면
-                    if(socketSessionAndMemberID.containsValue(f.getFriend_id())){
-                        f.setStatus("online");
-                    }
-                    receiverFriendList.add(socketService.dtoToJson(f));
-                }
-
-                if(!friendList.isEmpty()){
-                    socketService.sendMessage(socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID), friendList.toString());
-                }
-                if(!friendList.isEmpty()){
-                    socketService.sendMessage(socketService.findReceiverSession(requestDTO.getReceiver(), sessionMap, socketSessionAndMemberID), receiverFriendList.toString());
-                }
+                socketService.sendFriendList(myId, requestDTO, sessionMap, socketSessionAndMemberID);
             }
         }
         if(requestDTO.getRequest().equals("matchingStartDrowGame")){
@@ -172,7 +133,6 @@ public class SocketHandler extends TextWebSocketHandler {
         if(requestDTO.getRequest().equals("matchingCancleDrowGame")){
             drowGameMatchingInfo.remove(myId);
         }
-        
         if (requestDTO.getRequest().equals("sendMessage")) {
             ChattingDTO chattingDTO = new ChattingDTO();
             chattingDTO.setSender(myId);
@@ -180,11 +140,14 @@ public class SocketHandler extends TextWebSocketHandler {
             chattingDTO.setContent(requestDTO.getData());
             ChattingDTO result = socketService.chatContentSave(chattingDTO);
             result.setRequest(requestDTO.getRequest());
-
             WebSocketSession receiverSession = socketService.findReceiverSession(result.getReceiver(), sessionMap, socketSessionAndMemberID);
+            if(receiverSession != null){
+                socketService.sendMessage(receiverSession, socketService.dtoToJson(result));
+            }
             WebSocketSession senderSession = socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID);
-            socketService.sendMessage(receiverSession, socketService.dtoToJson(result));
-            socketService.sendMessage(senderSession, socketService.dtoToJson(result));
+            if(senderSession != null){
+                socketService.sendMessage(senderSession, socketService.dtoToJson(result));
+            }
         }
     }
 
@@ -192,10 +155,7 @@ public class SocketHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
-        //소켓 연결 System.out.println("소캣 연결 member ID -> "+myId);
-
         for (String s : socketSessionAndMemberID.keySet()){
-            //이미 소캣에 세션이 등록되어 있는 경우 등록된 세션 강제 로그아웃
             if(myId.equals(socketSessionAndMemberID.get(s))){
                 RequestDTO requestDTO = new RequestDTO();
                 requestDTO.setRequest("duplicateLogin");
@@ -205,26 +165,13 @@ public class SocketHandler extends TextWebSocketHandler {
             }
         }
 
-        //소켓에 연결된 member 의 socket session ID 를 sessionMap 에 추가
         sessionMap.put(session.getId(), session);
-
-        //소켓에 연결된 member 의 아이디를 httpSession 에서 가져와 SocketSessionAndMemberID 에 추가
         socketSessionAndMemberID.put(session.getId(), memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
-
-//        System.out.println("-----------------------------------------------------------------------");
-//        System.out.println("http session ID -> "+session.getAttributes().get("httpSessionId"));
-//        System.out.println("-----------------------------------------------------------------------");
-
-        //소캣 연결 시 현재 소캣에 연결되어 있는 member의 목록을 전송
         socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
 
-        //소캣 연결 시 친구 목록 전송
         List<FriendDTO> friendDTOList = socketService.getFriendList(myId);
         List<String> friendList = new ArrayList<>();
-
-        //친구 리스트 순회
         for (FriendDTO f : friendDTOList) {
-            //친구 ID가 socketSessionAndMemberID안에 존재한다면
             if(socketSessionAndMemberID.containsValue(f.getFriend_id())){
                 f.setStatus("online");
             }
@@ -233,8 +180,6 @@ public class SocketHandler extends TextWebSocketHandler {
         if(!friendList.isEmpty()){
             socketService.sendMessage(socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID), friendList.toString());
         }
-
-        //채팅 데이터 전송
         List<ChattingDTO> result = socketService.getChattingData(myId);
         List<String> chattingData = new ArrayList<>();
         for(ChattingDTO c : result){
@@ -249,13 +194,9 @@ public class SocketHandler extends TextWebSocketHandler {
     //소켓 종료
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-
-        //httpSession이 이미 제거되었기 때문에 memberSessionService 사용 불가
-        String myId = socketSessionAndMemberID.get(session.getId());
-        socketService.sendLogoutMember(session, sessionMap, socketSessionAndMemberID, myId);
-
-        //매칭 대기열에서 Member 삭제
-        drowGameMatchingInfo.removeIf(s -> s.equals(myId));
+        String myId = socketSessionAndMemberID.get(session.getId());//httpSession이 이미 제거되었기 때문에 memberSessionService 사용 불가
+        socketService.sendLogoutMember(session, sessionMap, socketSessionAndMemberID, myId);//로그아웃 시 싹다 빨간불 오류
+        drowGameMatchingInfo.removeIf(s -> s.equals(myId)); //매칭 대기열에서 Member 삭제
 //        for(String s : drowGameMatchingInfo){
 //            if(s.equals(myId)){
 //                drowGameMatchingInfo.remove(s);

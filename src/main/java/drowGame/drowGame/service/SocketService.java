@@ -2,6 +2,7 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import drowGame.drowGame.Handler.SocketHandler;
 import drowGame.drowGame.dto.*;
 import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.entity.FriendEntity;
@@ -34,36 +35,24 @@ public class SocketService {
                                  ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                  ConcurrentHashMap<String, String> socketSessionAndMemberID,
                                  String myId) {
-
         // socket sessionMap 순회
         for(String memberKey : sessionMap.keySet()){
             WebSocketSession wss = sessionMap.get(memberKey);
-
             // 소캣에 등록된 Member 아이디와 myId가 같지 않으면 (자기 자신 제외)
             if(!myId.equals(socketSessionAndMemberID.get(memberKey))){
                 for (String membersKey : sessionMap.keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
                     if (!socketSessionAndMemberID.get(memberKey).equals(socketSessionAndMemberID.get(membersKey))) {
-                        String memberInfo = "{\"logOutMember\" : \"" + socketSessionAndMemberID.get(membersKey) + "\"}";
-                        sendMessage(wss, memberInfo);
+                        StringBuilder memberInfo = new StringBuilder();
+                        memberInfo.append("{\"logOutMember\" : \"");
+                        memberInfo.append(socketSessionAndMemberID.get(membersKey));
+                        memberInfo.append("\"}");
+                        sendMessage(wss, memberInfo.toString());
                     }
                 }
             }
         }
     }
-
-    public List<FriendDTO> getFriendList(String myId) {
-        List<FriendEntity> friendList = friendRepository.findFriendList(myId);
-        List<FriendDTO> friendDTOList = new ArrayList<>();
-        for (FriendEntity f : friendList){
-            FriendDTO friendDTO = new FriendDTO();
-            friendDTO.setMember_id(f.getId().getMember_id());
-            friendDTO.setFriend_id(f.getId().getFriend_id());
-            friendDTOList.add(friendDTO);
-        }
-        return friendDTOList;
-    }
-
     public void sendLoginMemberList(WebSocketSession webSocketSession,
                                     ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                     ConcurrentHashMap<String, String> socketSessionAndMemberID,
@@ -78,8 +67,11 @@ public class SocketService {
                 for (String membersKey : sessionMap.keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
                     if (!socketSessionAndMemberID.get(loginMemberKey).equals(socketSessionAndMemberID.get(membersKey))) {
-                        String memberInfo = "{\"loginMember\" : \"" + socketSessionAndMemberID.get(membersKey) + "\"}";
-                        sendMessage(wss, memberInfo);
+                        StringBuilder memberInfo = new StringBuilder();
+                        memberInfo.append("{\"loginMember\" : \"");
+                        memberInfo.append(socketSessionAndMemberID.get(membersKey));
+                        memberInfo.append("\"}");
+                        sendMessage(wss, memberInfo.toString());
                     }
                 }
             }else{ // 자기 자신에게 전송
@@ -96,17 +88,26 @@ public class SocketService {
             }
         }
     }
-
     public WebSocketSession findReceiverSession(String receiver,
                                                 ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                                 ConcurrentHashMap<String, String> socketSessionAndMemberID){
-
         for(String key : sessionMap.keySet()){
             if(receiver.equals(socketSessionAndMemberID.get(key))){
                 return sessionMap.get(key);
             }
         }
         return null;
+    }
+    public List<FriendDTO> getFriendList(String myId) {
+        List<FriendEntity> friendList = friendRepository.findFriendList(myId);
+        List<FriendDTO> friendDTOList = new ArrayList<>();
+        for (FriendEntity f : friendList){
+            FriendDTO friendDTO = new FriendDTO();
+            friendDTO.setMember_id(f.getId().getMember_id());
+            friendDTO.setFriend_id(f.getId().getFriend_id());
+            friendDTOList.add(friendDTO);
+        }
+        return friendDTOList;
     }
 
     public void sendMessage(WebSocketSession wss, String message){
@@ -116,7 +117,6 @@ public class SocketService {
             e.printStackTrace();
         }
     }
-
     public void sendMessageSameRoomId(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, RequestDTO requestDTO){
         //같은 roomId를 가진 유저에게 전송
         int myRoomId = gameRooms.get(session).getRoomId();
@@ -136,7 +136,6 @@ public class SocketService {
             }
         }
     }
-
     public String dtoToJson(Object object){
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -145,25 +144,12 @@ public class SocketService {
             throw new RuntimeException(e);
         }
     }
-
     @Transactional
     public ChattingDTO chatContentSave(ChattingDTO chattingDTO) {
         ChattingEntity chattingEntity = new ChattingEntity(chattingDTO);
         ChattingEntity saveResult = chattingRepository.chatContentSave(chattingEntity);
         return new ChattingDTO(saveResult);
     }
-
-    public List<ChattingDTO> getChattingData(String myId) {
-        List<ChattingEntity> chattingData = chattingRepository.getChattingData(myId);
-        List<ChattingDTO> chattingDTOList = new ArrayList<>();
-        for(ChattingEntity c : chattingData){
-            ChattingDTO chattingDTO = new ChattingDTO(c);
-            chattingDTOList.add(chattingDTO);
-        }
-        return chattingDTOList;
-    }
-
-
     @Transactional
     public void addFriend(RequestDTO requestDTO, String myId) {
         if(Boolean.parseBoolean(requestDTO.getData())){
@@ -183,7 +169,15 @@ public class SocketService {
             friendRepository.addFriend(friendEntity, friendEntity1);
         }
     }
-
+    public List<ChattingDTO> getChattingData(String myId) {
+        List<ChattingEntity> chattingData = chattingRepository.getChattingData(myId);
+        List<ChattingDTO> chattingDTOList = new ArrayList<>();
+        for(ChattingEntity c : chattingData){
+            ChattingDTO chattingDTO = new ChattingDTO(c);
+            chattingDTOList.add(chattingDTO);
+        }
+        return chattingDTOList;
+    }
     public QuizDTO getQuiz() {
         int min = 1;
         int max = 7955;
@@ -196,5 +190,42 @@ public class SocketService {
         quizDTO.setQuiz(quiz.getQuiz());
         quizDTO.setAnswer(quiz.getAnswer());
         return quizDTO;
+    }
+    public RequestDTO requestDTOMapping(String msg) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        RequestDTO requestDTO = new RequestDTO();
+        return objectMapper.readValue(msg, RequestDTO.class);
+    }
+    public void sendFriendList(String myId, RequestDTO requestDTO, ConcurrentHashMap<String, WebSocketSession> sessionMap,
+                               ConcurrentHashMap<String, String> socketSessionAndMemberID){
+        //친구 목록 전송
+        List<FriendDTO> friendDTOList = getFriendList(myId);
+        List<FriendDTO> receiverFriendDTOList = getFriendList(requestDTO.getReceiver());
+
+        List<String> friendList = new ArrayList<>();
+        List<String> receiverFriendList = new ArrayList<>();
+
+        //친구 리스트 순회
+        for (FriendDTO f : friendDTOList) {
+            //친구 ID가 socketSessionAndMemberID안에 존재한다면
+            if(socketSessionAndMemberID.containsValue(f.getFriend_id())){
+                f.setStatus("online");
+            }
+            friendList.add(dtoToJson(f));
+        }
+        for (FriendDTO f : receiverFriendDTOList) {
+            //친구 ID가 socketSessionAndMemberID안에 존재한다면
+            if(socketSessionAndMemberID.containsValue(f.getFriend_id())){
+                f.setStatus("online");
+            }
+            receiverFriendList.add(dtoToJson(f));
+        }
+
+        if(!friendList.isEmpty()){
+            sendMessage(findReceiverSession(myId, sessionMap, socketSessionAndMemberID), friendList.toString());
+        }
+        if(!friendList.isEmpty()){
+            sendMessage(findReceiverSession(requestDTO.getReceiver(), sessionMap, socketSessionAndMemberID), receiverFriendList.toString());
+        }
     }
 }
