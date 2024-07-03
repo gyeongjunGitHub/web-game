@@ -14,8 +14,9 @@ const sendBtn = document.querySelector('.sendBtn');
 const blackBtn = document.querySelector('.blackBtn');
 const redBtn = document.querySelector('.redBtn');
 const blueBtn = document.querySelector('.blueBtn');
-const userNameBoxList = [document.querySelector('.user1_name'), document.querySelector('.user2_name')];
-const userAnswerBoxList = [document.querySelector('.user1_answer'), document.querySelector('.user2_answer')];
+const userNameBoxList = [document.querySelector('.user1_name'), document.querySelector('.user2_name'), document.querySelector('.user3_name'), document.querySelector('.user4_name')];
+const userAnswerBoxList = [document.querySelector('.user1_answer'), document.querySelector('.user2_answer'), document.querySelector('.user3_answer'), document.querySelector('.user4_answer')];
+const userAreaBoxList = [document.querySelector('.user1_area'), document.querySelector('.user2_area'), document.querySelector('.user3_area'), document.querySelector('.user4_area')]
 const inGameMenu = document.querySelector('.inGameMenu');
 const gameArea = document.querySelector('.gameArea');
 //id 변수
@@ -241,9 +242,15 @@ function receiveMessageHandler(msg) {
         myTurn = msg.yourTurn;
         userList = msg.roomUsers;
 
-        for(let i = 0; i<userList.length; i++){
-            userNameBoxList[i].innerHTML = `${userList[i]}`;
+        for(let i = 0; i<4; i++){
+            if(i<userList.length){
+                userNameBoxList[i].innerHTML = `${userList[i]}`;
+                userAnswerBoxList[i].style.display = 'block';
+            }else{
+                userAreaBoxList[i].style.display = 'none';
+            }
         }
+
 
         matchingArea.style.display = 'none';
         gameArea.style.display = 'block';
@@ -506,9 +513,37 @@ document.querySelector('.black-area').addEventListener('click', (e) => {
 //===회원정보====//
 //===============//
 let show = false;
-document.querySelectorAll('.nav a')[1].addEventListener('click', () => {
+async function getMemberInfo(){
+    const url = `/member/getMemberInfo`;
+    let result = await getRequest(url);
     document.querySelector('.profile-black').style.display = 'block';
-});
+    document.querySelector('.profile-white').style.display = 'block';
+    document.querySelector('.profile-white').innerHTML = `
+        <h2>회원정보</h2>
+        <ul>
+            <li>
+                <p>아이디 : ${result.id}</p>
+                <input type="text" placeholder="아이디" />
+            </li>
+            <li>
+                <p>비밀번호 : ${result.password}</p>
+                <input type="text" placeholder="비밀번호" />
+            </li>
+            <li>
+                <p>이름 : ${result.name}</p>
+                <input type="text" placeholder="이름" />
+            </li>
+            <li>
+                <p>이메일 : ${result.email}</p>
+                <input type="email" placeholder="email@naver.com" />
+            </li>
+        </ul>
+        <div class="profile-btn">
+            <button>수정</button>
+            <button>닫기</button>
+        </div>
+    `;
+}
 
 document
     .querySelector('.profile-black')

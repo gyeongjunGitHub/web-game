@@ -62,4 +62,10 @@ public class MemberController {
         return memberService.alreadyFriendCheck(id, myId);
     }
 
+    @GetMapping("/getMemberInfo")
+    @ResponseBody
+    public MemberDTO getMemberInfo(HttpSession httpSession){
+        return memberService.getMemberInfo(httpSession);
+    }
+
 }

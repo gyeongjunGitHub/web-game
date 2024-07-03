@@ -359,7 +359,7 @@ div {
 
 .matchingArea{
   width: 100%;
-  min-height: 500px;
+  height: 80vh;
   margin: 0 auto;
   padding: 20px;
   display: flex;
@@ -496,6 +496,7 @@ div {
 
 /* 그림판 */
 .gameArea {
+
   padding: 20px;
   border: 1px solid black;
 }
@@ -506,8 +507,10 @@ div {
   justify-content: center;
 }
 .user1_area,
-.user2_area {
-  width: 20%;
+.user2_area,
+.user3_area,
+.user4_area{
+  margin-bottom:10px;
   border-radius: 10px;
   font-size: 20px;
 }
@@ -517,12 +520,23 @@ div {
 .user2_area {
   border: 1px solid orange;
 }
+.user3_area {
+  border: 1px solid orange;
+}
+.user4_area {
+  border: 1px solid orange;
+}
 .user1_name,
-.user2_name {
+.user2_name,
+.user3_name,
+.user4_name{
+
   border-bottom: 1px solid #ccc;
 }
 .user1_answer,
-.user2_answer {
+.user2_answer,
+.user3_answer,
+.user4_answer{
   padding: 10px;
 }
 .quizBox{
@@ -536,10 +550,7 @@ div {
   font-size: 20px;
   font-weight: 600;
 }
-.quizBox {
-
-}
-.timeBox {
+.myCanvas{
 
 }
 .inGameMenu {
@@ -630,4 +641,22 @@ div {
 .clearBtn:hover {
   background-color: red;
   border: none;
+}
+
+@media screen and (max-height:800px){
+    .user1_area,.user2_name,.user3_name,.user4_name{
+    font-size:16px;
+    }
+.btn-wrap1, .btn-wrap2{
+padding-top:5px;}
+.sendBtn{
+margin-top:10px;}
+.gameArea {
+    padding: 10px 20px;
+    transition: all 0.5s;
+
+}
+.quizBox,.timeBox{
+padding-top:0;
+font-size:16px;}
 }

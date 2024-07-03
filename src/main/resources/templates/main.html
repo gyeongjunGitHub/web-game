@@ -14,31 +14,7 @@
 <!--회원정보-->
 <div class="profile-black none">
     <div class="profile-flex">
-        <div class="profile-white">
-            <h2>회원정보</h2>
-            <ul>
-                <li>
-                    <p>아이디 : id</p>
-                    <input type="text" placeholder="아이디" />
-                </li>
-                <li>
-                    <p>비밀번호 : pw</p>
-                    <input type="text" placeholder="비밀번호" />
-                </li>
-                <li>
-                    <p>이름</p>
-                    <input type="text" placeholder="이름" />
-                </li>
-                <li>
-                    <p>이메일</p>
-                    <input type="email" placeholder="email@naver.com" />
-                </li>
-            </ul>
-            <div class="profile-btn">
-                <button>수정</button>
-                <button>닫기</button>
-            </div>
-        </div>
+        <div class="profile-white"></div>
     </div>
 </div>
 
@@ -62,13 +38,9 @@
                         placeholder="유저 검색"
                 />
                 <div class="search-icon">
-                    <i
-                            class="fa-solid fa-magnifying-glass"
-                            onclick="searchMember()"
-                    ></i>
+                    <i class="fa-solid fa-magnifying-glass" onclick="searchMember()" ></i>
                 </div>
             </div>
-
             <div class="search-result"></div>
         </div>
     </div>
@@ -78,7 +50,7 @@
 <div class="nav">
     <span id="myIdArea"></span>
     <a href="/member/logout">로그아웃</a>
-    <a href="#">회원정보</a>
+    <a href="#" onclick="getMemberInfo()">회원정보</a>
 </div>
 
 <!-- 메인바 -->
@@ -93,25 +65,36 @@
                 매칭 취소
             </button>
         </div>
-
         <!-- 그림판 -->
         <div class="gameArea" style="border: 1px solid black; text-align: center;">
-            <div class="gameArea-flex">
-                <div class="user1_area" style="border: 1px solid black;">
-                    <div class="user1_name">user 1</div>
-                    <div class="user1_answer"></div>
-                </div>
-                <div class="user2_area" style="border: 1px solid black;">
-                    <div class="user2_name">user 2</div>
-                    <div class="user2_answer"></div>
-                </div>
-            </div>
-
 
             <div class="quizBox">퀴즈 문제 자리</div>
             <div class="timeBox">남은 시간 출력자리</div>
-            <canvas class="myCanvas" width="1000px" height="500px" style="border: 1px solid black;"></canvas>
+            <div class="gameArea-flex">
+                <div>
+                    <div class="user1_area" style="border: 1px solid black;">
+                        <div class="user1_name">user 1</div>
+                        <div class="user1_answer"></div>
+                    </div>
+                    <div class="user3_area" style="border: 1px solid black;">
+                        <div class="user3_name">user 1</div>
+                        <div class="user3_answer"></div>
+                    </div>
+                </div>
+                <canvas class="myCanvas" width="700" height="400" style="border: 1px solid black;"></canvas>
+                <div>
+                    <div class="user2_area" style="border: 1px solid black;">
+                        <div class="user2_name">user 2</div>
+                        <div class="user2_answer"></div>
+                    </div>
+                    <div class="user4_area" style="border: 1px solid black;">
+                        <div class="user4_name">user 1</div>
+                        <div class="user4_answer"></div>
+                    </div>
+                </div>
 
+            </div>
+<!--            <canvas class="myCanvas" width="600" height="300" style="border: 1px solid black;"></canvas>-->
             <div class="inGameMenu">
                 <div class="input">
                     <input class="answerBox" /><button class="sendBtn">제출</button>
@@ -129,7 +112,6 @@
                 </div>
             </div>
         </div>
-
     </div>
     <!-- 유저 바 -->
     <div class="user-area">

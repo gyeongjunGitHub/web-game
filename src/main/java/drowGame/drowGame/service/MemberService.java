@@ -136,4 +136,19 @@ public class MemberService {
             return "myPage";
         }
     }
+
+    public MemberDTO getMemberInfo(HttpSession httpSession) {
+        String memberId = memberSessionService.getMemberId(httpSession.getId());
+        if(memberId != null){
+            Optional<MemberEntity> byId = memberRepository.findById(memberId);
+            if(byId.isPresent()){
+                MemberDTO memberDTO = new MemberDTO(byId.get());
+                return memberDTO;
+            }else {
+                return null;
+            }
+        }else {
+            return null;
+        }
+    }
 }
