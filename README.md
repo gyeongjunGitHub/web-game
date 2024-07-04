@@ -1,5 +1,7 @@
 캐치마인드 게임 기반 프로젝트 입니다.
 
+![alt text](image-2.png)
+
 로그인
 ![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/a6178be4-53ed-4544-95e2-16979adc9793)
 
