@@ -18,3 +18,6 @@
 ![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/bfcc48b8-f483-4ccc-802e-698ec36cd11d)
 ![image](https://github.com/gyeongjunGitHub/web-game/assets/147642843/8bce254d-3c67-44f2-ae5b-b945b280606b)
 
+채팅
+![alt text](image.png)
+![alt text](image-1.png)
