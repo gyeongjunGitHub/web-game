@@ -54,29 +54,23 @@ public class SocketHandler extends TextWebSocketHandler {
         String requestName = socketRequest.getRequest();
         if(request.getRequest1().contains(requestName)){
             socketRequest.setSender(myId);
-            socketService.sendMessageSameRoomId(session, gameRooms, socketRequest);
+            socketService.sendMessageSameRoom(0, session, gameRooms, socketRequest);
         }
         if(request.getRequest2().contains(requestName)){
-            socketService.sendMessageSameRoomIdNotMe(session, gameRooms, socketRequest);
+            socketService.sendMessageSameRoom(1,session, gameRooms, socketRequest);
         }
         if(request.getRequest3().contains(requestName)){
             //필요 없으면 삭제
         }
         if (requestName.equals("nextTurn")) {
-            int turn = Integer.parseInt(socketRequest.getData()) + 1;
-            if(turn > 2){ turn = 1; } //사이클 종료
-            QuizDTO quiz = socketService.getQuiz();
-            socketRequest.setAnswer(quiz.getAnswer());
-            socketRequest.setQuiz(quiz.getQuiz());
-            socketRequest.setYourTurn(turn);
-            socketService.sendMessageSameRoomId(session, gameRooms, socketRequest);
+            socketService.nextTurn(socketRequest, session, gameRooms);
         }
         if(requestName.equals("gameStart") && gameRooms.get(session).getTurn() == 1){
             QuizDTO quiz = socketService.getQuiz();
             socketRequest.setAnswer(quiz.getAnswer());
             socketRequest.setQuiz(quiz.getQuiz());
             socketRequest.setYourTurn(1);
-            socketService.sendMessageSameRoomId(session, gameRooms, socketRequest);
+            socketService.sendMessageSameRoom(0, session, gameRooms, socketRequest);
         }
         if(requestName.equals("addFriendRequest")){
             socketRequest.setSender(myId);

@@ -215,7 +215,7 @@ function receiveMessageHandler(msg) {
                         }else{
                             removeListener();
                             requestParam.request = 'nextTurn';
-                            questParam.data = myTurn;
+                            requestParam.data = myTurn;
                             send(requestParam);
                             clear();
                             clear_no_send();
@@ -229,7 +229,9 @@ function receiveMessageHandler(msg) {
         }
     }
     //request -> rollBack
-    if(msg.request == 'rollBack'){ rollBack_no_send(); }
+    if(msg.request == 'rollBack'){
+        rollBack_no_send();
+    }
     //request -> push
     if(msg.request == 'push'){
         superRam.push(ram);
@@ -240,7 +242,9 @@ function receiveMessageHandler(msg) {
     //request -> sendCoordinate
     if(msg.request == 'sendCoordinate'){
         draw(msg.coordinate[0], msg.coordinate[1], msg.coordinate[2], msg.coordinate[3], msg.color);
-        ram.push(msg);
+        ram.push({ x: msg.coordinate[0], y: msg.coordinate[1], lastX: msg.coordinate[2], lastY: msg.coordinate[3], color: msg.color });
+        console.log([1,2,3,4,'black']);
+
     }
     //request -> matchingStartDrowGame
     if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
@@ -285,7 +289,6 @@ function receiveMessageHandler(msg) {
     if (Array.isArray(msg)) {                       //배열을 받았을 경우
         //채팅 데이터인지 확인
         if(msg[0].request == 'chattingData'){
-            console.log(msg);
             for(let i = 0; i<friendList.length; i++){
                 let data = [];
                 for(let j = 0; j<msg.length; j++){
@@ -625,7 +628,9 @@ function mouseHandler(event){
 function mouseMoveHandler(event){
     getCanvasXY(event.clientX, event.clientY);
     draw(xy[0], xy[1], lastXY.lastX, lastXY.lastY, color);
+    //ram.push([xy[0], xy[1], lastXY.lastX, lastXY.lastY, color]);
     ram.push({ x: xy[0], y: xy[1], lastX: lastXY.lastX, lastY: lastXY.lastY, color: color });
+
 
     //좌표전송
     const gameRequestParam = new GameRequestParam('sendCoordinate', xy[0], xy[1], lastXY.lastX, lastXY.lastY, color);

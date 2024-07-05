@@ -118,22 +118,25 @@ public class SocketService {
             e.printStackTrace();
         }
     }
-    public void sendMessageSameRoomId(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, SocketRequest socketRequest){
-        //같은 roomId를 가진 유저에게 전송
-        int myRoomId = gameRooms.get(session).getRoomId();
-        for (WebSocketSession wss : gameRooms.keySet()){
-            if(myRoomId == gameRooms.get(wss).getRoomId()){
-                sendMessage(wss, dtoToJson(socketRequest));
+
+    public void sendMessageSameRoom(int num, WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, SocketRequest socketRequest) {
+        if(num == 0){
+            //같은 roomId를 가진 유저에게 전송
+            int myRoomId = gameRooms.get(session).getRoomId();
+            for (WebSocketSession wss : gameRooms.keySet()) {
+                if (myRoomId == gameRooms.get(wss).getRoomId()) {
+                    sendMessage(wss, dtoToJson(socketRequest));
+                }
             }
         }
-    }
-    public void sendMessageSameRoomIdNotMe(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, SocketRequest socketRequest){
-        //자기 자신 제외 같은 roomId를 가진 유저에게 전송
-        int myRoomId = gameRooms.get(session).getRoomId();
-        for (WebSocketSession wss : gameRooms.keySet()){
-            //roomId는 같고 자기 자신 제외
-            if(gameRooms.get(wss).getRoomId() == myRoomId && !wss.equals(session)){
-                sendMessage(wss, dtoToJson(socketRequest));
+        if(num == 1){
+            //자기 자신 제외 같은 roomId를 가진 유저에게 전송
+            int myRoomId = gameRooms.get(session).getRoomId();
+            for (WebSocketSession wss : gameRooms.keySet()){
+                //roomId는 같고 자기 자신 제외
+                if(gameRooms.get(wss).getRoomId() == myRoomId && !wss.equals(session)){
+                    sendMessage(wss, dtoToJson(socketRequest));
+                }
             }
         }
     }
@@ -200,6 +203,16 @@ public class SocketService {
         ObjectMapper objectMapper = new ObjectMapper();
         SocketRequest socketRequest = new SocketRequest();
         return objectMapper.readValue(msg, SocketRequest.class);
+    }
+
+    public void nextTurn(SocketRequest socketRequest, WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms){
+        int turn = Integer.parseInt(socketRequest.getData()) + 1;
+        if(turn > 2){ turn = 1; } //사이클 종료
+        QuizDTO quiz = getQuiz();
+        socketRequest.setAnswer(quiz.getAnswer());
+        socketRequest.setQuiz(quiz.getQuiz());
+        socketRequest.setYourTurn(turn);
+        sendMessageSameRoom(0, session, gameRooms, socketRequest);
     }
     public void sendFriendList(String myId, SocketRequest socketRequest, ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                ConcurrentHashMap<String, String> socketSessionAndMemberID){
