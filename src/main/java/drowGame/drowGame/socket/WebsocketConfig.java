@@ -1,6 +1,5 @@
-package drowGame.drowGame.config;
+package drowGame.drowGame.socket;
 
-import drowGame.drowGame.interceptor.Intercepter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.WebSocketHandler;

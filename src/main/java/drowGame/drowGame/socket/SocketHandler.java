@@ -1,4 +1,4 @@
-package drowGame.drowGame.Handler;
+package drowGame.drowGame.socket;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -62,25 +62,19 @@ public class SocketHandler extends TextWebSocketHandler {
         if(request.getRequest3().contains(requestName)){
             //필요 없으면 삭제
         }
-        if (requestName.equals("nextTurn")) {
+        if(requestName.equals("nextTurn")) {
             socketService.nextTurn(socketRequest, session, gameRooms);
         }
         if(requestName.equals("gameStart") && gameRooms.get(session).getTurn() == 1){
-            QuizDTO quiz = socketService.getQuiz();
-            socketRequest.setAnswer(quiz.getAnswer());
-            socketRequest.setQuiz(quiz.getQuiz());
-            socketRequest.setYourTurn(1);
-            socketService.sendMessageSameRoom(0, session, gameRooms, socketRequest);
+            socketService.gameStart(socketRequest, session, gameRooms);
         }
         if(requestName.equals("addFriendRequest")){
-            socketRequest.setSender(myId);
-            WebSocketSession receiverSession = socketService.findReceiverSession(socketRequest.getReceiver(), sessionMap, socketSessionAndMemberID);
-            socketService.sendMessage(receiverSession, socketService.dtoToJson(socketRequest));
+            socketService.addFriendRequest(session, socketRequest);
         }
         if (requestName.equals("addFriendResponse")){
             socketService.addFriend(socketRequest, myId);
             if (Boolean.parseBoolean(socketRequest.getData())){
-                socketService.sendFriendList(myId, socketRequest, sessionMap, socketSessionAndMemberID);
+                socketService.sendFriendList(session, socketRequest);
             }
         }
         if(requestName.equals("matchingStartDrowGame")){
@@ -119,58 +113,33 @@ public class SocketHandler extends TextWebSocketHandler {
             drowGameMatchingInfo.remove(myId);
         }
         if (requestName.equals("sendMessage")) {
-            //채팅 저장
-            ChattingDTO result = socketService.chatContentSave(myId, socketRequest);
-            result.setRequest(requestName);
-
-            WebSocketSession[] sessions = new WebSocketSession[2];
-            sessions[0] = socketService.findReceiverSession(result.getReceiver(), sessionMap, socketSessionAndMemberID);
-            sessions[1] = socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID);
-            for(WebSocketSession wss : sessions){
-                if(wss != null){
-                    socketService.sendMessage(wss, socketService.dtoToJson(result));
-                }
-            }
+            socketService.sendChatting(session, socketRequest);
         }
     }
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         super.afterConnectionEstablished(session);
-        String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
-        for (String s : socketSessionAndMemberID.keySet()){
-            if(myId.equals(socketSessionAndMemberID.get(s))){
-                SocketRequest socketRequest = new SocketRequest();
-                socketRequest.setRequest("duplicateLogin");
-                socketService.sendMessage(sessionMap.get(s), socketService.dtoToJson(socketRequest));
-                CloseStatus status = new CloseStatus(1001);
-                afterConnectionClosed(sessionMap.get(s), status);
-            }
-        }
+
+        ////지울부분
 
         sessionMap.put(session.getId(), session);
         socketSessionAndMemberID.put(session.getId(), memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
-        socketService.sendLoginMemberList(session, sessionMap, socketSessionAndMemberID, myId);
 
-        List<FriendDTO> friendDTOList = socketService.getFriendList(myId);
-        List<String> friendList = new ArrayList<>();
-        for (FriendDTO f : friendDTOList) {
-            if(socketSessionAndMemberID.containsValue(f.getFriend_id())){
-                f.setStatus("online");
-            }
-            friendList.add(socketService.dtoToJson(f));
+        //중복 로그인 체크
+        WebSocketSession isDuplicateLogin = socketService.duplicateLoginCheck(session);
+        if (isDuplicateLogin != null){
+            CloseStatus status = new CloseStatus(1001);
+            afterConnectionClosed(isDuplicateLogin, status);
         }
-        if(!friendList.isEmpty()){
-            socketService.sendMessage(socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID), friendList.toString());
-        }
-        List<ChattingDTO> result = socketService.getChattingData(myId);
-        List<String> chattingData = new ArrayList<>();
-        for(ChattingDTO c : result){
-            chattingData.add(socketService.dtoToJson(c));
-        }
-        if(!chattingData.isEmpty()){
-            socketService.sendMessage(socketService.findReceiverSession(myId, sessionMap, socketSessionAndMemberID), chattingData.toString());
-        }
+        //세션 정보 추가
+        socketService.addSessionInfo(session);
+        //로그인 유저 전송
+        socketService.sendLoginMemberList(session);
+        //친구 목록 전송
+        socketService.sendFriendInfo(session);
+        //채팅 데이터 전송
+        socketService.sendChattingData(session);
     }
 
 
@@ -178,7 +147,9 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         String myId = socketSessionAndMemberID.get(session.getId());//httpSession이 이미 제거되었기 때문에 memberSessionService 사용 불가
-        socketService.sendLogoutMember(session, sessionMap, socketSessionAndMemberID, myId);//로그아웃 시 싹다 빨간불 오류
+
+
+        socketService.sendLogoutMember(session);//로그아웃 시 싹다 빨간불 오류
         drowGameMatchingInfo.removeIf(s -> s.equals(myId)); //매칭 대기열에서 Member 삭제
 //        for(String s : drowGameMatchingInfo){
 //            if(s.equals(myId)){
@@ -218,6 +189,12 @@ public class SocketHandler extends TextWebSocketHandler {
         }
         sessionMap.remove(session.getId());
         socketSessionAndMemberID.remove(session.getId());
+
+        //세션 정보 제거
+        socketService.removeSessionInfo(session);
+        
+        
+        
         super.afterConnectionClosed(session, status);
     }
 }

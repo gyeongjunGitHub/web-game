@@ -628,7 +628,6 @@ function mouseHandler(event){
 function mouseMoveHandler(event){
     getCanvasXY(event.clientX, event.clientY);
     draw(xy[0], xy[1], lastXY.lastX, lastXY.lastY, color);
-    //ram.push([xy[0], xy[1], lastXY.lastX, lastXY.lastY, color]);
     ram.push({ x: xy[0], y: xy[1], lastX: lastXY.lastX, lastY: lastXY.lastY, color: color });
 
 

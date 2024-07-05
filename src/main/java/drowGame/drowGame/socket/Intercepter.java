@@ -1,4 +1,4 @@
-package drowGame.drowGame.interceptor;
+package drowGame.drowGame.socket;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
