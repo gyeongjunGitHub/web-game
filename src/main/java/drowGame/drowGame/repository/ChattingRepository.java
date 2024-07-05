@@ -21,7 +21,6 @@ public class ChattingRepository {
     public List<ChattingEntity> getChattingData(String myId) {
         return em.createQuery("select c from ChattingEntity as c where c.sender = :myId or c.receiver = :myId", ChattingEntity.class)
                 .setParameter("myId", myId)
-                .setMaxResults(50)
                 .getResultList();
     }
 }

@@ -106,10 +106,15 @@ async function searchMember() {
     }
 }
 //생성자
-function RequestParam(request, receiver = '', data = '') {
+function RequestParam(request='', receiver = '', data = '') {
     this.request = request;
     this.receiver = receiver;
     this.data = data;
+}
+function GameRequestParam(request='', x=0, y=0, lastX=0, lastY=0, color=''){
+    this.request = request;
+    this.coordinate = [x, y, lastX, lastY];
+    this.color = color;
 }
 //로그인 후 main 페이지 로드 시 소캣 연걸
 window.onload = wsOpen;
@@ -210,7 +215,7 @@ function receiveMessageHandler(msg) {
                         }else{
                             removeListener();
                             requestParam.request = 'nextTurn';
-                            requestParam.data = myTurn;
+                            questParam.data = myTurn;
                             send(requestParam);
                             clear();
                             clear_no_send();
@@ -234,7 +239,7 @@ function receiveMessageHandler(msg) {
     if(msg.request == 'clear'){ clear_no_send(); }
     //request -> sendCoordinate
     if(msg.request == 'sendCoordinate'){
-        draw(msg.x, msg.y, msg.lastX, msg.lastY, msg.color);
+        draw(msg.coordinate[0], msg.coordinate[1], msg.coordinate[2], msg.coordinate[3], msg.color);
         ram.push(msg);
     }
     //request -> matchingStartDrowGame
@@ -278,7 +283,9 @@ function receiveMessageHandler(msg) {
     if (msg.request == 'sendMessage') { sendMessageProc(msg); }
     //request -> array
     if (Array.isArray(msg)) {                       //배열을 받았을 경우
-        if(msg[0].request == 'chattingData'){       //채팅 데이터인지 확인
+        //채팅 데이터인지 확인
+        if(msg[0].request == 'chattingData'){
+            console.log(msg);
             for(let i = 0; i<friendList.length; i++){
                 let data = [];
                 for(let j = 0; j<msg.length; j++){
@@ -568,14 +575,7 @@ document
 
 
 //===================================== 게임 자바스크립트 모음 =====================================//
-function GameRequestParam(request='', x=0, y=0, lastX=0, lastY=0, color=''){
-    this.request = request;
-    this.x = x;
-    this.y = y;
-    this.lastX = lastX;
-    this.lastY = lastY;
-    this.color = color;
-}
+
 //이벤트 리스너 추가 함수
 function addListener(){
     blackBtn.addEventListener('click', blackBtnClickHandler);

@@ -2,7 +2,6 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import drowGame.drowGame.Handler.SocketHandler;
 import drowGame.drowGame.dto.*;
 import drowGame.drowGame.entity.ChattingEntity;
 import drowGame.drowGame.entity.FriendEntity;
@@ -117,22 +116,22 @@ public class SocketService {
             e.printStackTrace();
         }
     }
-    public void sendMessageSameRoomId(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, RequestDTO requestDTO){
+    public void sendMessageSameRoomId(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, SocketRequest socketRequest){
         //같은 roomId를 가진 유저에게 전송
         int myRoomId = gameRooms.get(session).getRoomId();
         for (WebSocketSession wss : gameRooms.keySet()){
             if(myRoomId == gameRooms.get(wss).getRoomId()){
-                sendMessage(wss, dtoToJson(requestDTO));
+                sendMessage(wss, dtoToJson(socketRequest));
             }
         }
     }
-    public void sendMessageSameRoomIdNotMe(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, RequestDTO requestDTO){
+    public void sendMessageSameRoomIdNotMe(WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, SocketRequest socketRequest){
         //자기 자신 제외 같은 roomId를 가진 유저에게 전송
         int myRoomId = gameRooms.get(session).getRoomId();
         for (WebSocketSession wss : gameRooms.keySet()){
             //roomId는 같고 자기 자신 제외
             if(gameRooms.get(wss).getRoomId() == myRoomId && !wss.equals(session)){
-                sendMessage(wss, dtoToJson(requestDTO));
+                sendMessage(wss, dtoToJson(socketRequest));
             }
         }
     }
@@ -145,24 +144,28 @@ public class SocketService {
         }
     }
     @Transactional
-    public ChattingDTO chatContentSave(ChattingDTO chattingDTO) {
+    public ChattingDTO chatContentSave(String myId, SocketRequest socketRequest) {
+        ChattingDTO chattingDTO = new ChattingDTO();
+        chattingDTO.setSender(myId);
+        chattingDTO.setReceiver(socketRequest.getReceiver());
+        chattingDTO.setContent(socketRequest.getData());
         ChattingEntity chattingEntity = new ChattingEntity(chattingDTO);
         ChattingEntity saveResult = chattingRepository.chatContentSave(chattingEntity);
         return new ChattingDTO(saveResult);
     }
     @Transactional
-    public void addFriend(RequestDTO requestDTO, String myId) {
-        if(Boolean.parseBoolean(requestDTO.getData())){
+    public void addFriend(SocketRequest socketRequest, String myId) {
+        if(Boolean.parseBoolean(socketRequest.getData())){
             FriendId friendId = new FriendId();
             FriendId friendId1 = new FriendId();
             FriendEntity friendEntity = new FriendEntity();
             FriendEntity friendEntity1 = new FriendEntity();
 
             friendId.setMember_id(myId);
-            friendId.setFriend_id(requestDTO.getReceiver());
+            friendId.setFriend_id(socketRequest.getReceiver());
             friendEntity.setId(friendId);
 
-            friendId1.setMember_id(requestDTO.getReceiver());
+            friendId1.setMember_id(socketRequest.getReceiver());
             friendId1.setFriend_id(myId);
             friendEntity1.setId(friendId1);
 
@@ -191,16 +194,16 @@ public class SocketService {
         quizDTO.setAnswer(quiz.getAnswer());
         return quizDTO;
     }
-    public RequestDTO requestDTOMapping(String msg) throws JsonProcessingException {
+    public SocketRequest socketRequestMapping(String msg) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
-        RequestDTO requestDTO = new RequestDTO();
-        return objectMapper.readValue(msg, RequestDTO.class);
+        SocketRequest socketRequest = new SocketRequest();
+        return objectMapper.readValue(msg, SocketRequest.class);
     }
-    public void sendFriendList(String myId, RequestDTO requestDTO, ConcurrentHashMap<String, WebSocketSession> sessionMap,
+    public void sendFriendList(String myId, SocketRequest socketRequest, ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                ConcurrentHashMap<String, String> socketSessionAndMemberID){
         //친구 목록 전송
         List<FriendDTO> friendDTOList = getFriendList(myId);
-        List<FriendDTO> receiverFriendDTOList = getFriendList(requestDTO.getReceiver());
+        List<FriendDTO> receiverFriendDTOList = getFriendList(socketRequest.getReceiver());
 
         List<String> friendList = new ArrayList<>();
         List<String> receiverFriendList = new ArrayList<>();
@@ -225,7 +228,7 @@ public class SocketService {
             sendMessage(findReceiverSession(myId, sessionMap, socketSessionAndMemberID), friendList.toString());
         }
         if(!friendList.isEmpty()){
-            sendMessage(findReceiverSession(requestDTO.getReceiver(), sessionMap, socketSessionAndMemberID), receiverFriendList.toString());
+            sendMessage(findReceiverSession(socketRequest.getReceiver(), sessionMap, socketSessionAndMemberID), receiverFriendList.toString());
         }
     }
 }
