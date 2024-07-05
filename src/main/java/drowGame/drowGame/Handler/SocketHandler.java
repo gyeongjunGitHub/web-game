@@ -29,6 +29,8 @@ public class SocketHandler extends TextWebSocketHandler {
     ConcurrentHashMap<String, String> socketSessionAndMemberID = new ConcurrentHashMap<>();
     //매칭 대기열 que
     ConcurrentLinkedQueue<String> drowGameMatchingInfo = new ConcurrentLinkedQueue<>();
+    //Request
+    Request request = new Request();
     //gameRoom 정보를 담을 Map
     private final ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms = new ConcurrentHashMap<WebSocketSession, GameRoom>();
     //room id
@@ -49,16 +51,18 @@ public class SocketHandler extends TextWebSocketHandler {
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
         SocketRequest socketRequest = socketService.socketRequestMapping(msg);
 
-        if(socketRequest.getRequest().equals("answer") || socketRequest.getRequest().equals("gameOver") || socketRequest.getRequest().equals("timeCount")){
+        String requestName = socketRequest.getRequest();
+        if(request.getRequest1().contains(requestName)){
             socketRequest.setSender(myId);
             socketService.sendMessageSameRoomId(session, gameRooms, socketRequest);
         }
-        if(socketRequest.getRequest().equals("rollBack") || socketRequest.getRequest().equals("clear")
-                || socketRequest.getRequest().equals("all_clear") || socketRequest.getRequest().equals("push")
-                || socketRequest.getRequest().equals("sendCoordinate")){
+        if(request.getRequest2().contains(requestName)){
             socketService.sendMessageSameRoomIdNotMe(session, gameRooms, socketRequest);
         }
-        if (socketRequest.getRequest().equals("nextTurn")) {
+        if(request.getRequest3().contains(requestName)){
+            //필요 없으면 삭제
+        }
+        if (requestName.equals("nextTurn")) {
             int turn = Integer.parseInt(socketRequest.getData()) + 1;
             if(turn > 2){ turn = 1; } //사이클 종료
             QuizDTO quiz = socketService.getQuiz();
@@ -67,25 +71,25 @@ public class SocketHandler extends TextWebSocketHandler {
             socketRequest.setYourTurn(turn);
             socketService.sendMessageSameRoomId(session, gameRooms, socketRequest);
         }
-        if(socketRequest.getRequest().equals("gameStart") && gameRooms.get(session).getTurn() == 1){
+        if(requestName.equals("gameStart") && gameRooms.get(session).getTurn() == 1){
             QuizDTO quiz = socketService.getQuiz();
             socketRequest.setAnswer(quiz.getAnswer());
             socketRequest.setQuiz(quiz.getQuiz());
             socketRequest.setYourTurn(1);
             socketService.sendMessageSameRoomId(session, gameRooms, socketRequest);
         }
-        if(socketRequest.getRequest().equals("addFriendRequest")){
+        if(requestName.equals("addFriendRequest")){
             socketRequest.setSender(myId);
             WebSocketSession receiverSession = socketService.findReceiverSession(socketRequest.getReceiver(), sessionMap, socketSessionAndMemberID);
             socketService.sendMessage(receiverSession, socketService.dtoToJson(socketRequest));
         }
-        if (socketRequest.getRequest().equals("addFriendResponse")){
+        if (requestName.equals("addFriendResponse")){
             socketService.addFriend(socketRequest, myId);
             if (Boolean.parseBoolean(socketRequest.getData())){
                 socketService.sendFriendList(myId, socketRequest, sessionMap, socketSessionAndMemberID);
             }
         }
-        if(socketRequest.getRequest().equals("matchingStartDrowGame")){
+        if(requestName.equals("matchingStartDrowGame")){
             //매칭 대기열에 추가
             drowGameMatchingInfo.add(myId);
 
@@ -117,13 +121,13 @@ public class SocketHandler extends TextWebSocketHandler {
                 }
             }
         }
-        if(socketRequest.getRequest().equals("matchingCancleDrowGame")){
+        if(requestName.equals("matchingCancleDrowGame")){
             drowGameMatchingInfo.remove(myId);
         }
-        if (socketRequest.getRequest().equals("sendMessage")) {
+        if (requestName.equals("sendMessage")) {
             //채팅 저장
             ChattingDTO result = socketService.chatContentSave(myId, socketRequest);
-            result.setRequest(socketRequest.getRequest());
+            result.setRequest(requestName);
 
             WebSocketSession[] sessions = new WebSocketSession[2];
             sessions[0] = socketService.findReceiverSession(result.getReceiver(), sessionMap, socketSessionAndMemberID);

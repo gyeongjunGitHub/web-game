@@ -38,10 +38,11 @@ public class SocketService {
         for(String memberKey : sessionMap.keySet()){
             WebSocketSession wss = sessionMap.get(memberKey);
             // 소캣에 등록된 Member 아이디와 myId가 같지 않으면 (자기 자신 제외)
-            if(!myId.equals(socketSessionAndMemberID.get(memberKey))){
+            String memberId = socketSessionAndMemberID.get(memberKey);
+            if(!myId.equals(memberId)){
                 for (String membersKey : sessionMap.keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
-                    if (!socketSessionAndMemberID.get(memberKey).equals(socketSessionAndMemberID.get(membersKey))) {
+                    if (!memberId.equals(socketSessionAndMemberID.get(membersKey))) {
                         StringBuilder memberInfo = new StringBuilder();
                         memberInfo.append("{\"logOutMember\" : \"");
                         memberInfo.append(socketSessionAndMemberID.get(membersKey));
@@ -91,7 +92,8 @@ public class SocketService {
                                                 ConcurrentHashMap<String, WebSocketSession> sessionMap,
                                                 ConcurrentHashMap<String, String> socketSessionAndMemberID){
         for(String key : sessionMap.keySet()){
-            if(receiver.equals(socketSessionAndMemberID.get(key))){
+            String memberId = socketSessionAndMemberID.get(key);
+            if(receiver.equals(memberId)){
                 return sessionMap.get(key);
             }
         }
