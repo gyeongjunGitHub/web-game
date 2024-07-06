@@ -1,15 +1,9 @@
 package drowGame.drowGame.socket;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.fasterxml.jackson.core.JsonProcessingException;
-import drowGame.drowGame.dto.*;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.service.MemberSessionService;
-import drowGame.drowGame.service.SocketService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -28,6 +22,21 @@ public class SocketHandler extends TextWebSocketHandler {
     public void handleTextMessage(WebSocketSession session, TextMessage message) throws JsonProcessingException {
         String msg = message.getPayload();
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
+//        try {
+//            ObjectMapper objectMapper = new ObjectMapper();
+//            JsonNode jsonNode = objectMapper.readTree(msg);
+//            // JsonNode 출력
+//            //System.out.println(jsonNode.toString());
+//
+//            // JsonNode 구조 탐색
+//            String type = jsonNode.get("type").asText();
+//            System.out.println("Type: " + type);
+//            JsonNode data = jsonNode.get("data");
+//            System.out.println(data);
+////            System.out.println("Field2: " + dataNode.get("field2").asText());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
         SocketRequest socketRequest = socketService.socketRequestMapping(msg);
 
         String requestName = socketRequest.getRequest();
@@ -76,6 +85,8 @@ public class SocketHandler extends TextWebSocketHandler {
         socketService.addSessionInfo(session);
         socketService.sendLoginMemberList(session);
         socketService.sendFriendInfo(session);
+
+        //삭제 예정
         socketService.sendChattingData(session);
     }
 

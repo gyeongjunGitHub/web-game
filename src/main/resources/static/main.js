@@ -28,6 +28,7 @@ const message = document.getElementById('message');
 const myIdArea = document.getElementById('myIdArea');
 const matchingStartBtn = document.getElementById('matchingStartBtn');
 const matchingCancleBtn = document.getElementById('matchingCancleBtn');
+
 let myId = '';
 let chattingAreaMemberName = '';
 let chattingAreaIsTrue = false;
@@ -57,20 +58,33 @@ let mouseState = {
 var ws;
 gameArea.style.display = 'none';
 
+class Friend{
+    #member_id;
+    #friend_id;
+    #status;
+
+    constructor(data){
+        this.#member_id = data.member_id;
+        this.#friend_id = data.friend_id;
+        this.#status = data.status;
+    }
+
+    get member_id(){ return this.#member_id; }
+    get friend_id(){ return this.#friend_id; }
+    get status(){ return this.#status; }
+    set status(status){ this.#status = status; }
+}
+
 //GET 요청 함수
 async function getRequest(url = '') {
     try {
         const response = await fetch(url, { method: 'GET' });
-
         if (!response.ok) {
             throw new Error(
                 'Network response was not ok ' + response.statusText
             );
         }
-
-        // JSON 형식으로 변환된 데이터를 가져옴.
         const responseData = await response.json();
-
         return responseData;
     } catch (error) {
         console.error('Fetch operation failed:', error);
@@ -105,6 +119,8 @@ async function searchMember() {
         }
     }
 }
+
+
 //생성자
 function RequestParam(request='', receiver = '', data = '') {
     this.request = request;
@@ -137,15 +153,12 @@ function wsEvt() {
 }
 //메시지 처리 핸들러 함수
 function receiveMessageHandler(msg) {
-    //request -> duplicateLogin
-    if(msg.request == 'duplicateLogin'){
-        alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
-        location.href = '/';
-    }
+
     //request -> addFriendResponse
     if(msg.request == 'addFriendResponse'){
         if(msg.data == 'true'){
-            //
+            document.querySelector('.user-menu').innerHTML = '';
+            inputFriendList(friendList);
         }
     }
     //request -> leaveOtherMember
@@ -243,8 +256,6 @@ function receiveMessageHandler(msg) {
     if(msg.request == 'sendCoordinate'){
         draw(msg.coordinate[0], msg.coordinate[1], msg.coordinate[2], msg.coordinate[3], msg.color);
         ram.push({ x: msg.coordinate[0], y: msg.coordinate[1], lastX: msg.coordinate[2], lastY: msg.coordinate[3], color: msg.color });
-        console.log([1,2,3,4,'black']);
-
     }
     //request -> matchingStartDrowGame
     if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
@@ -259,7 +270,6 @@ function receiveMessageHandler(msg) {
                 userAreaBoxList[i].style.display = 'none';
             }
         }
-
 
         matchingArea.style.display = 'none';
         gameArea.style.display = 'block';
@@ -300,21 +310,27 @@ function receiveMessageHandler(msg) {
                 chattingData.push(data);
             }
         }
-        if(msg[0].request == 'friendList'){         //친구 목록
-            friendList = msg;
+
+        if(msg[0].type == 'friend'){
+            for(let i = 0; i<msg.length; i++){
+                const friend = new Friend(msg[i].data);
+                friendList.push(friend);
+            }
             document.querySelector('.user-menu').innerHTML = '';
             inputFriendList(friendList);
         }
     }
+
+    ////////////////////////////////////////////////////////////////////////
     //myId
-    if (msg.myId != undefined) {
-        myIdArea.innerHTML = `${msg.myId}`;
-        myId = msg.myId;
+    if(msg.type == 'myId') {
+        myIdArea.innerHTML = `${msg.data}`;
+        myId = msg.data;
     }
     //다른 유저 로그인 status 수정
-    if(msg.loginMember != undefined){
+    if(msg.type == 'login'){
         for(let i = 0; i<friendList.length; i++){
-            if(msg.loginMember == friendList[i].friend_id){
+            if(msg.data == friendList[i].friend_id){
                 friendList[i].status = 'online';
                 document.querySelector('.user-menu').innerHTML = '';
                 inputFriendList(friendList)
@@ -322,14 +338,19 @@ function receiveMessageHandler(msg) {
         }
     }
     //다른 유저 로그아웃 status 수정
-    if (msg.logOutMember != undefined) {
+    if (msg.type == "logout") {
         for(let i = 0; i<friendList.length; i++){
-            if(msg.logOutMember == friendList[i].friend_id){
+            if(msg.data == friendList[i].friend_id){
                 friendList[i].status = 'offline';
                 document.querySelector('.user-menu').innerHTML = '';
                 inputFriendList(friendList);
             }
         }
+    }
+    //request -> duplicateLogin
+    if(msg.type == 'duplicateLogin'){
+        alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
+        location.href = '/';
     }
 }
 //친구추가 요청 처리 함수
@@ -391,8 +412,8 @@ function matching(request) {
 }
 // 친구 추가 요청 전송
 function addFriendRequest(id) {
-    const requestParam = new RequestParam('addFriendRequest', id);
-    send(requestParam);
+       const requestParam = new RequestParam('addFriendRequest', id);
+       send(requestParam);
 }
 // 친구 추가 요청 응답 전송 -> 수락 및 거절 이후 화면 처리 필요
 function addFriendResponse(response, receiver){
@@ -406,7 +427,6 @@ function inputFriendList(friendList){
         if(friendList[i].status == 'online'){
             setMemberStateOnline(friendList[i].friend_id);
         }
-
         if(friendList[i].status == 'offline'){
             setMemberStateOffline(friendList[i].friend_id);
         }
@@ -493,7 +513,9 @@ function setMessage() {
     message.value = '';
 }
 //메시지 전송
-function send(requestParam) { ws.send(JSON.stringify(requestParam)); }
+function send(requestParam) {
+    ws.send(JSON.stringify(requestParam));
+}
 document
   .querySelector('#chattingArea')
   .addEventListener('click', function (e) {

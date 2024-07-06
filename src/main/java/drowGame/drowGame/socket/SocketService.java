@@ -1,4 +1,4 @@
-package drowGame.drowGame.service;
+package drowGame.drowGame.socket;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,8 +10,7 @@ import drowGame.drowGame.entity.QuizEntity;
 import drowGame.drowGame.repository.ChattingRepository;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.QuizRepository;
-import drowGame.drowGame.socket.GameManager;
-import drowGame.drowGame.socket.SocketSessionManager;
+import drowGame.drowGame.service.MemberSessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,7 +19,6 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -44,29 +42,36 @@ public class SocketService {
         sm.removeMemberIdMap(session);
     }
     public WebSocketSession duplicateLoginCheck(WebSocketSession session){
-        String myId = (String) session.getAttributes().get("httpSessionId");
+        String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
         for(String s : sm.getMemberIdMap().keySet()){
             if(myId.equals(sm.getMemberIdMap().get(s))){
-                SocketRequest socketRequest = new SocketRequest();
-                socketRequest.setRequest("duplicateLogin");
-                sendMessage(sm.getSessionMap().get(s), dtoToJson(socketRequest));
+                Data data = new Data();
+                data.setType("duplicateLogin");
+                sendMessage(sm.getSessionMap().get(s), dtoToJson(data));
                 return sm.getSessionMap().get(s); //중복 로그인
             }
         }
         return null;
     }
+    //친구 정보 전송
     public void sendFriendInfo(WebSocketSession session){
         String myId = sm.getMyId(session);
+
+        //friend list 획득
         List<FriendDTO> friendDTOList = getFriendList(myId);
-        List<String> friendList = new ArrayList<>();
-        for (FriendDTO f : friendDTOList) {
-            if(sm.getMemberIdMap().containsValue(f.getFriend_id())){
-                f.setStatus("online");
+
+        List<String> dataList = new ArrayList<>();
+        for(FriendDTO friend : friendDTOList){
+            Data data = new Data();
+            if(sm.getMemberIdMap().containsValue(friend.getFriend_id())){
+                friend.setStatus("online");
             }
-            friendList.add(dtoToJson(f));
+            data.setType("friend");
+            data.setData(friend);
+            dataList.add(dtoToJson(data));
         }
-        if(!friendList.isEmpty()){
-            sendMessage(findReceiverSession(myId), friendList.toString());
+        if(!dataList.isEmpty()){
+            sendMessage(findReceiverSession(myId), dataList.toString());
         }
     }
     public WebSocketSession findReceiverSession(String receiver){
@@ -100,10 +105,10 @@ public class SocketService {
                 for (String membersKey : sm.getSessionMap().keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
                     if (!memberId.equals(sm.getMemberId(membersKey))) {
-                        String memberInfo = "{\"logOutMember\" : \"" +
-                                sm.getMemberId(membersKey) +
-                                "\"}";
-                        sendMessage(wss, memberInfo);
+                        Data data = new Data();
+                        data.setType("logout");
+                        data.setData(sm.getMemberId(membersKey));
+                        sendMessage(wss, dtoToJson(data));
                     }
                 }
             }
@@ -120,21 +125,25 @@ public class SocketService {
                 for (String membersKey : sm.getSessionMap().keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
                     if (!sm.getMemberId(loginMemberKey).equals(sm.getMemberId(membersKey))) {
-                        String memberInfo = "{\"loginMember\" : \"" +
-                                sm.getMemberId(membersKey) +
-                                "\"}";
-                        sendMessage(wss, memberInfo);
+                        Data data = new Data();
+                        data.setType("login");
+                        data.setData(sm.getMemberId(membersKey));
+                        sendMessage(wss, dtoToJson(data));
                     }
                 }
             }else{ // 자기 자신에게 전송
                 for(String membersKey : sm.getSessionMap().keySet()){
                     // 자기 자신 ID 제외 전송
                     if (!myId.equals(sm.getMemberId(membersKey))){
-                        String memberInfo = "{\"loginMember\" : \"" + sm.getMemberId(membersKey) + "\"}";
-                        sendMessage(wss, memberInfo);
+                        Data data = new Data();
+                        data.setType("login");
+                        data.setData(sm.getMemberId(membersKey));
+                        sendMessage(wss, dtoToJson(data));
                     }else{
-                        String myIdInfo = "{\"myId\" : \"" + myId + "\"}";
-                        sendMessage(wss, myIdInfo);
+                        Data data = new Data();
+                        data.setType("myId");
+                        data.setData(myId);
+                        sendMessage(wss, dtoToJson(data));
                     }
                 }
             }
