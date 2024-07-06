@@ -9,7 +9,7 @@ import java.util.List;
 public class Request {
     List<String> request1 = new ArrayList<>();
     List<String> request2 = new ArrayList<>();
-    List<String> request3 = new ArrayList<>();
+//    List<String> request3 = new ArrayList<>();
 
     public Request(){
         this.request1.add("answer");
@@ -22,12 +22,12 @@ public class Request {
         this.request2.add("push");
         this.request2.add("sendCoordinate");
 
-        this.request3.add("nextTurn");
-        this.request3.add("gameStart");
-        this.request3.add("addFriendRequest");
-        this.request3.add("addFriendResponse");
-        this.request3.add("matchingStartDrowGame");
-        this.request3.add("matchingCancleDrowGame");
-        this.request3.add("sendMessage");
+//        this.request3.add("nextTurn");
+//        this.request3.add("gameStart");
+//        this.request3.add("addFriendRequest");
+//        this.request3.add("addFriendResponse");
+//        this.request3.add("matchingStartDrowGame");
+//        this.request3.add("matchingCancleDrowGame");
+//        this.request3.add("sendMessage");
     }
 }

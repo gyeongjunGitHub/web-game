@@ -10,6 +10,7 @@ import drowGame.drowGame.entity.QuizEntity;
 import drowGame.drowGame.repository.ChattingRepository;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.QuizRepository;
+import drowGame.drowGame.socket.GameManager;
 import drowGame.drowGame.socket.SocketSessionManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -28,12 +29,11 @@ public class SocketService {
     
     //나중에 정리 필요
     private final SocketSessionManager sm;
+    private final GameManager gm;
     private final MemberSessionService memberSessionService;
-
     private final FriendRepository friendRepository;
     private final ChattingRepository chattingRepository;
     private final QuizRepository quizRepository;
-
 
     public void addSessionInfo(WebSocketSession session) {
         sm.addSessionMap(session.getId(), session);
@@ -100,11 +100,10 @@ public class SocketService {
                 for (String membersKey : sm.getSessionMap().keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
                     if (!memberId.equals(sm.getMemberId(membersKey))) {
-                        StringBuilder memberInfo = new StringBuilder();
-                        memberInfo.append("{\"logOutMember\" : \"");
-                        memberInfo.append(sm.getMemberId(membersKey));
-                        memberInfo.append("\"}");
-                        sendMessage(wss, memberInfo.toString());
+                        String memberInfo = "{\"logOutMember\" : \"" +
+                                sm.getMemberId(membersKey) +
+                                "\"}";
+                        sendMessage(wss, memberInfo);
                     }
                 }
             }
@@ -112,7 +111,6 @@ public class SocketService {
     }
     public void sendLoginMemberList(WebSocketSession session) {
         String myId = sm.getMyId(session);
-
         // socket sessionMap 순회
         for(String loginMemberKey : sm.getSessionMap().keySet()){
             WebSocketSession wss = sm.getSessionMap().get(loginMemberKey);
@@ -122,11 +120,10 @@ public class SocketService {
                 for (String membersKey : sm.getSessionMap().keySet()) {
                     // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
                     if (!sm.getMemberId(loginMemberKey).equals(sm.getMemberId(membersKey))) {
-                        StringBuilder memberInfo = new StringBuilder();
-                        memberInfo.append("{\"loginMember\" : \"");
-                        memberInfo.append(sm.getMemberId(membersKey));
-                        memberInfo.append("\"}");
-                        sendMessage(wss, memberInfo.toString());
+                        String memberInfo = "{\"loginMember\" : \"" +
+                                sm.getMemberId(membersKey) +
+                                "\"}";
+                        sendMessage(wss, memberInfo);
                     }
                 }
             }else{ // 자기 자신에게 전송
@@ -142,18 +139,6 @@ public class SocketService {
                 }
             }
         }
-    }
-
-    public WebSocketSession findReceiverSession(String receiver,
-                                                ConcurrentHashMap<String, WebSocketSession> sessionMap,
-                                                ConcurrentHashMap<String, String> socketSessionAndMemberID){
-        for(String key : sessionMap.keySet()){
-            String memberId = socketSessionAndMemberID.get(key);
-            if(receiver.equals(memberId)){
-                return sessionMap.get(key);
-            }
-        }
-        return null;
     }
     public List<FriendDTO> getFriendList(String myId) {
         List<FriendEntity> friendList = friendRepository.findFriendList(myId);
@@ -259,10 +244,8 @@ public class SocketService {
         //친구 목록 전송
         List<FriendDTO> friendDTOList = getFriendList(myId);
         List<FriendDTO> receiverFriendDTOList = getFriendList(socketRequest.getReceiver());
-
         List<String> friendList = new ArrayList<>();
         List<String> receiverFriendList = new ArrayList<>();
-
         //친구 리스트 순회
         for (FriendDTO f : friendDTOList) {
             //친구 ID가 socketSessionAndMemberID안에 존재한다면
@@ -278,7 +261,6 @@ public class SocketService {
             }
             receiverFriendList.add(dtoToJson(f));
         }
-
         if(!friendList.isEmpty()){
             sendMessage(findReceiverSession(myId), friendList.toString());
         }
@@ -286,41 +268,84 @@ public class SocketService {
             sendMessage(findReceiverSession(socketRequest.getReceiver()), receiverFriendList.toString());
         }
     }
+    public void startMatching(WebSocketSession session, SocketRequest socketRequest){
+        String myId = sm.getMyId(session);
+        int inGameMemberSize = 2;
+        if(gm.addMatchingQueue(myId)){
+            List<WebSocketSession> player_session = new ArrayList<>();
+            List<String> memebers = new ArrayList<>();
+            for (int i = 0; i < inGameMemberSize; i++) {
+                //memberId
+                String player = gm.pollMatchingQueue();
+                memebers.add(player);
+                //memberSession
+                for (String sessionId : sm.getMemberIdMap().keySet()) {
+                    if (sm.getMemberIdMap().get(sessionId).equals(player)) {
+                        player_session.add(sm.getSessionMap().get(sessionId));
+                    }
+                }
+            }
+            gm.createGameRoom(player_session);
+            socketRequest.setRoomUsers(memebers);
+            socketRequest.setResponse("success");
 
-    //gameRoom 수정 필요
-    public void nextTurn(SocketRequest socketRequest, WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms){
+            for(WebSocketSession wss : player_session){
+                socketRequest.setYourTurn(gm.getTurn(wss));
+                sendMessage(wss, dtoToJson(socketRequest));
+            }
+        }
+    }
+    public void nextTurn(WebSocketSession session, SocketRequest socketRequest){
         int turn = Integer.parseInt(socketRequest.getData()) + 1;
         if(turn > 2){ turn = 1; } //사이클 종료
         QuizDTO quiz = getQuiz();
         socketRequest.setAnswer(quiz.getAnswer());
         socketRequest.setQuiz(quiz.getQuiz());
         socketRequest.setYourTurn(turn);
-        sendMessageSameRoom(0, session, gameRooms, socketRequest);
+        sendMessageSameRoom(0, session, socketRequest);
     }
-    public void gameStart(SocketRequest socketRequest, WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms){
-        QuizDTO quiz = getQuiz();
-        socketRequest.setAnswer(quiz.getAnswer());
-        socketRequest.setQuiz(quiz.getQuiz());
-        socketRequest.setYourTurn(1);
-        sendMessageSameRoom(0, session, gameRooms, socketRequest);
+    public void gameStart(WebSocketSession session, SocketRequest socketRequest){
+        if(gm.getTurn(session) == 1){
+            QuizDTO quiz = getQuiz();
+            socketRequest.setAnswer(quiz.getAnswer());
+            socketRequest.setQuiz(quiz.getQuiz());
+            socketRequest.setYourTurn(1);
+            sendMessageSameRoom(0, session, socketRequest);
+        }
     }
-    public void sendMessageSameRoom(int num, WebSocketSession session, ConcurrentHashMap<WebSocketSession, GameRoom> gameRooms, SocketRequest socketRequest) {
-        if(num == 0){
-            //같은 roomId를 가진 유저에게 전송
-            int myRoomId = gameRooms.get(session).getRoomId();
-            for (WebSocketSession wss : gameRooms.keySet()) {
-                if (myRoomId == gameRooms.get(wss).getRoomId()) {
+    public void sendMessageSameRoom(int num, WebSocketSession session, SocketRequest socketRequest) {
+        if (num == 0) {
+            for (WebSocketSession wss : gm.getSameRoomMemberSession(session)) {
+                sendMessage(wss, dtoToJson(socketRequest));
+            }
+        }
+        if (num == 1) {
+            for (WebSocketSession wss : gm.getSameRoomMemberSession(session)){
+                if(!session.equals(wss)){
                     sendMessage(wss, dtoToJson(socketRequest));
                 }
             }
         }
-        if(num == 1){
-            //자기 자신 제외 같은 roomId를 가진 유저에게 전송
-            int myRoomId = gameRooms.get(session).getRoomId();
-            for (WebSocketSession wss : gameRooms.keySet()){
-                //roomId는 같고 자기 자신 제외
-                if(gameRooms.get(wss).getRoomId() == myRoomId && !wss.equals(session)){
+    }
+    public String getMyId(WebSocketSession session){
+        return sm.getMyId(session);
+    }
+    public void removeMatchingQueue(WebSocketSession session) {
+        String myId = sm.getMyId(session);
+        gm.removeMatchingQueue(myId);
+    }
+    public void removeGameRoom(WebSocketSession session) {
+
+        //게임중 일 경우
+        if (gm.isDuringGame(session)){
+            int roomId = gm.getGameRoomId(session);
+            gm.removeSessionGameRoom(session);
+            if (gm.getRoomMemberCount(roomId) == 1) {
+                SocketRequest socketRequest = new SocketRequest();
+                socketRequest.setRequest("leaveOtherMember");
+                for (WebSocketSession wss : gm.getSameRoomMemberSession(roomId)) {
                     sendMessage(wss, dtoToJson(socketRequest));
+                    gm.removeSessionGameRoom(wss);
                 }
             }
         }
