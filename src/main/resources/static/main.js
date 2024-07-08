@@ -152,7 +152,7 @@ function wsEvt() {
     };
 }
 //메시지 처리 핸들러 함수
-function receiveMessageHandler(msg) {
+async function receiveMessageHandler(msg) {
 
     //request -> addFriendResponse
     if(msg.request == 'addFriendResponse'){
@@ -261,10 +261,18 @@ function receiveMessageHandler(msg) {
     if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
         myTurn = msg.yourTurn;
         userList = msg.roomUsers;
+        let userProfile = [];
+        for(let i = 0; i<userList.length; i++){
+            const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
+            userProfile.push(result.stored_file_name);
+        }
 
         for(let i = 0; i<4; i++){
             if(i<userList.length){
-                userNameBoxList[i].innerHTML = `${userList[i]}`;
+                userNameBoxList[i].innerHTML = `
+                    <p>${userList[i]}</p>
+                    <img src="/images/${userProfile[i]}" width="100" height="100">
+                `;
                 userAnswerBoxList[i].style.display = 'block';
             }else{
                 userAreaBoxList[i].style.display = 'none';

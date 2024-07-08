@@ -1,6 +1,7 @@
 package drowGame.drowGame.dto;
 
 import drowGame.drowGame.entity.MemberEntity;
+import drowGame.drowGame.entity.ProfilePictureEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
@@ -18,5 +19,16 @@ public class ProfilePictureDTO {
     private String stored_file_name;
     private LocalDateTime created_time;
     private LocalDateTime updated_time;
-    private MemberEntity memberEntity;
+    private MemberDTO memberDTO;
+
+    public ProfilePictureDTO(){}
+
+    public ProfilePictureDTO(ProfilePictureEntity profilePictureEntity) {
+        this.file_id = profilePictureEntity.getFile_id();
+        this.original_file_name = profilePictureEntity.getOriginal_file_name();
+        this.stored_file_name = profilePictureEntity.getStored_file_name();
+        this.created_time = profilePictureEntity.getCreated_time();
+        this.updated_time = profilePictureEntity.getUpdated_time();
+    }
+
 }

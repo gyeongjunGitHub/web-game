@@ -27,7 +27,7 @@
             const formData = new FormData();
             if(file.files.length == 1){
                 formData.append('file', file.files[0]);
-                const url = '/member/setBasicProfile';
+                const url = '/member/selectBasicProfile';
                 postRequest(url, formData);
             }
         }

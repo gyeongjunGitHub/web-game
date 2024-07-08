@@ -316,8 +316,9 @@
             let result = await postRequest(url, member);
 
             if (result == 1) {
-              alert('회원가입 성공!');
-              location.href = '/';
+                let result1 = await('/member/profilePictureSetting');
+                alert('회원가입 성공!');
+                location.href = '/';
             }
         }
       }

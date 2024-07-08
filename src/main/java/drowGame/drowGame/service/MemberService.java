@@ -71,6 +71,7 @@ public class MemberService {
         memberEntity.setGender(memberDTO.getGender());
         memberEntity.setEmail(memberDTO.getEmail());
         memberEntity.setRole("ROLE_USER");
+
         String result = memberRepository.memberSave(memberEntity);
         ResultDTO resultDTO = new ResultDTO();
         if (result == null) {
@@ -142,6 +143,8 @@ public class MemberService {
             Optional<MemberEntity> byId = memberRepository.findById(memberId);
             if(byId.isPresent()){
                 MemberDTO memberDTO = new MemberDTO(byId.get());
+                ProfilePictureDTO profilePictureDTO = new ProfilePictureDTO(byId.get().getProfilePictureEntity());
+                memberDTO.setProfilePictureDTO(profilePictureDTO);
                 return memberDTO;
             }else {
                 return null;
@@ -150,10 +153,8 @@ public class MemberService {
             return null;
         }
     }
-
-
     @Transactional
-    public void setBasicProfile(MultipartFile file, HttpSession session) throws IOException {
+    public void selectBasicProfile(MultipartFile file, HttpSession session) throws IOException {
         String originalFileName = file.getOriginalFilename();
         String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
 
@@ -174,10 +175,17 @@ public class MemberService {
         profilePictureEntity.setOriginal_file_name(originalFileName);
         profilePictureEntity.setStored_file_name(storedFileName);
         profilePictureEntity.setMemberEntity(memberRepository.findById(memberSessionService.getMemberId(session.getId())).get());
-
         profilePictureRepository.saveProfilePicture(profilePictureEntity);
     }
-
+    @Transactional
+    public void setBasicProfile(MemberDTO memberDTO){
+        Optional<MemberEntity> byId = memberRepository.findById(memberDTO.getId());
+        if (byId.isPresent()){
+            MemberEntity memberEntity = byId.get();
+            ProfilePictureEntity basicFile = ProfilePictureEntity.getBasicFile(memberEntity);
+            profilePictureRepository.saveProfilePicture(basicFile);
+        }
+    }
     public int profileCheck(HttpSession session) {
         Optional<MemberEntity> byId = memberRepository.findById(memberSessionService.getMemberId(session.getId()));
         if(byId.isPresent()){
@@ -189,5 +197,10 @@ public class MemberService {
             }
         }
         return 2; // 이럴 경우는 없지만.. 로그인 화면으로
+    }
+
+    public ProfilePictureDTO getProfilePicture(String id) {
+        ProfilePictureEntity byId = profilePictureRepository.findById(id);
+        return new ProfilePictureDTO(byId);
     }
 }

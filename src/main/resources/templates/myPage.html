@@ -3,15 +3,40 @@
 <head>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <meta charset="UTF-8" />
-    <title>Chating</title>
-    <link
-            rel="stylesheet"
-            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
-    />
-    <link rel="stylesheet" href="/static/main.css">
 </head>
 <body>
-    <h1>my Page</h1>
+    <div class="container">
+        <div id="test"></div>
 
+    </div>
+<script>
+    const test = document.getElementById('test');
+    getMemberInfo();
+
+    async function getRequest(url = '') {
+        try {
+            const response = await fetch(url, { method: 'GET' });
+            if (!response.ok) {
+                throw new Error(
+                    'Network response was not ok ' + response.statusText
+                );
+            }
+            const responseData = await response.json();
+            return responseData;
+        } catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+    async function getMemberInfo(){
+        const result = await getRequest('/member/getMemberInfo');
+        test.innerHTML = `
+            <p>${result.id}</p>
+            <p>${result.password}</p>
+            <p>${result.name}</p>
+            <p>${result.email}</p>
+            <img id="dynamicImage" src="/images/${result.profilePictureDTO.stored_file_name}" width="100" height="100">
+        `
+    }
+</script>
 </body>
 </html>

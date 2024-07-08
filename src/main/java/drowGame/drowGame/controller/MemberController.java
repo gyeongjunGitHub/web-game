@@ -2,6 +2,7 @@ package drowGame.drowGame.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import drowGame.drowGame.dto.MemberDTO;
+import drowGame.drowGame.dto.ProfilePictureDTO;
 import drowGame.drowGame.dto.ResultDTO;
 import drowGame.drowGame.service.MemberService;
 import drowGame.drowGame.service.MemberSessionService;
@@ -38,6 +39,7 @@ public class MemberController {
     @ResponseBody
     public ResponseEntity<ResultDTO> joinProc(@RequestBody MemberDTO memberDTO) {
         ResultDTO resultDTO = memberService.joinProc(memberDTO);
+        memberService.setBasicProfile(memberDTO);
         return ResponseEntity.ok(resultDTO);
     }
 
@@ -72,16 +74,22 @@ public class MemberController {
         return memberService.getMemberInfo(httpSession);
     }
 
+    @GetMapping("/getProfile")
+    @ResponseBody
+    public ProfilePictureDTO getProfilePicture(@RequestParam(name = "id")String id) {
+        return memberService.getProfilePicture(id);
+    }
+
     @GetMapping("/profileCheck")
     @ResponseBody
     public int profileCheck(HttpSession session){
         return memberService.profileCheck(session);
     }
 
-    @PostMapping("/setBasicProfile")
+    @PostMapping("/selectBasicProfile")
     @ResponseBody
     public ResponseEntity<Void> setBasicProfileProfile(@RequestParam(name = "file") MultipartFile file, HttpSession session) throws IOException {
-        memberService.setBasicProfile(file, session);
+        memberService.selectBasicProfile(file, session);
 
         return ResponseEntity.ok().build();
     }

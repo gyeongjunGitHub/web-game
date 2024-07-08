@@ -1,5 +1,6 @@
 package drowGame.drowGame.entity;
 
+import drowGame.drowGame.dto.BasicFileName;
 import drowGame.drowGame.dto.MemberDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -26,4 +27,12 @@ public class ProfilePictureEntity extends Time{
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
     private MemberEntity memberEntity;
+
+    public static ProfilePictureEntity getBasicFile(MemberEntity memberEntity){
+        ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
+        profilePictureEntity.setOriginal_file_name("기본.png");
+        profilePictureEntity.setStored_file_name("1720427482598_기본.png");
+        profilePictureEntity.setMemberEntity(memberEntity);
+        return profilePictureEntity;
+    }
 }

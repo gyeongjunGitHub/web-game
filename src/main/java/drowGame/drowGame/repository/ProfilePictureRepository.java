@@ -13,4 +13,10 @@ public class ProfilePictureRepository {
     public void saveProfilePicture(ProfilePictureEntity profilePictureEntity) {
         em.persist(profilePictureEntity);
     }
+
+    public ProfilePictureEntity findById(String id) {
+        return em.createQuery("select p from ProfilePictureEntity as p where p.memberEntity.id =:id", ProfilePictureEntity.class)
+                .setParameter("id", id)
+                .getSingleResult();
+    }
 }
