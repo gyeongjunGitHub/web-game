@@ -2,20 +2,25 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import drowGame.drowGame.dto.FriendDTO;
 import drowGame.drowGame.dto.MemberDTO;
+import drowGame.drowGame.dto.ProfilePictureDTO;
 import drowGame.drowGame.dto.ResultDTO;
 import drowGame.drowGame.entity.FriendEntity;
 import drowGame.drowGame.entity.FriendId;
 import drowGame.drowGame.entity.MemberEntity;
+import drowGame.drowGame.entity.ProfilePictureEntity;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.MemberRepository;
+import drowGame.drowGame.repository.ProfilePictureRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Optional;
 
 @Service
@@ -24,6 +29,7 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final MemberSessionService memberSessionService;
     private final FriendRepository friendRepository;
+    private final ProfilePictureRepository profilePictureRepository;
 
     public ResultDTO loginProc(MemberDTO memberDTO, HttpSession httpSession) {
 
@@ -55,7 +61,6 @@ public class MemberService {
             return resultDTO;
         }
     }
-
     @Transactional
     public ResultDTO joinProc(MemberDTO memberDTO) {
         // 유효성 및 중복 검사
@@ -75,11 +80,9 @@ public class MemberService {
         }
         return resultDTO;
     }
-
     public void logoutProc(HttpSession httpSession) {
         memberSessionService.removeSession(httpSession.getId());
     }
-
     public ResultDTO duplicateCheck(String data) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         MemberDTO memberDTO = objectMapper.readValue(data, MemberDTO.class);
@@ -96,7 +99,6 @@ public class MemberService {
         }
         return resultDTO;
     }
-
     public MemberDTO findById(String id) {
         Optional<MemberEntity> byId = memberRepository.findById(id);
         if(byId.isPresent()){
@@ -107,7 +109,6 @@ public class MemberService {
             return memberDTO;
         }
     }
-
     public ResultDTO alreadyFriendCheck(String id, String myId) {
         FriendId friendId = new FriendId();
         ResultDTO resultDTO = new ResultDTO();
@@ -121,7 +122,6 @@ public class MemberService {
         }
         return resultDTO;
     }
-
     public String goMyPage(HttpSession httpSession, Model model) {
         String myId = memberSessionService.getMemberId(httpSession.getId());
         if (myId == null){
@@ -136,7 +136,6 @@ public class MemberService {
             return "myPage";
         }
     }
-
     public MemberDTO getMemberInfo(HttpSession httpSession) {
         String memberId = memberSessionService.getMemberId(httpSession.getId());
         if(memberId != null){
@@ -150,5 +149,45 @@ public class MemberService {
         }else {
             return null;
         }
+    }
+
+
+    @Transactional
+    public void setBasicProfile(MultipartFile file, HttpSession session) throws IOException {
+        String originalFileName = file.getOriginalFilename();
+        String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
+
+        String windowSavePath = "C:/images/" + storedFileName;
+        String ec2SavePath = "/home/images/" + storedFileName;
+
+        File saveFile = new File(windowSavePath);
+
+        //폴더가 없을 경우 폴더 생성!
+        if(!saveFile.exists()){
+            saveFile.mkdirs();
+        }
+
+        //file 저장
+        file.transferTo(saveFile);
+
+        ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
+        profilePictureEntity.setOriginal_file_name(originalFileName);
+        profilePictureEntity.setStored_file_name(storedFileName);
+        profilePictureEntity.setMemberEntity(memberRepository.findById(memberSessionService.getMemberId(session.getId())).get());
+
+        profilePictureRepository.saveProfilePicture(profilePictureEntity);
+    }
+
+    public int profileCheck(HttpSession session) {
+        Optional<MemberEntity> byId = memberRepository.findById(memberSessionService.getMemberId(session.getId()));
+        if(byId.isPresent()){
+            MemberEntity memberEntity = byId.get();
+            if(memberEntity.getProfilePictureEntity() != null){
+                return 0; // 기본 프로필 사진이 이미 있음
+            }else {
+                return 1; // 기본 프로필 사진이 없음
+            }
+        }
+        return 2; // 이럴 경우는 없지만.. 로그인 화면으로
     }
 }

@@ -11,6 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @Controller
 @RequestMapping("/member")
@@ -21,12 +24,13 @@ public class MemberController {
 
     @PostMapping("/loginProc")
     @ResponseBody
-    public ResponseEntity<ResultDTO> loginProc(@RequestBody MemberDTO memberDTO, HttpSession httpSession){
+    public ResponseEntity<ResultDTO> loginProc(@RequestBody MemberDTO memberDTO, HttpSession httpSession) {
         ResultDTO resultDTO = memberService.loginProc(memberDTO, httpSession);
         return ResponseEntity.ok(resultDTO);
     }
+
     @GetMapping("/join")
-    public String goJoinForm(){
+    public String goJoinForm() {
         return "joinForm";
     }
 
@@ -38,7 +42,7 @@ public class MemberController {
     }
 
     @GetMapping("/logout")
-    public String logoutProc(HttpSession httpSession){
+    public String logoutProc(HttpSession httpSession) {
         memberService.logoutProc(httpSession);
         return "loginForm";
     }
@@ -64,8 +68,21 @@ public class MemberController {
 
     @GetMapping("/getMemberInfo")
     @ResponseBody
-    public MemberDTO getMemberInfo(HttpSession httpSession){
+    public MemberDTO getMemberInfo(HttpSession httpSession) {
         return memberService.getMemberInfo(httpSession);
     }
 
+    @GetMapping("/profileCheck")
+    @ResponseBody
+    public int profileCheck(HttpSession session){
+        return memberService.profileCheck(session);
+    }
+
+    @PostMapping("/setBasicProfile")
+    @ResponseBody
+    public ResponseEntity<Void> setBasicProfileProfile(@RequestParam(name = "file") MultipartFile file, HttpSession session) throws IOException {
+        memberService.setBasicProfile(file, session);
+
+        return ResponseEntity.ok().build();
+    }
 }

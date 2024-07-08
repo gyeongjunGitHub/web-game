@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <meta charset="UTF-8" />
+    <title>Chating</title>
+</head>
+<body>
+<h2>기본 프로필 사진 설정</h2>
+<div class="container">
+    기본 프로필 사진 파일 선택 -> <input type="file" id="file" multiple>
+    <br><button class="picture_selectBtn" onclick="setProfile()">기본사진 선택 완료</button>
+    <img id="dynamicImage" width="550" height="400">
+</div>
+<script>
+    const file = document.getElementById('file');
+    const picture_selectBtn = document.querySelector('.picture_selectBtn');
+
+    async function setProfile(){
+        let result = await getRequest('/member/profileCheck');
+
+        // result : 1 프로필 설정 가능
+        // result : 0 이미 프로필 사진 존재
+        // result : 2 로그인 화면으로 보내버리기
+
+        if(result == 1){
+            const formData = new FormData();
+            if(file.files.length == 1){
+                formData.append('file', file.files[0]);
+                const url = '/member/setBasicProfile';
+                postRequest(url, formData);
+            }
+        }
+        if(result == 2){
+            location.href = '/';
+        }
+    }
+    async function getRequest(url = '') {
+        try {
+            const response = await fetch(url, { method: 'GET' });
+            if (!response.ok) {
+                throw new Error(
+                    'Network response was not ok ' + response.statusText
+                );
+            }
+            const responseData = await response.json();
+            return responseData;
+        } catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+    //post 요청
+    async function postRequest(url = '', formData) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+
+        if (!response.ok) {
+            throw new Error(
+                'Network response was not ok ' + response.statusText
+            );
+        }
+        else{
+            console.log("ok!");
+        }
+
+        } catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+</script>
+<script>
+        // 파일 이름을 동적으로 설정하거나, 서버에서 받아온 정보를 사용할 수 있습니다.
+        var fileName = "1720425031205_기본.png"; // 여기에 파일 이름을 할당합니다.
+
+        var imageUrl = '/images/' + fileName; // 이미지 경로를 설정합니다.
+
+        // 이미지 태그의 src 속성에 이미지 경로 설정
+        var imageElement = document.getElementById('dynamicImage');
+        imageElement.src = imageUrl;
+</script>
+</body>
+</html>

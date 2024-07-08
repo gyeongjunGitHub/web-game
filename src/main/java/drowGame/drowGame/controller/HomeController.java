@@ -1,11 +1,16 @@
 package drowGame.drowGame.controller;
 
+import drowGame.drowGame.entity.MemberEntity;
+import drowGame.drowGame.repository.MemberRepository;
+import drowGame.drowGame.repository.ProfilePictureRepository;
 import drowGame.drowGame.service.MemberSessionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import java.util.Optional;
 
 @Controller
 @RequiredArgsConstructor
@@ -35,4 +40,15 @@ public class HomeController {
         return "drowGame";
     }
 
+    @GetMapping("/myPage")
+    public String myPage(HttpSession httpSession, Model model){
+        String myId = memberSessionService.getMemberId(httpSession.getId());
+        if(myId == null){
+            return "loginForm";
+        }
+        if (myId.equals("admin")){
+            return "adminPage";
+        }
+        return "myPage";
+    }
 }

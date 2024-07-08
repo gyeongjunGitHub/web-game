@@ -1,9 +1,6 @@
 package drowGame.drowGame.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -25,4 +22,6 @@ public class MemberEntity {
     private String email;
     @Column(name = "role")
     private String role;
+    @OneToOne(mappedBy = "memberEntity", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private ProfilePictureEntity profilePictureEntity;
 }

@@ -12,6 +12,7 @@ public class MemberDTO {
     private String name;
     private String gender;
     private String email;
+    private ProfilePictureDTO profilePictureDTO;
 
     public MemberDTO(){}
     public MemberDTO(MemberEntity memberEntity){
@@ -20,6 +21,5 @@ public class MemberDTO {
         this.name = memberEntity.getName();
         this.gender = memberEntity.getGender();
         this.email = memberEntity.getEmail();
-
     }
 }
