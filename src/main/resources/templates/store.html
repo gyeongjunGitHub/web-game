@@ -4,13 +4,22 @@
     <meta charset="UTF-8" />
 </head>
 <body>
-    <div class="container">
-        <div id="test"></div>
-    </div>
+<div class="container">
+    <h2>상점</h2>
+</div>
 <script>
-    const test = document.getElementById('test');
-    getMemberInfo();
+    const container = document.querySelector('.container');
 
+    getItems();
+
+    async function getItems(){
+        const items = await getRequest('/store/getItems');
+        for(let i = 0; i < items.length; i++){
+            container.innerHTML += `
+                <p>${items[i].name} -> ${items[i].price}원</p>
+            `;
+        }
+    }
     async function getRequest(url = '') {
         try {
             const response = await fetch(url, { method: 'GET' });
@@ -24,16 +33,6 @@
         } catch (error) {
             console.error('Fetch operation failed:', error);
         }
-    }
-    async function getMemberInfo(){
-        const result = await getRequest('/member/getMemberInfo');
-        test.innerHTML = `
-            <p>ID : ${result.id}</p>
-            <p>PASSWORD : ${result.password}</p>
-            <p>NAME : ${result.name}</p>
-            <p>EMAIL : ${result.email}</p>
-            프로필 사진 : <img id="dynamicImage" src="/images/${result.profilePictureDTO.stored_file_name}" width="100" height="100">
-        `
     }
 </script>
 </body>

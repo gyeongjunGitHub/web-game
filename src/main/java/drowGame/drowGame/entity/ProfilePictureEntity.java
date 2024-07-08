@@ -1,13 +1,8 @@
 package drowGame.drowGame.entity;
 
-import drowGame.drowGame.dto.BasicFileName;
-import drowGame.drowGame.dto.MemberDTO;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.lang.reflect.Member;
-import java.lang.reflect.Type;
 
 @Entity
 @Getter

@@ -10,12 +10,29 @@
 <div class="container">
     기본 프로필 사진 파일 선택 -> <input type="file" id="file" multiple>
     <br><button class="picture_selectBtn" onclick="setProfile()">기본사진 선택 완료</button>
-    <img id="dynamicImage" width="550" height="400">
+    <img id="dynamicImage" width="100" height="100">
+    <br>
+    <h2>상점 아이템 등록</h2>
+    <br>
+    아이템 이름 : <input id="name" type="text"><br>
+    아이템 가격 : <input id="price" type="text"><br>
+    <button onclick="itemRegistration()">등록</button>
 </div>
 <script>
     const file = document.getElementById('file');
+    const name = document.getElementById('name');
+    const price = document.getElementById('price');
     const picture_selectBtn = document.querySelector('.picture_selectBtn');
 
+    async function itemRegistration(){
+        const url = '/store/itemRegistration';
+        let data = {
+            name : name.value,
+            price : price.value
+        };
+        const result = await postRequest(url, data);
+        console.log(result);
+    }
     async function setProfile(){
         let result = await getRequest('/member/profileCheck');
 
@@ -28,7 +45,7 @@
             if(file.files.length == 1){
                 formData.append('file', file.files[0]);
                 const url = '/member/selectBasicProfile';
-                postRequest(url, formData);
+                postFileRequest(url, formData);
             }
         }
         if(result == 2){
@@ -49,8 +66,8 @@
             console.error('Fetch operation failed:', error);
         }
     }
-    //post 요청
-    async function postRequest(url = '', formData) {
+    //post file 요청
+    async function postFileRequest(url = '', formData) {
         try {
             const response = await fetch(url, {
                 method: 'POST',
@@ -66,6 +83,28 @@
             console.log("ok!");
         }
 
+        } catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+    //post 요청
+    async function postRequest(url = '', data = {}) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    'Network response was not ok ' + response.statusText
+                );
+            }
+
+            // JSON 형식으로 변환된 데이터를 가져옴.
+            const responseData = await response.json();
+            return responseData;
         } catch (error) {
             console.error('Fetch operation failed:', error);
         }

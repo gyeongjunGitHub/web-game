@@ -41,7 +41,7 @@ public class HomeController {
     }
 
     @GetMapping("/myPage")
-    public String myPage(HttpSession httpSession, Model model){
+    public String myPage(HttpSession httpSession){
         String myId = memberSessionService.getMemberId(httpSession.getId());
         if(myId == null){
             return "loginForm";
@@ -50,5 +50,13 @@ public class HomeController {
             return "adminPage";
         }
         return "myPage";
+    }
+    @GetMapping("/store")
+    public String store(HttpSession httpSession){
+        String myId = memberSessionService.getMemberId(httpSession.getId());
+        if(myId == null){
+            return "loginForm";
+        }
+        return "store";
     }
 }
