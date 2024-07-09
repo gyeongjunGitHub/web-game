@@ -4,10 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.dto.ItemDTO;
+import drowGame.drowGame.dto.MyItemsDTO;
 import drowGame.drowGame.entity.ItemEntity;
+import drowGame.drowGame.entity.MyItemsEntity;
 import drowGame.drowGame.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,5 +42,15 @@ public class StoreService {
             result.add(itemDTO);
         }
         return result;
+    }
+
+    public List<MyItemsDTO> getMyItems(String memberId) {
+        List<MyItemsEntity> myItemsEntityList = storeRepository.getMyItems(memberId);
+        List<MyItemsDTO> myItems = new ArrayList<>();
+        for(MyItemsEntity m : myItemsEntityList){
+            MyItemsDTO myItemsDTO = new MyItemsDTO(m);
+            myItems.add(myItemsDTO);
+        }
+        return myItems;
     }
 }

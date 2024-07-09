@@ -22,6 +22,5 @@ public class MemberEntity {
     private String email;
     @Column(name = "role")
     private String role;
-    @OneToOne(mappedBy = "memberEntity", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
-    private ProfilePictureEntity profilePictureEntity;
+
 }

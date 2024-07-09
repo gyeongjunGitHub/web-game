@@ -143,7 +143,8 @@ public class MemberService {
             Optional<MemberEntity> byId = memberRepository.findById(memberId);
             if(byId.isPresent()){
                 MemberDTO memberDTO = new MemberDTO(byId.get());
-                ProfilePictureDTO profilePictureDTO = new ProfilePictureDTO(byId.get().getProfilePictureEntity());
+                ProfilePictureEntity byId1 = profilePictureRepository.findById(memberId);
+                ProfilePictureDTO profilePictureDTO = new ProfilePictureDTO(byId1);
                 memberDTO.setProfilePictureDTO(profilePictureDTO);
                 return memberDTO;
             }else {
@@ -174,7 +175,7 @@ public class MemberService {
         ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
         profilePictureEntity.setOriginal_file_name(originalFileName);
         profilePictureEntity.setStored_file_name(storedFileName);
-        profilePictureEntity.setMemberEntity(memberRepository.findById(memberSessionService.getMemberId(session.getId())).get());
+        profilePictureEntity.setMember_id(memberSessionService.getMemberId(session.getId()));
         profilePictureRepository.saveProfilePicture(profilePictureEntity);
     }
     @Transactional
@@ -187,16 +188,11 @@ public class MemberService {
         }
     }
     public int profileCheck(HttpSession session) {
-        Optional<MemberEntity> byId = memberRepository.findById(memberSessionService.getMemberId(session.getId()));
-        if(byId.isPresent()){
-            MemberEntity memberEntity = byId.get();
-            if(memberEntity.getProfilePictureEntity() != null){
-                return 0; // 기본 프로필 사진이 이미 있음
-            }else {
-                return 1; // 기본 프로필 사진이 없음
-            }
+        ProfilePictureEntity byId = profilePictureRepository.findById(memberSessionService.getMemberId(session.getId()));
+        if(byId == null){
+            return 1; // 기본 프로필 사진이 없음
         }
-        return 2; // 이럴 경우는 없지만.. 로그인 화면으로
+        return 0; // 기본 프로필 사진이 이미 있음
     }
 
     public ProfilePictureDTO getProfilePicture(String id) {

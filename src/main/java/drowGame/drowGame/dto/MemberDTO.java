@@ -13,7 +13,6 @@ public class MemberDTO {
     private String gender;
     private String email;
     private ProfilePictureDTO profilePictureDTO;
-
     public MemberDTO(){}
     public MemberDTO(MemberEntity memberEntity){
         this.id = memberEntity.getId();

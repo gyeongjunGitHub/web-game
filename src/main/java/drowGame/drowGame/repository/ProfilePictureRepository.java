@@ -15,7 +15,7 @@ public class ProfilePictureRepository {
     }
 
     public ProfilePictureEntity findById(String id) {
-        return em.createQuery("select p from ProfilePictureEntity as p where p.memberEntity.id =:id", ProfilePictureEntity.class)
+        return em.createQuery("select p from ProfilePictureEntity as p where p.member_id=:id", ProfilePictureEntity.class)
                 .setParameter("id", id)
                 .getSingleResult();
     }

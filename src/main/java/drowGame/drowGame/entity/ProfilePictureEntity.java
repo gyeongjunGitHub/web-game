@@ -19,15 +19,14 @@ public class ProfilePictureEntity extends Time{
     @Column(name = "stored_file_name")
     private String stored_file_name;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "id")
-    private MemberEntity memberEntity;
+    @Column(name = "member_id")
+    private String member_id;
 
     public static ProfilePictureEntity getBasicFile(MemberEntity memberEntity){
         ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
         profilePictureEntity.setOriginal_file_name("기본.png");
         profilePictureEntity.setStored_file_name("1720427482598_기본.png");
-        profilePictureEntity.setMemberEntity(memberEntity);
+        profilePictureEntity.setMember_id(memberEntity.getId());
         return profilePictureEntity;
     }
 }

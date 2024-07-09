@@ -5,21 +5,58 @@
 </head>
 <body>
 <div class="container">
-    <h2>상점</h2>
+    <a href="#" onclick="getItems()">상점</a>
+    <a href="#" onclick="getMyItems()">내 아이템</a>
+    <div class="items_area"></div>
+    <div class="my_items_area"></div>
 </div>
 <script>
-    const container = document.querySelector('.container');
+    const items_area = document.querySelector('.items_area');
+    const my_items_area = document.querySelector('.my_items_area');
 
+    let items = [];
     getItems();
 
+    my_items_area.style.display = 'none';
+
     async function getItems(){
-        const items = await getRequest('/store/getItems');
+        my_items_area.style.display = 'none';
+        items_area.style.display = 'block';
+
+        // [ '/store/getItems' ] -> items = [{ name : ㅁㅁㅁ , price : xxx }, ..... ]
+        items = await getRequest('/store/getItems');
+
+        items_area.innerHTML = '';
         for(let i = 0; i < items.length; i++){
-            container.innerHTML += `
-                <p>${items[i].name} -> ${items[i].price}원</p>
+            items_area.innerHTML += `
+                <div class="item">
+                    <span class="item-name">${items[i].name}</span>
+                    <span class="price">${items[i].price}</span>
+                    <button onclick="buy(${i})">구매</button>
+                </div>
             `;
         }
     }
+    async function getMyItems(){
+        my_items_area.style.display = 'block';
+        items_area.style.display = 'none';
+
+        my_items_area.innerHTML = '';
+        let myItems = await getRequest('/store/getMyItems');
+
+        for(let i = 0; i<myItems.length; i++){
+            my_items_area.innerHTML += `
+                <div class="item">
+                    <span class="item-name">${myItems[i].name}</span>
+                    <span class="price">${myItems[i].price}</span>
+                </div>
+            `;
+        }
+    }
+    function buy(i){
+        console.log(items[i]);
+    }
+
     async function getRequest(url = '') {
         try {
             const response = await fetch(url, { method: 'GET' });

@@ -19,7 +19,6 @@ public class ProfilePictureDTO {
     private String stored_file_name;
     private LocalDateTime created_time;
     private LocalDateTime updated_time;
-    private MemberDTO memberDTO;
 
     public ProfilePictureDTO(){}
 
