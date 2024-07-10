@@ -8,5 +8,6 @@ import lombok.Setter;
 public class FriendDTO {
     private String member_id;
     private String friend_id;
+    private String friend_nick_name;
     private String status = "offline";
 }

@@ -29,7 +29,13 @@ public class StoreController {
         return ResponseEntity.ok(storeService.getItems());
     }
     @GetMapping("/getMyItems")
-    public ResponseEntity<List<MyItemsDTO>> getMyItems(HttpSession session){
-        return ResponseEntity.ok(storeService.getMyItems(memberSessionService.getMemberId(session.getId())));
+    public ResponseEntity<List<MyItemsDTO>> getMyItems(HttpSession httpSession){
+        return ResponseEntity.ok(storeService.getMyItems(httpSession));
+    }
+
+    @PostMapping("/buy")
+    public int buy(@RequestBody String item, HttpSession httpSession){
+        storeService.buy(item, httpSession);
+        return 0;
     }
 }

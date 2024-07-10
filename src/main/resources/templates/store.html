@@ -54,7 +54,7 @@
         }
     }
     function buy(i){
-        console.log(items[i]);
+        postRequest('/store/buy',items[i]);
     }
 
     async function getRequest(url = '') {
@@ -67,6 +67,29 @@
             }
             const responseData = await response.json();
             return responseData;
+        } catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+    //post 요청
+    async function postRequest(url = '', data = {}) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    'Network response was not ok ' + response.statusText
+                );
+            }
+
+            // JSON 형식으로 변환된 데이터를 가져옴.
+            const responseData = await response.json();
+
+            return responseData.result;
         } catch (error) {
             console.error('Fetch operation failed:', error);
         }

@@ -30,6 +30,7 @@ const matchingStartBtn = document.getElementById('matchingStartBtn');
 const matchingCancleBtn = document.getElementById('matchingCancleBtn');
 
 let myId = '';
+let myNickName = '';
 let chattingAreaMemberName = '';
 let chattingAreaIsTrue = false;
 let chattingData = [];
@@ -47,6 +48,7 @@ let superRam = [];
 let quiz = '';
 let answer = '';
 let userList = [];
+let userNickNameList = [];
 let lastXY={
     lastX: 0,
     lastY: 0
@@ -61,16 +63,19 @@ gameArea.style.display = 'none';
 class Friend{
     #member_id;
     #friend_id;
+    #friend_nick_name;
     #status;
 
     constructor(data){
         this.#member_id = data.member_id;
         this.#friend_id = data.friend_id;
+        this.#friend_nick_name = data.friend_nick_name;
         this.#status = data.status;
     }
 
     get member_id(){ return this.#member_id; }
     get friend_id(){ return this.#friend_id; }
+    get friend_nick_name(){ return this.#friend_nick_name; }
     get status(){ return this.#status; }
     set status(status){ this.#status = status; }
 }
@@ -174,7 +179,11 @@ async function receiveMessageHandler(msg) {
             }
         }
         if(msg.data == answer){
-            quizBox.innerHTML = `${msg.sender}님 정답!!! -> ${answer}`;
+            for(let i = 0; i<userList.length; i++){
+                if(msg.sender == userList[i]){
+                    quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
+                }
+            }
             time = 5;
         }
 
@@ -261,6 +270,7 @@ async function receiveMessageHandler(msg) {
     if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
         myTurn = msg.yourTurn;
         userList = msg.roomUsers;
+        userNickNameList = msg.roomUsersNickName;
         let userProfile = [];
         for(let i = 0; i<userList.length; i++){
             const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
@@ -268,9 +278,9 @@ async function receiveMessageHandler(msg) {
         }
 
         for(let i = 0; i<4; i++){
-            if(i<userList.length){
+            if(i<userNickNameList.length){
                 userNameBoxList[i].innerHTML = `
-                    <p>${userList[i]}</p>
+                    <p>${userNickNameList[i]}</p>
                     <img src="/images/${userProfile[i]}" width="100" height="100">
                 `;
                 userAnswerBoxList[i].style.display = 'block';
@@ -334,6 +344,10 @@ async function receiveMessageHandler(msg) {
     if(msg.type == 'myId') {
         myIdArea.innerHTML = `${msg.data}`;
         myId = msg.data;
+    }
+    //myNickName
+    if(msg.type == 'myNickName'){
+        myNickName = msg.data;
     }
     //다른 유저 로그인 status 수정
     if(msg.type == 'login'){
@@ -433,32 +447,32 @@ function addFriendResponse(response, receiver){
 function inputFriendList(friendList){
     for(let i = 0; i < friendList.length; i++){
         if(friendList[i].status == 'online'){
-            setMemberStateOnline(friendList[i].friend_id);
+            setMemberStateOnline(friendList[i].friend_id, friendList[i].friend_nick_name);
         }
         if(friendList[i].status == 'offline'){
-            setMemberStateOffline(friendList[i].friend_id);
+            setMemberStateOffline(friendList[i].friend_id, friendList[i].friend_nick_name);
         }
     }
 }
 //유저 온라인 상태 set
-function setMemberStateOnline(id){
+function setMemberStateOnline(id, nick_name){
     document.querySelector('.user-menu').insertAdjacentHTML(
         'beforeend',
         `
             <li class="user-list" onclick="chat('${id}')">
-                <div class="user-name">${id}</div>
+                <div class="user-name">${nick_name}</div>
                 <div class="user-online"></div>
             </li>
         `
     );
 }
 //유저 오프라인 상태 set
-function setMemberStateOffline(id){
+function setMemberStateOffline(id, nick_name){
     document.querySelector('.user-menu').insertAdjacentHTML(
         'beforeend',
         `
             <li class="user-list" onclick="chat('${id}')">
-                <div class="user-name">${id}</div>
+                <div class="user-name">${nick_name}</div>
                 <div class="user-offline"></div>
             </li>
         `
@@ -470,7 +484,12 @@ function getMember() { return member; }
 function setMember(m) { member = m; }
 function chat(member) {
     setMember(member);
-    memberNameArea.innerHTML = member;
+    for(let i = 0; i<friendList.length; i++){
+        if(member == friendList[i].friend_id){
+            memberNameArea.innerHTML = friendList[i].friend_nick_name;
+        }
+    }
+//    memberNameArea.innerHTML = member;
 
     //채팅 공간 토글 처리
     if (chattingAreaMemberName != member) {
@@ -483,34 +502,34 @@ function chat(member) {
         chattingArea.style.display = 'none';
     } else {
         chatContentArea.innerHTML = '';
-        inputAllChattingData(member);
+//        inputAllChattingData(member);
         chattingArea.style.display = 'block';
         chatContentArea.scrollTop = chatContentArea.scrollHeight;
     }
 }
 //채팅공간에 채팅 데이터 입력
-function inputAllChattingData(member) {
-    chatContentArea.innerHTML = '';
-    for(let i = 0; i<friendList.length; i++){
-        if(member == friendList[i].friend_id){
-            for(let j = 0; j<chattingData[i].length; j++){
-                if (chattingData[i][j].sender == myId) {
-                    chatContentArea.innerHTML += `
-                        <div class="chatBallonArea">
-                            <p class="chat-ballon1">${chattingData[i][j].content}</p>
-                        </div>
-                    `;
-                } else {
-                    chatContentArea.innerHTML += `
-                        <div class="chatBallonArea">
-                            <p class="chat-ballon2">${chattingData[i][j].content}</p>
-                        </div>
-                    `;
-                }
-            }
-        }
-    }
-}
+//function inputAllChattingData(member) {
+//    chatContentArea.innerHTML = '';
+//    for(let i = 0; i<friendList.length; i++){
+//        if(member == friendList[i].friend_id){
+//            for(let j = 0; j<chattingData[i].length; j++){
+//                if (chattingData[i][j].sender == myId) {
+//                    chatContentArea.innerHTML += `
+//                        <div class="chatBallonArea">
+//                            <p class="chat-ballon1">${chattingData[i][j].content}</p>
+//                        </div>
+//                    `;
+//                } else {
+//                    chatContentArea.innerHTML += `
+//                        <div class="chatBallonArea">
+//                            <p class="chat-ballon2">${chattingData[i][j].content}</p>
+//                        </div>
+//                    `;
+//                }
+//            }
+//        }
+//    }
+//}
 //메시지 set
 function setMessage() {
     const requestParam = new RequestParam('sendMessage'

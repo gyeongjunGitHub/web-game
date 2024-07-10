@@ -70,6 +70,7 @@
     }
     #id,
     #password,
+    #nick_name,
     #name,
     #email {
       box-sizing: border-box;
@@ -120,19 +121,24 @@
 
     <div class="input-box">
         <input type="text" id="id" name="id" placeholder="ID" />
-
         <div class="check-box">
-            <button class="check-btn" onclick="duplicateCheck()">중복체크</button>
-            <div id="messageBox"></div>
+            <button class="check-btn" onclick="idDuplicateCheck()">중복체크</button>
+            <div id="idMessageBox"></div>
         </div>
         <div class="warn"></div>
-
         <input
                 type="password"
                 id="password"
                 name="password"
                 placeholder="password"
         />
+        <div class="warn"></div>
+        <input type="text" id="nick_name" name="nick_name" placeholder="nick name"/>
+        <div class="check-box">
+            <button class="check-btn" onclick="nickNameDuplicateCheck()">중복체크</button>
+            <div id="nickNameMessageBox"></div>
+        </div>
+
         <div class="warn"></div>
         <input type="text" id="name" name="name" placeholder="name" />
         <div class="warn"></div>
@@ -177,18 +183,22 @@
     //member 변수
     const id = document.getElementById('id');
     const password = document.getElementById('password');
+    const nick_name = document.getElementById('nick_name');
     const name = document.getElementById('name');
     const genderRadios = document.querySelectorAll('input[name="gender"]');
     const email = document.getElementById('email');
-    const messageBox = document.getElementById('messageBox');
+    const idMessageBox = document.getElementById('idMessageBox');
+    const nickNameMessageBox = document.getElementById('nickNameMessageBox');
     const warn = document.querySelectorAll('.warn');
 
-    let isTrue = false;
+    let idIsTrue = false;
+    let nickNameIsTrue = false;
 
     //Member 생성자
-    function Member(id, password, name, gender, email) {
+    function Member(id, password, nick_name, name, gender, email) {
       this.id = id;
       this.password = password;
+      this.nick_name = nick_name;
       this.name = name;
       this.gender = gender;
       this.email = email;
@@ -218,23 +228,39 @@
       }
     }
 
-    async function duplicateCheck() {
-      let url = '/member/duplicateCheck';
+    async function idDuplicateCheck() {
+        let url = '/member/idDuplicateCheck';
 
-      let checkParam = {
-        id: id.value,
-      };
-      let result = await postRequest(url, checkParam);
+        let checkParam = {
+            id: id.value,
+        };
+        let result = await postRequest(url, checkParam);
 
-      if (result == 1) {
-        //사용 가능
-        isTrue = true;
-        messageBox.innerHTML = `<span style="color: green;">사용 가능한 아이디 입니다.</span>`;
-      } else if (result == 0) {
-        //사용 불가능
-        isTrue = false;
-        messageBox.innerHTML = `<span style="color: red;">존재하는 아이디 입니다.</span>`;
-      }
+        if (result == 1) {
+            //사용 가능
+            idIsTrue = true;
+            idMessageBox.innerHTML = `<span style="color: green;">사용 가능한 아이디 입니다.</span>`;
+        } else if (result == 0) {
+            //사용 불가능
+            idIsTrue = false;
+            idMessageBox.innerHTML = `<span style="color: red;">존재하는 아이디 입니다.</span>`;
+        }
+    }
+    async function nickNameDuplicateCheck(){
+        let url = '/member/nickNameDuplicateCheck';
+        let checkParam = {
+            nick_name: nick_name.value,
+        };
+        let result = await postRequest(url, checkParam);
+        if (result == 1) {
+            //사용 가능
+            nickNameIsTrue = true;
+            nickNameMessageBox.innerHTML = `<span style="color: green;">사용 가능한 닉네임 입니다.</span>`;
+        } else if (result == 0) {
+            //사용 불가능
+            nickNameIsTrue = false;
+            nickNameMessageBox.innerHTML = `<span style="color: red;">존재하는 닉네임 입니다.</span>`;
+        }
     }
 
 
@@ -242,6 +268,7 @@
       let isCorrect = 0;
       const idReg = /^[a-zA-Z0-9]*$/g;
       const passwordReg = /^[a-zA-Z0-9!@#$%^&*()]*$/g;
+      const nick_nameReg = /^[a-zA-Z0-9가-힣]*$/g;;
       const nameReg = /^[가-힣]{1,4}$/;
       const emailReg =
         /^[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*@[0-9a-zA-Z]([-_\.]?[0-9a-zA-Z])*\.[a-zA-Z]{2,3}$/i;
@@ -257,6 +284,7 @@
         warn[0].style.marginBottom = '0px';
         isCorrect++;
       }
+
       if (!passwordReg.test(password.value)) {
         warn[1].innerHTML = '형식이 맞지 않습니다.';
         warn[1].style.marginBottom = '20px';
@@ -268,21 +296,23 @@
         warn[1].style.marginBottom = '0';
         isCorrect++;
       }
-      if (name.value == '') {
-        warn[2].innerHTML = '이름을 입력하세요';
-        warn[2].style.marginBottom = '20px';
-      } else if (!nameReg.test(name.value)) {
+
+      if (!nick_nameReg.test(nick_name.value)) {
         warn[2].innerHTML = '형식이 맞지 않습니다.';
+        warn[2].style.marginBottom = '20px';
+      } else if (nick_name.value == '') {
+        warn[2].innerHTML = '닉네임을 입력하세요.';
         warn[2].style.marginBottom = '20px';
       } else {
         warn[2].innerHTML = '';
-        warn[2].style.marginBottom = '0';
+        warn[2].style.marginBottom = '0px';
         isCorrect++;
       }
-      if (email.value == '') {
-        warn[3].innerHTML = '이메일을 입력하세요.';
+
+      if (name.value == '') {
+        warn[3].innerHTML = '이름을 입력하세요';
         warn[3].style.marginBottom = '20px';
-      } else if (!emailReg.test(email.value)) {
+      } else if (!nameReg.test(name.value)) {
         warn[3].innerHTML = '형식이 맞지 않습니다.';
         warn[3].style.marginBottom = '20px';
       } else {
@@ -290,12 +320,25 @@
         warn[3].style.marginBottom = '0';
         isCorrect++;
       }
-
-      if (!isTrue) {
-        alert('아이디 중복 체크를 해주세요.');
+      if (email.value == '') {
+        warn[4].innerHTML = '이메일을 입력하세요.';
+        warn[4].style.marginBottom = '20px';
+      } else if (!emailReg.test(email.value)) {
+        warn[4].innerHTML = '형식이 맞지 않습니다.';
+        warn[4].style.marginBottom = '20px';
       } else {
+        warn[4].innerHTML = '';
+        warn[4].style.marginBottom = '0';
+        isCorrect++;
+      }
+
+      if (!idIsTrue) {
+        alert('아이디 중복 체크를 해주세요.');
+      }else if(!nickNameIsTrue){
+        alert('닉네임 중복 체크를 해주세요.');
+      }else {
         console.log(isCorrect);
-        if(isCorrect==4){
+        if(isCorrect==5){
             let selectedGender;
             let url = '/member/joinProc';
 
@@ -308,6 +351,7 @@
             const member = new Member(
               id.value,
               password.value,
+              nick_name.value,
               name.value,
               selectedGender,
               email.value

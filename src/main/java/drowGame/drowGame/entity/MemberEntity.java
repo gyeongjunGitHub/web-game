@@ -14,6 +14,8 @@ public class MemberEntity {
     private String id;
     @Column(name = "password")
     private String password;
+    @Column(name = "nick_name")
+    private String nick_name;
     @Column(name = "name")
     private String name;
     @Column(name = "gender")

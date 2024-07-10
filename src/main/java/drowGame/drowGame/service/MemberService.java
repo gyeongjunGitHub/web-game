@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -44,7 +45,7 @@ public class MemberService {
             // 비밀번호 일치
             if (byId.getPassword().equals(memberDTO.getPassword())) {
                 //세션에 추가
-                memberSessionService.addSession(httpSession.getId(), byId.getId());
+                memberSessionService.addSession(httpSession.getId(), byId.getId(), byId.getNick_name());
 
                 resultDTO.setResult(1);
                 return resultDTO;
@@ -67,6 +68,7 @@ public class MemberService {
         MemberEntity memberEntity = new MemberEntity();
         memberEntity.setId(memberDTO.getId());
         memberEntity.setPassword(memberDTO.getPassword());
+        memberEntity.setNick_name(memberDTO.getNick_name());
         memberEntity.setName(memberDTO.getName());
         memberEntity.setGender(memberDTO.getGender());
         memberEntity.setEmail(memberDTO.getEmail());
@@ -84,7 +86,7 @@ public class MemberService {
     public void logoutProc(HttpSession httpSession) {
         memberSessionService.removeSession(httpSession.getId());
     }
-    public ResultDTO duplicateCheck(String data) throws JsonProcessingException {
+    public ResultDTO idDuplicateCheck(String data) throws JsonProcessingException {
         ObjectMapper objectMapper = new ObjectMapper();
         MemberDTO memberDTO = objectMapper.readValue(data, MemberDTO.class);
 
@@ -93,10 +95,24 @@ public class MemberService {
         ResultDTO resultDTO = new ResultDTO();
 
         if (byId.isPresent()) {
-            System.out.println("아이디가 존재합니다.");
             resultDTO.setResult(0);
         } else {
             resultDTO.setResult(1);
+        }
+        return resultDTO;
+    }
+    public ResultDTO nickNameDuplicateCheck(String data) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        MemberDTO memberDTO = objectMapper.readValue(data, MemberDTO.class);
+
+        List<MemberEntity> byNickName = memberRepository.findByNickName(memberDTO.getNick_name());
+
+        ResultDTO resultDTO = new ResultDTO();
+
+        if (!byNickName.isEmpty()) {
+            resultDTO.setResult(0); // 사용 불가능
+        } else {
+            resultDTO.setResult(1); // 사용가능
         }
         return resultDTO;
     }

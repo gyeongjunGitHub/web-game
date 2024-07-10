@@ -24,5 +24,6 @@ public class SocketRequest {
 
 
     private List<String> roomUsers;
+    private List<String> roomUsersNickName;
 
 }

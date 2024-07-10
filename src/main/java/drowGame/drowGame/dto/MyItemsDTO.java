@@ -11,6 +11,7 @@ public class MyItemsDTO {
     private Long id;
     private String name;
     private int price;
+    private int count;
     private String member_id;
 
     public MyItemsDTO(){}
@@ -18,6 +19,7 @@ public class MyItemsDTO {
         this.id = m.getId();
         this.name = m.getName();
         this.price = m.getPrice();
+        this.count = m.getCount();
         this.member_id = m.getMember_id();
     }
 }

@@ -15,4 +15,6 @@ import lombok.Setter;
 public class FriendEntity {
     @EmbeddedId
     private FriendId id;
+    @Column(name = "friend_nick_name")
+    private String friend_nick_name;
 }

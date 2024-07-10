@@ -36,10 +36,12 @@ public class SocketService {
     public void addSessionInfo(WebSocketSession session) {
         sm.addSessionMap(session.getId(), session);
         sm.addMemberIdMap(session.getId(), memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId")));
+        sm.addMemberNickNameMap(session.getId(), memberSessionService.getMemberNickName((String) session.getAttributes().get("httpSessionId")));
     }
     public void removeSessionInfo(WebSocketSession session) {
         sm.removeSessionMap(session);
         sm.removeMemberIdMap(session);
+        sm.removeMemberNickNameMap(session);
     }
     public WebSocketSession duplicateLoginCheck(WebSocketSession session){
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
@@ -144,6 +146,9 @@ public class SocketService {
                         data.setType("myId");
                         data.setData(myId);
                         sendMessage(wss, dtoToJson(data));
+                        data.setType("myNickName");
+                        data.setData(sm.getMemberNickName(membersKey));
+                        sendMessage(wss, dtoToJson(data));
                     }
                 }
             }
@@ -156,6 +161,7 @@ public class SocketService {
             FriendDTO friendDTO = new FriendDTO();
             friendDTO.setMember_id(f.getId().getMember_id());
             friendDTO.setFriend_id(f.getId().getFriend_id());
+            friendDTO.setFriend_nick_name(f.getFriend_nick_name());
             friendDTOList.add(friendDTO);
         }
         return friendDTOList;
@@ -199,10 +205,12 @@ public class SocketService {
             friendId.setMember_id(myId);
             friendId.setFriend_id(socketRequest.getReceiver());
             friendEntity.setId(friendId);
+            friendEntity.setFriend_nick_name(sm.findByIdMemberNickName(socketRequest.getReceiver()));
 
             friendId1.setMember_id(socketRequest.getReceiver());
             friendId1.setFriend_id(myId);
             friendEntity1.setId(friendId1);
+            friendEntity1.setFriend_nick_name(sm.findByIdMemberNickName(myId));
 
             friendRepository.addFriend(friendEntity, friendEntity1);
         }
@@ -280,22 +288,29 @@ public class SocketService {
     public void startMatching(WebSocketSession session, SocketRequest socketRequest){
         String myId = sm.getMyId(session);
         int inGameMemberSize = 2;
+
+        // 매칭 큐 인원 충족 시
         if(gm.addMatchingQueue(myId)){
             List<WebSocketSession> player_session = new ArrayList<>();
-            List<String> memebers = new ArrayList<>();
+            List<String> members = new ArrayList<>();
+            List<String> memebersNickName = new ArrayList<>();
+
             for (int i = 0; i < inGameMemberSize; i++) {
                 //memberId
                 String player = gm.pollMatchingQueue();
-                memebers.add(player);
+                members.add(player);
+
                 //memberSession
                 for (String sessionId : sm.getMemberIdMap().keySet()) {
                     if (sm.getMemberIdMap().get(sessionId).equals(player)) {
+                        memebersNickName.add(sm.getMemberNickName(sessionId));
                         player_session.add(sm.getSessionMap().get(sessionId));
                     }
                 }
             }
             gm.createGameRoom(player_session);
-            socketRequest.setRoomUsers(memebers);
+            socketRequest.setRoomUsers(members);
+            socketRequest.setRoomUsersNickName(memebersNickName);
             socketRequest.setResponse("success");
 
             for(WebSocketSession wss : player_session){

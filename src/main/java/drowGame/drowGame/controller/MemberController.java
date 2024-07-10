@@ -49,10 +49,16 @@ public class MemberController {
         return "loginForm";
     }
 
-    @PostMapping("/duplicateCheck")
+    @PostMapping("/idDuplicateCheck")
     @ResponseBody
     public ResponseEntity<ResultDTO> duplicateCheck(@RequestBody String data) throws JsonProcessingException {
-        ResultDTO resultDTO = memberService.duplicateCheck(data);
+        ResultDTO resultDTO = memberService.idDuplicateCheck(data);
+        return ResponseEntity.ok(resultDTO);
+    }
+    @PostMapping("/nickNameDuplicateCheck")
+    @ResponseBody
+    public ResponseEntity<ResultDTO> nickNameDuplicateCheck(@RequestBody String data) throws JsonProcessingException {
+        ResultDTO resultDTO = memberService.nickNameDuplicateCheck(data);
         return ResponseEntity.ok(resultDTO);
     }
 

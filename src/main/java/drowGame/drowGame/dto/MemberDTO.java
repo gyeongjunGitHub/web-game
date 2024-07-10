@@ -9,6 +9,7 @@ import lombok.Setter;
 public class MemberDTO {
     private String id;
     private String password;
+    private String nick_name;
     private String name;
     private String gender;
     private String email;
@@ -17,6 +18,7 @@ public class MemberDTO {
     public MemberDTO(MemberEntity memberEntity){
         this.id = memberEntity.getId();
         this.password = memberEntity.getPassword();
+        this.nick_name = memberEntity.getNick_name();
         this.name = memberEntity.getName();
         this.gender = memberEntity.getGender();
         this.email = memberEntity.getEmail();

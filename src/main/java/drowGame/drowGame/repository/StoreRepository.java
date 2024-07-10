@@ -21,9 +21,13 @@ public class StoreRepository {
                 .getResultList();
     }
 
-    public List<MyItemsEntity> getMyItems(String member_id) {
+    public List<MyItemsEntity> getMyItems(String myId) {
         return em.createQuery("select m from MyItemsEntity m where m.member_id=:member_id", MyItemsEntity.class)
-                .setParameter("member_id", member_id)
+                .setParameter("member_id", myId)
                 .getResultList();
+    }
+
+    public void buy(MyItemsEntity myItemsEntity) {
+        em.persist(myItemsEntity);
     }
 }
