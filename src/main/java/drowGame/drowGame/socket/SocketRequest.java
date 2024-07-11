@@ -19,9 +19,11 @@ public class SocketRequest {
     private int yourTurn;
     private int cycle;
 
+    private String[] inGameMember;
+    private int[] score;
+
     private String quiz;
     private String answer;
-
 
     private List<String> roomUsers;
     private List<String> roomUsersNickName;

@@ -17,6 +17,8 @@ const blueBtn = document.querySelector('.blueBtn');
 const userNameBoxList = [document.querySelector('.user1_name'), document.querySelector('.user2_name'), document.querySelector('.user3_name'), document.querySelector('.user4_name')];
 const userAnswerBoxList = [document.querySelector('.user1_answer'), document.querySelector('.user2_answer'), document.querySelector('.user3_answer'), document.querySelector('.user4_answer')];
 const userAreaBoxList = [document.querySelector('.user1_area'), document.querySelector('.user2_area'), document.querySelector('.user3_area'), document.querySelector('.user4_area')]
+const userScoreBoxList = [document.querySelector('.user1_score'), document.querySelector('.user2_score'), document.querySelector('.user3_score'), document.querySelector('.user4_score')]
+const userPictureBoxList = [document.querySelector('.user1_picture'), document.querySelector('.user2_picture'), document.querySelector('.user3_picture'), document.querySelector('.user4_picture')]
 const inGameMenu = document.querySelector('.inGameMenu');
 const gameArea = document.querySelector('.gameArea');
 //id 변수
@@ -49,6 +51,7 @@ let quiz = '';
 let answer = '';
 let userList = [];
 let userNickNameList = [];
+let score = [];
 let lastXY={
     lastX: 0,
     lastY: 0
@@ -59,7 +62,6 @@ let mouseState = {
 };
 var ws;
 gameArea.style.display = 'none';
-
 class Friend{
     #member_id;
     #friend_id;
@@ -79,7 +81,6 @@ class Friend{
     get status(){ return this.#status; }
     set status(status){ this.#status = status; }
 }
-
 //GET 요청 함수
 async function getRequest(url = '') {
     try {
@@ -124,8 +125,6 @@ async function searchMember() {
         }
     }
 }
-
-
 //생성자
 function RequestParam(request='', receiver = '', data = '') {
     this.request = request;
@@ -136,6 +135,11 @@ function GameRequestParam(request='', x=0, y=0, lastX=0, lastY=0, color=''){
     this.request = request;
     this.coordinate = [x, y, lastX, lastY];
     this.color = color;
+}
+function GameScore(request, userList, score){
+    this.request = request;
+    this.inGameMember = userList;
+    this.score = score;
 }
 //로그인 후 main 페이지 로드 시 소캣 연걸
 window.onload = wsOpen;
@@ -158,7 +162,6 @@ function wsEvt() {
 }
 //메시지 처리 핸들러 함수
 async function receiveMessageHandler(msg) {
-
     //request -> addFriendResponse
     if(msg.request == 'addFriendResponse'){
         if(msg.data == 'true'){
@@ -182,11 +185,14 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(msg.sender == userList[i]){
                     quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
+                    score[i] += 10;
+                    userScoreBoxList[i].innerHTML = `
+                        <span>score : ${score[i]}</span>
+                    `;
                 }
             }
             time = 5;
         }
-
     }
     //request -> gameOver
     if(msg.request == 'gameOver'){
@@ -233,6 +239,8 @@ async function receiveMessageHandler(msg) {
                         if(cycle == 2 && myTurn == 2){
                             requestParam.request = 'gameOver';
                             send(requestParam);
+                            const gameScore = new GameScore('score', userList, score);
+                            send(gameScore);
                             cycle = 0;
                         }else{
                             removeListener();
@@ -268,6 +276,7 @@ async function receiveMessageHandler(msg) {
     }
     //request -> matchingStartDrowGame
     if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
+        score = [0, 0, 0, 0];
         myTurn = msg.yourTurn;
         userList = msg.roomUsers;
         userNickNameList = msg.roomUsersNickName;
@@ -276,11 +285,19 @@ async function receiveMessageHandler(msg) {
             const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
             userProfile.push(result.stored_file_name);
         }
-
         for(let i = 0; i<4; i++){
             if(i<userNickNameList.length){
+                userAnswerBoxList[i].innerHTML = '';
                 userNameBoxList[i].innerHTML = `
-                    <p>${userNickNameList[i]}</p>
+                    <span>${userNickNameList[i]}</span>
+                `;
+                if(myId != userList[i]){
+                    userNameBoxList[i].innerHTML += `<button onclick="ttabong('${userNickNameList[i]}')">따봉!</button>`;
+                }
+                userScoreBoxList[i].innerHTML = `
+                    <span>score : ${score[i]}</span>
+                `;
+                userPictureBoxList[i].innerHTML = `
                     <img src="/images/${userProfile[i]}" width="100" height="100">
                 `;
                 userAnswerBoxList[i].style.display = 'block';
@@ -338,8 +355,6 @@ async function receiveMessageHandler(msg) {
             inputFriendList(friendList);
         }
     }
-
-    ////////////////////////////////////////////////////////////////////////
     //myId
     if(msg.type == 'myId') {
         myIdArea.innerHTML = `${msg.data}`;
@@ -374,6 +389,10 @@ async function receiveMessageHandler(msg) {
         alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
         location.href = '/';
     }
+}
+//따봉!!
+function ttabong(nick_name){
+    console.log(nick_name);
 }
 //친구추가 요청 처리 함수
 function addFriendProc(msg){
@@ -603,7 +622,6 @@ async function getMemberInfo(){
         </div>
     `;
 }
-
 document
     .querySelector('.profile-black')
     .addEventListener('click', (e) => {
@@ -624,10 +642,7 @@ document
         }
     }
 });
-
-
 //===================================== 게임 자바스크립트 모음 =====================================//
-
 //이벤트 리스너 추가 함수
 function addListener(){
     blackBtn.addEventListener('click', blackBtnClickHandler);

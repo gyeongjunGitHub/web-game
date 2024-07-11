@@ -300,7 +300,7 @@ public class SocketService {
                 String player = gm.pollMatchingQueue();
                 members.add(player);
 
-                //memberSession
+                //memberSession, memberNickName
                 for (String sessionId : sm.getMemberIdMap().keySet()) {
                     if (sm.getMemberIdMap().get(sessionId).equals(player)) {
                         memebersNickName.add(sm.getMemberNickName(sessionId));

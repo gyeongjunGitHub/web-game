@@ -2,8 +2,38 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
+    <style>
+        .nav {
+            box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 15px;
+            font-size: 13px;
+        }
+        .nav > * {
+            color: gray;
+        }
+        .nav > *::after {
+            content: '|';
+            padding: 0 10px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: gray;
+            font-size: 13px;
+        }
+    </style>
 </head>
 <body>
+<!--상단 바-->
+<div class="nav">
+    <span id="myIdArea"></span>
+    <a href="/main">메인</a>
+    <a href="/member/logout">로그아웃</a>
+    <a href="/store">상점</a>
+    <a href="/myPage">마이페이지</a>
+</div>
 <div class="container">
     <a href="#" onclick="getItems()">상점</a>
     <a href="#" onclick="getMyItems()">내 아이템</a>
@@ -23,7 +53,7 @@
         my_items_area.style.display = 'none';
         items_area.style.display = 'block';
 
-        // [ '/store/getItems' ] -> items = [{ name : ㅁㅁㅁ , price : xxx }, ..... ]
+        // [ '/store/getItems' ] -> items = [{ name : ㅁㅁㅁ , price : xxx , count : xxx}, ..... ]
         items = await getRequest('/store/getItems');
 
         items_area.innerHTML = '';
@@ -49,6 +79,7 @@
                 <div class="item">
                     <span class="item-name">${myItems[i].name}</span>
                     <span class="price">${myItems[i].price}</span>
+                    <span class="count">${myItems[i].count}</span>
                 </div>
             `;
         }

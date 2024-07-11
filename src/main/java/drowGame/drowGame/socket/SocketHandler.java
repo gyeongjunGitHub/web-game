@@ -56,6 +56,9 @@ public class SocketHandler extends TextWebSocketHandler {
         if (requestName.equals("sendMessage")) {
             socketService.sendChatting(session, socketRequest);
         }
+        if(requestName.equals("score")){
+            System.out.println(msg);
+        }
     }
 
     @Override
