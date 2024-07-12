@@ -1,0 +1,65 @@
+소캣 연결 시 서버가 클라이언트 에게 전송
+[login member list]
+(자기자신)
+[myId]
+Data = {
+    type : "myId" ,
+    data : myId
+};
+[myNickName]
+Data = {
+    type : "myNickName",
+    data : myNickname
+};
+[friend list]
+Data = {
+    type : "friend",
+    data : { member_id: '123', friend_id: 'admin', ... }
+};
+
+(나머지)
+Data = {
+    type : "login",
+    data : memberId
+};
+
+게임 중
+[answer]
+RequestParam = {
+    request : "answer",
+    receiver : "",
+    data : answer
+};
+[rollBack]
+RequestParam = {
+    request : "rollBack",
+    receiver : "",
+    data : ""
+};
+[clear]
+RequestParam = {
+    request : "clear",
+    receiver : "",
+    data : ""
+};
+[sendCoordinate]
+GameRequestParam = {
+    request = "sendCoordinate",
+    coordinate = [x, y, lastX, lastY],
+    color = color
+};
+[push]
+GameRequestParam = {
+    request = "push",
+    coordinate = "",
+    color = "";
+};
+[addFriendResponse]
+RequestParam = {
+    request : "clear",
+    receiver : "",
+    data : ""
+};
+
+
+

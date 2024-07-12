@@ -1,4 +1,4 @@
-package drowGame.drowGame.socket;
+package drowGame.drowGame.socket.manager;
 
 import lombok.Getter;
 import org.springframework.stereotype.Component;
@@ -52,7 +52,6 @@ public class SocketSessionManager {
                 break;
             }
         }
-        System.out.println(memberNickName);
         return memberNickName;
     }
 }

@@ -1,5 +1,6 @@
-package drowGame.drowGame.socket;
+package drowGame.drowGame.socket.manager;
 
+import drowGame.drowGame.socket.GameRoom;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.WebSocketSession;
 

@@ -59,4 +59,12 @@ public class HomeController {
         }
         return "store";
     }
+    @GetMapping("/myItems")
+    public String myItems(HttpSession httpSession){
+        String myId = memberSessionService.getMemberId(httpSession.getId());
+        if(myId == null){
+            return "loginForm";
+        }
+        return "myItems";
+    }
 }

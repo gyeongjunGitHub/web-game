@@ -126,8 +126,22 @@ async function searchMember() {
     }
 }
 //생성자
-
-function Data(type='', data = ''){
+function RequestParam(request='', receiver = '', data = '') {
+    this.request = request;
+    this.receiver = receiver;
+    this.data = data;
+}
+function GameRequestParam(request='', x=0, y=0, lastX=0, lastY=0, color=''){
+    this.request = request;
+    this.coordinate = [x, y, lastX, lastY];
+    this.color = color;
+}
+function GameScore(request, userList, score){
+    this.request = request;
+    this.inGameMember = userList;
+    this.score = score;
+}
+function Data(type, data = ''){
     this.type = type;
     this.data = data;
 }
@@ -152,25 +166,28 @@ function wsEvt() {
 }
 //메시지 처리 핸들러 함수
 async function receiveMessageHandler(msg) {
-    if(msg.type == 'addFriendResponse'){
+    //request -> addFriendResponse
+    if(msg.request == 'addFriendResponse'){
         if(msg.data == 'true'){
             document.querySelector('.user-menu').innerHTML = '';
             inputFriendList(friendList);
         }
     }
-    if(msg.type == 'leaveOtherMember'){
+    //request -> leaveOtherMember
+    if(msg.request == 'leaveOtherMember'){
         alert('다른 유저가 게임을 떠났습니다.');
         location.href = '/main';
     }
-    if(msg.type == 'answer'){
+    //request -> answer
+    if(msg.request == 'answer'){
         for(let i = 0; i < userList.length; i++){
-            if(userList[i] == msg.data.sender){
-                userAnswerBoxList[i].innerHTML = `${msg.data.answer}`;
+            if(userList[i] == msg.sender){
+                userAnswerBoxList[i].innerHTML = `${msg.data}`;
             }
         }
-        if(msg.data.answer == answer){
+        if(msg.data == answer){
             for(let i = 0; i<userList.length; i++){
-                if(msg.data.sender == userList[i]){
+                if(msg.sender == userList[i]){
                     quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
                     score[i] += 10;
                     userScoreBoxList[i].innerHTML = `
@@ -181,7 +198,8 @@ async function receiveMessageHandler(msg) {
             time = 5;
         }
     }
-    if(msg.type == 'gameOver'){
+    //request -> gameOver
+    if(msg.request == 'gameOver'){
         quizBox.innerHTML = `잠시 후 게임이 종료됩니다.`;
         time = 5;
         timeCalculation(time, timeBox)
@@ -199,35 +217,40 @@ async function receiveMessageHandler(msg) {
             }, 1000);
         }
     }
-    if(msg.type == 'timeCount'){ timeBox.innerHTML = `${msg.data.timeCount}`; }
-    if(msg.type == 'gameStart' || msg.type == 'nextTurn'){
-        quiz = msg.data.quiz;
-        answer = msg.data.answer;
-        if(msg.data.yourTurn == myTurn){
+    //request -> timeCount
+    if(msg.request == 'timeCount'){ timeBox.innerHTML = `${msg.data}`; }
+    //request -> gameStart, nextTurn
+    if(msg.request == 'gameStart' || msg.request == 'nextTurn'){
+        quiz = msg.quiz;
+        answer = msg.answer;
+        if(msg.yourTurn == myTurn){
             sendBtn.removeEventListener('click', sendAnswer);
             if(myTurn == 2){ cycle++; }
             addListener();
             time = 60;
-            quizBox.innerHTML = `${answer}`;
+            quizBox.innerHTML = `${msg.answer}`;
             timeBox.innerHTML = `${time}`;
-            const data = new Data('timeCount', '', time);
+            const requestParam = new RequestParam('timeCount', '', time);
             timeCalculation1();
             function timeCalculation1(){
                 setTimeout(function() {
                     if(time > 1){
                         time--;
-                        data.data = {"timeCount" : time };
-                        send(data);
+                        requestParam.data = time;
+                        send(requestParam);
                         timeCalculation1();
                     }else{
                         if(cycle == 2 && myTurn == 2){
-                            data.type = 'gameOver';
-                            send(data);
+                            requestParam.request = 'gameOver';
+                            send(requestParam);
+                            const gameScore = new GameScore('score', userList, score);
+                            send(gameScore);
                             cycle = 0;
                         }else{
                             removeListener();
-                            const data = new Data('nextTurn', {"myTurn" : myTurn});
-                            send(data);
+                            requestParam.request = 'nextTurn';
+                            requestParam.data = myTurn;
+                            send(requestParam);
                             clear();
                             clear_no_send();
                         }
@@ -236,25 +259,31 @@ async function receiveMessageHandler(msg) {
             }
         }else{
             sendBtn.addEventListener('click', sendAnswer);
-            quizBox.innerHTML = `${quiz}`;
+            quizBox.innerHTML = `${msg.quiz}`;
         }
     }
-    if(msg.type == 'rollBack'){ rollBack_no_send(); }
-    if(msg.type == 'push'){
+    //request -> rollBack
+    if(msg.request == 'rollBack'){
+        rollBack_no_send();
+    }
+    //request -> push
+    if(msg.request == 'push'){
         superRam.push(ram);
         ram = [];
     }
-    if(msg.type == 'clear'){ clear_no_send(); }
-    if(msg.type == 'sendCoordinate'){
-        draw(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4]);
-        ram.push({ x: msg.data[0], y: msg.data[1], lastX: msg.data[2], lastY: msg.data[3], color: msg.data[4] });
+    //request -> clear
+    if(msg.request == 'clear'){ clear_no_send(); }
+    //request -> sendCoordinate
+    if(msg.request == 'sendCoordinate'){
+        draw(msg.coordinate[0], msg.coordinate[1], msg.coordinate[2], msg.coordinate[3], msg.color);
+        ram.push({ x: msg.coordinate[0], y: msg.coordinate[1], lastX: msg.coordinate[2], lastY: msg.coordinate[3], color: msg.color });
     }
-    if(msg.type == 'matchingStartDrowGame' && msg.data.response == 'success'){
+    //request -> matchingStartDrowGame
+    if(msg.request == 'matchingStartDrowGame' && msg.response == 'success'){
         score = [0, 0, 0, 0];
-        myTurn = msg.data.yourTurn;
-        userList = msg.data.roomUsers;
-        userNickNameList = msg.data.roomUsersNickName;
-
+        myTurn = msg.yourTurn;
+        userList = msg.roomUsers;
+        userNickNameList = msg.roomUsersNickName;
         let userProfile = [];
         for(let i = 0; i<userList.length; i++){
             const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
@@ -295,17 +324,20 @@ async function receiveMessageHandler(msg) {
                     timeCalculation(time, box);
                 }
                 else{
-                    const data = new Data('gameStart');
-                    send(data);
+                    const requestParam = new RequestParam('gameStart');
+                    send(requestParam);
                 }
             }, 1000);
         }
     }
-    if(msg.type == 'addFriendRequest'){ addFriendProc(msg); }
-    if (msg.type == 'sendMessage') { sendMessageProc(msg); }
+    //request -> addFriendRequest
+    if(msg.request == 'addFriendRequest'){ addFriendProc(msg); }
+    //request -> sendMessage
+    if (msg.request == 'sendMessage') { sendMessageProc(msg); }
+    //request -> array
     if (Array.isArray(msg)) {                       //배열을 받았을 경우
         //채팅 데이터인지 확인
-        if(msg[0].type == 'chattingData'){
+        if(msg[0].request == 'chattingData'){
             for(let i = 0; i<friendList.length; i++){
                 let data = [];
                 for(let j = 0; j<msg.length; j++){
@@ -319,7 +351,6 @@ async function receiveMessageHandler(msg) {
         }
 
         if(msg[0].type == 'friend'){
-            friendList = [];
             for(let i = 0; i<msg.length; i++){
                 const friend = new Friend(msg[i].data);
                 friendList.push(friend);
@@ -371,11 +402,11 @@ function ttabong(nick_name){
 function addFriendProc(msg){
     acceptArea.innerHTML = `
         <div class="accept-msg-area">
-            <p class="accept-msg">${msg.data.sender} 님이</p>
+            <p class="accept-msg">${msg.sender} 님이</p>
             <p class="accept-msg">친구추가 요청을 보냈습니다.</p>
             <div class="accept-check">
-                <div class="yes" onclick="addFriendResponse(true, '${msg.data.sender}')">yes</div>
-                <div class="no" onclick="addFriendResponse(false, '${msg.data.sender}')">no</div>
+                <div class="yes" onclick="addFriendResponse(true, '${msg.sender}')">yes</div>
+                <div class="no" onclick="addFriendResponse(false, '${msg.sender}')">no</div>
             </div>
         </div>
     `;
@@ -410,7 +441,9 @@ function sendMessageProc(msg){
 // 매칭 함수
 function matching(request) {
     if (request == 'drowGameStart') {
+//        const requestParam = new RequestParam('matchingStartDrowGame');
         const data = new Data('matchingStartDrowGame');
+//        send(requestParam);
         send(data);
         matchingStartBtn.style.display = 'none';
         matchingCancleBtn.style.display = 'block';
@@ -426,13 +459,13 @@ function matching(request) {
 }
 // 친구 추가 요청 전송
 function addFriendRequest(id) {
-    const data = new Data('addFriendRequest', { receiver : id });
-    send(data);
+       const requestParam = new RequestParam('addFriendRequest', id);
+       send(requestParam);
 }
 // 친구 추가 요청 응답 전송 -> 수락 및 거절 이후 화면 처리 필요
 function addFriendResponse(response, receiver){
-    const data = new Data('addFriendResponse', { 'receiver' : receiver , 'response' : response });
-    send(data);
+    const requestParam = new RequestParam('addFriendResponse', receiver, response);
+    send(requestParam);
     acceptArea.style.display='none';
 }
 //친구목록 출력
@@ -448,25 +481,27 @@ function inputFriendList(friendList){
 }
 //유저 온라인 상태 set
 function setMemberStateOnline(id, nick_name){
-    document.querySelector('.user-menu').innerHTML +=
+    document.querySelector('.user-menu').insertAdjacentHTML(
+        'beforeend',
         `
             <li class="user-list" onclick="chat('${id}')">
                 <div class="user-name">${nick_name}</div>
                 <div class="user-online"></div>
             </li>
         `
-    ;
+    );
 }
 //유저 오프라인 상태 set
 function setMemberStateOffline(id, nick_name){
-    document.querySelector('.user-menu').innerHTML +=
+    document.querySelector('.user-menu').insertAdjacentHTML(
+        'beforeend',
         `
             <li class="user-list" onclick="chat('${id}')">
                 <div class="user-name">${nick_name}</div>
                 <div class="user-offline"></div>
             </li>
         `
-    ;
+    );
 }
 //현재 열려있는 채팅창의 member 를 저장
 let member;
@@ -654,8 +689,8 @@ function mouseHandler(event){
             superRam.push(ram);
 
             //push 요청 전송
-            const data = new Data('push');
-            send(data);
+            const gameRequestParam = new GameRequestParam('push');
+            send(gameRequestParam);
             mouseState.isout=true;
         }
     }
@@ -667,8 +702,8 @@ function mouseMoveHandler(event){
 
 
     //좌표전송
-    const data = new Data('sendCoordinate', [xy[0], xy[1], lastXY.lastX, lastXY.lastY, color]);
-    send(data);
+    const gameRequestParam = new GameRequestParam('sendCoordinate', xy[0], xy[1], lastXY.lastX, lastXY.lastY, color);
+    send(gameRequestParam);
 
     setLastXY(xy[0], xy[1]);
     canvas.addEventListener('mouseout', out);
@@ -709,8 +744,8 @@ function clear(){
     ctx.clearRect(0,0,canvas.width, canvas.height);
     superRam=[];
     //clear 요청 전송
-    const data = new Data('clear');
-    send(data);
+    const gameRequestParam = new GameRequestParam('clear');
+    send(gameRequestParam);
 }
 function clear_no_send(){
     ctx.clearRect(0,0,canvas.width, canvas.height);
@@ -726,8 +761,8 @@ function rollBack(){
     }
 
     //rollBack 요청 전송
-    const data = new Data('rollBack');
-    ws.send(JSON.stringify(data));
+    const gameRequestParam = new GameRequestParam('rollBack');
+    ws.send(JSON.stringify(gameRequestParam));
 }
 function rollBack_no_send(){
     superRam.pop();
@@ -739,9 +774,9 @@ function rollBack_no_send(){
     }
 }
 function sendAnswer(){
-    const data = new Data('answer', { "answer" : answerBox.value });
+    const requestParam = new RequestParam('answer', '', answerBox.value);
     answerBox.value = '';
-    send(data);
+    send(requestParam);
 }
 function blackBtnClickHandler() { color = 'black'; };
 function blueBtnClickHandler() { color = 'blue'; };

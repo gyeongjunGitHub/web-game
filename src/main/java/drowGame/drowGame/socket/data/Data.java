@@ -1,4 +1,4 @@
-package drowGame.drowGame.socket;
+package drowGame.drowGame.socket.data;
 
 import lombok.Getter;
 import lombok.Setter;

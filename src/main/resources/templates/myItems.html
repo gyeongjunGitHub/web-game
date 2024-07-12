@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        .nav {
+            box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 15px;
+            font-size: 13px;
+        }
+        .nav > * {
+            color: gray;
+        }
+        .nav > *::after {
+            content: '|';
+            padding: 0 10px;
+        }
+        .nav a {
+            text-decoration: none;
+            color: gray;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+<!--상단 바-->
+<div class="nav">
+    <span id="myIdArea"></span>
+    <a href="/main">메인</a>
+    <a href="/member/logout">로그아웃</a>
+    <a href="/store">상점</a>
+    <a href="/myItems">내 아이템</a>
+    <a href="/myPage">마이페이지</a>
+</div>
+<div class="container">
+    <div class="my_items_area"></div>
+</div>
+<script>
+    const my_items_area = document.querySelector('.my_items_area');
+
+    getMyItems();
+
+    async function getMyItems(){
+        my_items_area.style.display = 'block';
+
+        my_items_area.innerHTML = '';
+        let myItems = await getRequest('/store/getMyItems');
+
+        for(let i = 0; i<myItems.length; i++){
+            my_items_area.innerHTML += `
+                <div class="item">
+                    <span class="item-name">${myItems[i].name}</span>
+                    <span class="price">${myItems[i].price}</span>
+                    <span class="count">${myItems[i].count}</span>
+                </div>
+            `;
+        }
+    }
+    async function getRequest(url = '') {
+        try {
+            const response = await fetch(url, { method: 'GET' });
+            if (!response.ok) {
+                throw new Error(
+                    'Network response was not ok ' + response.statusText
+                );
+            }
+            const responseData = await response.json();
+            return responseData;
+        } catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+    //post 요청
+    async function postRequest(url = '', data = {}) {
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error(
+                    'Network response was not ok ' + response.statusText
+                );
+            }
+
+            // JSON 형식으로 변환된 데이터를 가져옴.
+            const responseData = await response.json();
+
+            return responseData.result;
+        } catch (error) {
+            console.error('Fetch operation failed:', error);
+        }
+    }
+</script>
+</body>
+</html>

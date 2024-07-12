@@ -1,8 +1,9 @@
 package drowGame.drowGame.socket;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.service.MemberSessionService;
-import drowGame.drowGame.socket.data.RequestType;
-import drowGame.drowGame.socket.data.SocketRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
@@ -16,19 +17,21 @@ public class SocketHandler extends TextWebSocketHandler {
     private final SocketService socketService;
     private final MemberSessionService memberSessionService;
     //Request
-    private final RequestType requestType = new RequestType();
+    private final Request request = new Request();
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message){
         String msg = message.getPayload();
+        System.out.println(msg);
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
+        Data data = socketService.dataMapping(msg);
         SocketRequest socketRequest = socketService.socketRequestMapping(msg);
-        String requestName = socketRequest.getType();
 
-        if(requestType.getRequest1().contains(requestName)){
-            System.out.println(msg);
-            socketService.setRequest1(socketRequest, myId, session);
+        String requestName = socketRequest.getRequest();
+        if(request.getRequest1().contains(requestName)){
+            socketRequest.setSender(myId);
+            socketService.sendMessageSameRoom(0, session, socketRequest);
         }
-        if(requestType.getRequest2().contains(requestName)){
+        if(request.getRequest2().contains(requestName)){
             socketService.sendMessageSameRoom(1,session, socketRequest);
         }
         if(requestName.equals("nextTurn")) {
@@ -41,18 +44,20 @@ public class SocketHandler extends TextWebSocketHandler {
             socketService.addFriendRequest(session, socketRequest);
         }
         if (requestName.equals("addFriendResponse")){
-            socketService.addFriend(socketRequest, session);
+            socketService.addFriend(socketRequest, myId);
+            if (Boolean.parseBoolean(socketRequest.getData())){
+                socketService.sendFriendList(session, socketRequest);
+            }
         }
-        /////////////////////////////////////////////////////
-        if (requestName.equals("matchingStartDrowGame")) {
+        if (data.getType().equals("matchingStartDrowGame")) {
             socketService.startMatching(session, socketRequest);
         }
         if(requestName.equals("matchingCancleDrowGame")){
             socketService.removeMatchingQueue(session);
         }
-//        if (requestName.equals("sendMessage")) {
-//            socketService.sendChatting(session, socketRequest);
-//        }
+        if (requestName.equals("sendMessage")) {
+            socketService.sendChatting(session, socketRequest);
+        }
         if(requestName.equals("score")){
             System.out.println(msg);
         }

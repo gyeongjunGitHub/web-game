@@ -10,4 +10,5 @@ public class QuizDTO {
     private int num;
     private String quiz;
     private String answer;
+    private int yourTurn;
 }

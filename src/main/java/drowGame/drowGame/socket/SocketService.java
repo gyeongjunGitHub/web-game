@@ -11,6 +11,10 @@ import drowGame.drowGame.repository.ChattingRepository;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.QuizRepository;
 import drowGame.drowGame.service.MemberSessionService;
+import drowGame.drowGame.socket.data.*;
+import drowGame.drowGame.socket.manager.GameManager;
+import drowGame.drowGame.socket.manager.SocketSessionManager;
+import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -118,14 +122,19 @@ public class SocketService {
     }
     public void sendLoginMemberList(WebSocketSession session) {
         String myId = sm.getMyId(session);
+
         // socket sessionMap 순회
         for(String loginMemberKey : sm.getSessionMap().keySet()){
             WebSocketSession wss = sm.getSessionMap().get(loginMemberKey);
 
-            // 소캣에 등록된 Member 아이디와 myId가 같지 않으면 (자기 자신 제외)
+            // socket sessionMap 에 등록 된 member 중 자기 자신 제외
             if(!myId.equals(sm.getMemberId(loginMemberKey))){
+
+                // socket sessionMap 순회
                 for (String membersKey : sm.getSessionMap().keySet()) {
-                    // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
+
+                    // ex) ID : 123 인 사람에게 123의 아이디를 제외하고 전송
+                    // List 로 바꿔 보내기
                     if (!sm.getMemberId(loginMemberKey).equals(sm.getMemberId(membersKey))) {
                         Data data = new Data();
                         data.setType("login");
@@ -136,6 +145,7 @@ public class SocketService {
             }else{ // 자기 자신에게 전송
                 for(String membersKey : sm.getSessionMap().keySet()){
                     // 자기 자신 ID 제외 전송
+                    // List 로 바꿔 보내기
                     if (!myId.equals(sm.getMemberId(membersKey))){
                         Data data = new Data();
                         data.setType("login");
@@ -173,46 +183,55 @@ public class SocketService {
             e.printStackTrace();
         }
     }
+//    @Transactional
+//    public void sendChatting(WebSocketSession session, SocketRequest socketRequest){
+//        String myId = sm.getMyId(session);
+//        ChattingDTO chattingDTO = new ChattingDTO();
+//        chattingDTO.setSender(myId);
+//        chattingDTO.setReceiver(socketRequest.getReceiver());
+//        chattingDTO.setContent(socketRequest.getData());
+//        ChattingEntity chattingEntity = new ChattingEntity(chattingDTO);
+//
+//        ChattingDTO saveResult = new ChattingDTO(chattingRepository.chatContentSave(chattingEntity));
+//        saveResult.setRequest("sendMessage");
+//
+//        WebSocketSession[] sessions = new WebSocketSession[2];
+//        sessions[0] = findReceiverSession(saveResult.getReceiver());
+//        sessions[1] = findReceiverSession(myId);
+//        for(WebSocketSession wss : sessions){
+//            if(wss != null){
+//                sendMessage(wss, dtoToJson(saveResult));
+//            }
+//        }
+//    }
     @Transactional
-    public void sendChatting(WebSocketSession session, SocketRequest socketRequest){
+    public void addFriend(SocketRequest socketRequest, WebSocketSession session) {
         String myId = sm.getMyId(session);
-        ChattingDTO chattingDTO = new ChattingDTO();
-        chattingDTO.setSender(myId);
-        chattingDTO.setReceiver(socketRequest.getReceiver());
-        chattingDTO.setContent(socketRequest.getData());
-        ChattingEntity chattingEntity = new ChattingEntity(chattingDTO);
 
-        ChattingDTO saveResult = new ChattingDTO(chattingRepository.chatContentSave(chattingEntity));
-        saveResult.setRequest("sendMessage");
+        AddFriendResponse addFriendResponse = socketRequest.typeAddFriendResponse(socketRequest);
 
-        WebSocketSession[] sessions = new WebSocketSession[2];
-        sessions[0] = findReceiverSession(saveResult.getReceiver());
-        sessions[1] = findReceiverSession(myId);
-        for(WebSocketSession wss : sessions){
-            if(wss != null){
-                sendMessage(wss, dtoToJson(saveResult));
-            }
-        }
-    }
-    @Transactional
-    public void addFriend(SocketRequest socketRequest, String myId) {
-        if(Boolean.parseBoolean(socketRequest.getData())){
+        WebSocketSession receiverSession = findReceiverSession(addFriendResponse.getReceiver());
+
+        if(addFriendResponse.isResponse()){
             FriendId friendId = new FriendId();
             FriendId friendId1 = new FriendId();
             FriendEntity friendEntity = new FriendEntity();
             FriendEntity friendEntity1 = new FriendEntity();
 
             friendId.setMember_id(myId);
-            friendId.setFriend_id(socketRequest.getReceiver());
+            friendId.setFriend_id(addFriendResponse.getReceiver());
             friendEntity.setId(friendId);
-            friendEntity.setFriend_nick_name(sm.findByIdMemberNickName(socketRequest.getReceiver()));
+            friendEntity.setFriend_nick_name(sm.findByIdMemberNickName(addFriendResponse.getReceiver()));
 
-            friendId1.setMember_id(socketRequest.getReceiver());
+            friendId1.setMember_id(addFriendResponse.getReceiver());
             friendId1.setFriend_id(myId);
             friendEntity1.setId(friendId1);
             friendEntity1.setFriend_nick_name(sm.findByIdMemberNickName(myId));
 
             friendRepository.addFriend(friendEntity, friendEntity1);
+
+            sendFriendInfo(session);
+            sendFriendInfo(receiverSession);
         }
     }
     public String dtoToJson(Object object){
@@ -245,45 +264,25 @@ public class SocketService {
         quizDTO.setAnswer(quiz.getAnswer());
         return quizDTO;
     }
-    public SocketRequest socketRequestMapping(String msg) throws JsonProcessingException {
-        ObjectMapper objectMapper = new ObjectMapper();
-        SocketRequest socketRequest = new SocketRequest();
-        return objectMapper.readValue(msg, SocketRequest.class);
+    public SocketRequest socketRequestMapping(String msg){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            SocketRequest socketRequest = new SocketRequest();
+            return objectMapper.readValue(msg, SocketRequest.class);
+        }catch (Exception e){
+            System.out.println("socket request 매핑 실패");
+        }
+        return null;
     }
     public void addFriendRequest(WebSocketSession session, SocketRequest socketRequest){
         String myId = sm.getMyId(session);
-        socketRequest.setSender(myId);
-        WebSocketSession receiverSession = findReceiverSession(socketRequest.getReceiver());
+
+        AddFriend addFriend = socketRequest.typeAddFriend(socketRequest);
+        addFriend.setSender(myId);
+        socketRequest.setData(addFriend);
+
+        WebSocketSession receiverSession = findReceiverSession(addFriend.getReceiver());
         sendMessage(receiverSession, dtoToJson(socketRequest));
-    }
-    public void sendFriendList(WebSocketSession session, SocketRequest socketRequest){
-        String myId = sm.getMyId(session);
-        //친구 목록 전송
-        List<FriendDTO> friendDTOList = getFriendList(myId);
-        List<FriendDTO> receiverFriendDTOList = getFriendList(socketRequest.getReceiver());
-        List<String> friendList = new ArrayList<>();
-        List<String> receiverFriendList = new ArrayList<>();
-        //친구 리스트 순회
-        for (FriendDTO f : friendDTOList) {
-            //친구 ID가 socketSessionAndMemberID안에 존재한다면
-            if(sm.getMemberIdMap().containsValue(f.getFriend_id())){
-                f.setStatus("online");
-            }
-            friendList.add(dtoToJson(f));
-        }
-        for (FriendDTO f : receiverFriendDTOList) {
-            //친구 ID가 socketSessionAndMemberID안에 존재한다면
-            if(sm.getMemberIdMap().containsValue(f.getFriend_id())){
-                f.setStatus("online");
-            }
-            receiverFriendList.add(dtoToJson(f));
-        }
-        if(!friendList.isEmpty()){
-            sendMessage(findReceiverSession(myId), friendList.toString());
-        }
-        if(!friendList.isEmpty()){
-            sendMessage(findReceiverSession(socketRequest.getReceiver()), receiverFriendList.toString());
-        }
     }
     public void startMatching(WebSocketSession session, SocketRequest socketRequest){
         String myId = sm.getMyId(session);
@@ -309,31 +308,31 @@ public class SocketService {
                 }
             }
             gm.createGameRoom(player_session);
-            socketRequest.setRoomUsers(members);
-            socketRequest.setRoomUsersNickName(memebersNickName);
-            socketRequest.setResponse("success");
-
+            MatchingInfo matchingInfo = new MatchingInfo();
+            matchingInfo.setRoomUsers(members);
+            matchingInfo.setRoomUsersNickName(memebersNickName);
+            matchingInfo.setResponse("success");
             for(WebSocketSession wss : player_session){
-                socketRequest.setYourTurn(gm.getTurn(wss));
+                matchingInfo.setYourTurn(gm.getTurn(wss));
+                socketRequest.setData(matchingInfo);
                 sendMessage(wss, dtoToJson(socketRequest));
             }
         }
     }
     public void nextTurn(WebSocketSession session, SocketRequest socketRequest){
-        int turn = Integer.parseInt(socketRequest.getData()) + 1;
+        NextTurn nextTurn = socketRequest.typeNextTurn(socketRequest);
+        int turn = nextTurn.getMyTurn() + 1;
         if(turn > 2){ turn = 1; } //사이클 종료
         QuizDTO quiz = getQuiz();
-        socketRequest.setAnswer(quiz.getAnswer());
-        socketRequest.setQuiz(quiz.getQuiz());
-        socketRequest.setYourTurn(turn);
+        quiz.setYourTurn(turn);
+        socketRequest.setData(quiz);
         sendMessageSameRoom(0, session, socketRequest);
     }
     public void gameStart(WebSocketSession session, SocketRequest socketRequest){
         if(gm.getTurn(session) == 1){
             QuizDTO quiz = getQuiz();
-            socketRequest.setAnswer(quiz.getAnswer());
-            socketRequest.setQuiz(quiz.getQuiz());
-            socketRequest.setYourTurn(1);
+            quiz.setYourTurn(1);
+            socketRequest.setData(quiz);
             sendMessageSameRoom(0, session, socketRequest);
         }
     }
@@ -351,9 +350,6 @@ public class SocketService {
             }
         }
     }
-    public String getMyId(WebSocketSession session){
-        return sm.getMyId(session);
-    }
     public void removeMatchingQueue(WebSocketSession session) {
         String myId = sm.getMyId(session);
         gm.removeMatchingQueue(myId);
@@ -366,12 +362,19 @@ public class SocketService {
             gm.removeSessionGameRoom(session);
             if (gm.getRoomMemberCount(roomId) == 1) {
                 SocketRequest socketRequest = new SocketRequest();
-                socketRequest.setRequest("leaveOtherMember");
+                socketRequest.setType("leaveOtherMember");
                 for (WebSocketSession wss : gm.getSameRoomMemberSession(roomId)) {
                     sendMessage(wss, dtoToJson(socketRequest));
                     gm.removeSessionGameRoom(wss);
                 }
             }
         }
+    }
+
+    public void setRequest1(SocketRequest socketRequest, String myId, WebSocketSession session) {
+        Request1 result = socketRequest.typeRequest1(socketRequest);
+        result.setSender(myId);
+        socketRequest.setData(result);
+        sendMessageSameRoom(0, session, socketRequest);
     }
 }
