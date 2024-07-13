@@ -23,4 +23,11 @@ public class ChattingRepository {
                 .setParameter("myId", myId)
                 .getResultList();
     }
+
+    public List<ChattingEntity> getChatting(String myId, String member_id){
+        return em.createQuery("select c from ChattingEntity as c where (c.sender=:myId and c.receiver=:member_id) or (c.sender=:member_id and c.receiver=:myId)", ChattingEntity.class)
+                .setParameter("myId", myId)
+                .setParameter("member_id", member_id)
+                .getResultList();
+    }
 }

@@ -146,7 +146,7 @@
 <div id="chattingArea">
     <div class="chattingBig">
         <div class="chattingBtn">
-            <div class="close">
+            <div class="close" onclick="chattingAreaClose()">
                 <div class="close-bar"></div>
                 <div class="close-bar"></div>
             </div>
@@ -155,7 +155,7 @@
         <div id="chatContentArea"></div>
         <div class="message-area">
             <input id="message" type="text" />
-            <button onclick="setMessage()" class="send-btn">전송</button>
+            <button onclick="sendMessage()" class="send-btn">전송</button>
         </div>
     </div>
 </div>

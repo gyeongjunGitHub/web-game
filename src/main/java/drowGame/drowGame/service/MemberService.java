@@ -2,11 +2,9 @@ package drowGame.drowGame.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import drowGame.drowGame.dto.MemberDTO;
-import drowGame.drowGame.dto.MyItemsDTO;
-import drowGame.drowGame.dto.ProfilePictureDTO;
-import drowGame.drowGame.dto.ResultDTO;
+import drowGame.drowGame.dto.*;
 import drowGame.drowGame.entity.*;
+import drowGame.drowGame.repository.ChattingRepository;
 import drowGame.drowGame.repository.FriendRepository;
 import drowGame.drowGame.repository.MemberRepository;
 import drowGame.drowGame.repository.ProfilePictureRepository;
@@ -30,6 +28,7 @@ public class MemberService {
     private final MemberSessionService memberSessionService;
     private final FriendRepository friendRepository;
     private final ProfilePictureRepository profilePictureRepository;
+    private final ChattingRepository chattingRepository;
 
     public ResultDTO loginProc(MemberDTO memberDTO, HttpSession httpSession) {
 
@@ -288,5 +287,16 @@ public class MemberService {
                 m.setCount(m.getCount() - 1);
             }
         }
+    }
+
+    public List<ChattingDTO> getChatting(HttpSession httpSession, String memberId) {
+        String myId = memberSessionService.getMemberId(httpSession.getId());
+        List<ChattingEntity> chatting = chattingRepository.getChatting(myId, memberId);
+        List<ChattingDTO> chattingDTOList = new ArrayList<>();
+        for (ChattingEntity c : chatting){
+            ChattingDTO chattingDTO = new ChattingDTO(c);
+            chattingDTOList.add(chattingDTO);
+        }
+        return chattingDTOList;
     }
 }

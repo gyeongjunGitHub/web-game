@@ -1,10 +1,7 @@
 package drowGame.drowGame.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import drowGame.drowGame.dto.MemberDTO;
-import drowGame.drowGame.dto.MyItemsDTO;
-import drowGame.drowGame.dto.ProfilePictureDTO;
-import drowGame.drowGame.dto.ResultDTO;
+import drowGame.drowGame.dto.*;
 import drowGame.drowGame.service.MemberService;
 import drowGame.drowGame.service.MemberSessionService;
 import jakarta.servlet.http.HttpSession;
@@ -122,5 +119,11 @@ public class MemberController {
     public int updateNickName(@RequestParam(name = "nick_name")String nick_name, HttpSession httpSession){
         memberService.updateNickName(httpSession, nick_name);
         return 1;
+    }
+
+    @GetMapping("/getChatting")
+    @ResponseBody
+    public ResponseEntity<List<ChattingDTO>> getChatting(@RequestParam(name = "member_id")String member_id, HttpSession httpSession) {
+        return ResponseEntity.ok(memberService.getChatting(httpSession, member_id));
     }
 }

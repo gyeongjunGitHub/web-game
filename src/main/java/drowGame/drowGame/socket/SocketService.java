@@ -89,17 +89,6 @@ public class SocketService {
         }
         return null;
     }
-    public void sendChattingData(WebSocketSession session){
-        String myId = sm.getMyId(session);
-        List<ChattingDTO> result = getChattingData(myId);
-        List<String> chattingData = new ArrayList<>();
-        for(ChattingDTO c : result){
-            chattingData.add(dtoToJson(c));
-        }
-        if(!chattingData.isEmpty()){
-            sendMessage(findReceiverSession(myId), chattingData.toString());
-        }
-    }
     public void sendLogoutMember(WebSocketSession session) {
         String myId = sm.getMyId(session);
         // socket sessionMap 순회
@@ -238,15 +227,6 @@ public class SocketService {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-    }
-    public List<ChattingDTO> getChattingData(String myId) {
-        List<ChattingEntity> chattingData = chattingRepository.getChattingData(myId);
-        List<ChattingDTO> chattingDTOList = new ArrayList<>();
-        for(ChattingEntity c : chattingData){
-            ChattingDTO chattingDTO = new ChattingDTO(c);
-            chattingDTOList.add(chattingDTO);
-        }
-        return chattingDTOList;
     }
     public QuizDTO getQuiz() {
         int min = 1;

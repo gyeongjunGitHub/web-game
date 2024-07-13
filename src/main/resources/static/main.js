@@ -35,9 +35,9 @@ let myId = '';
 let myNickName = '';
 let chattingAreaMemberName = '';
 let chattingAreaIsTrue = false;
-let chattingData = [];
 let memberList = [];
 let friendList = [];
+let chattingData = [];
 let myTurn;
 let cycle = 0;
 let isCorrect = false;
@@ -301,23 +301,20 @@ async function receiveMessageHandler(msg) {
         }
     }
     if(msg.type == 'addFriendRequest'){ addFriendProc(msg); }
-    if (msg.type == 'sendMessage') { sendMessageProc(msg); }
-    if (Array.isArray(msg)) {                       //배열을 받았을 경우
-        //채팅 데이터인지 확인
-        if(msg[0].type == 'chattingData'){
-            for(let i = 0; i<friendList.length; i++){
-                let data = [];
-                for(let j = 0; j<msg.length; j++){
-                    if((msg[j].sender == friendList[i].member_id && msg[j].receiver == friendList[i].friend_id) ||
-                        (msg[j].sender == friendList[i].friend_id && msg[j].receiver == friendList[i].member_id)){
-                        data.push(msg[j]);
-                    }
-                }
-                console.log(data);
-                chattingData.push(data);
+    if (msg.type == 'sendMessage') {
+        console.log(msg);
+        if (chattingAreaIsTrue){
+            if(msg.sender == getMember() && msg.receiver == myId){
+                chattingData.push(msg);
+                inputChattingData(chattingData);
+            }
+            if(msg.sender == myId && msg.receiver == getMember()){
+                chattingData.push(msg);
+                inputChattingData(chattingData);
             }
         }
-
+    }
+    if (Array.isArray(msg)) {
         if(msg[0].type == 'friend'){
             friendList = [];
             for(let i = 0; i<msg.length; i++){
@@ -359,6 +356,7 @@ async function receiveMessageHandler(msg) {
 //따봉!!
 function ttabong(nick_name){
     console.log(nick_name);
+
 }
 //친구추가 요청 처리 함수
 function addFriendProc(msg){
@@ -373,32 +371,6 @@ function addFriendProc(msg){
         </div>
     `;
     acceptArea.style.display = 'block';
-}
-// 채팅 메시지 처리 함수///////////////////////////////////////////
-function sendMessageProc(msg){
-    //내가 보낸 메시지
-    if(msg.sender == myId && msg.receiver == member){
-        chatContentArea.innerHTML += `
-            <div class="chatBallonArea">
-                <p class="chat-ballon1">${msg.content}</p>
-            </div>
-        `;
-    }
-    //상대가 보낸 메시지
-    if(msg.sender == member && msg.receiver == myId){
-        chatContentArea.innerHTML += `
-            <div class="chatBallonArea">
-                <p class="chat-ballon2">${msg.content}</p>
-            </div>
-        `;
-    }
-    for(let i = 0; i<friendList.length; i++){
-        if((msg.sender == friendList[i].member_id && msg.receiver == friendList[i].friend_id) ||
-            (msg.sender == friendList[i].friend_id && msg.receiver == friendList[i].member_id)){
-            chattingData[i].push(msg);
-        }
-    }
-    chatContentArea.scrollTop = chatContentArea.scrollHeight;       //스크롤 위치 조정
 }
 // 매칭 함수
 function matching(request) {
@@ -465,58 +437,65 @@ function setMemberStateOffline(id, nick_name){
 let member;
 function getMember() { return member; }
 function setMember(m) { member = m; }
-function chat(member) {
+async function chat(member) {
     setMember(member);
+    //채팅 공간 토글 처리
+    if (!chattingAreaIsTrue && chattingAreaMemberName != member) {
+        chattingAreaMemberName = member;
+        chattingAreaIsTrue = !chattingAreaIsTrue;
+    }else if(chattingAreaIsTrue && chattingAreaMemberName != member){
+        chattingAreaMemberName = member;
+    }else{
+        chattingAreaIsTrue = !chattingAreaIsTrue;
+    }
+
     for(let i = 0; i<friendList.length; i++){
         if(member == friendList[i].friend_id){
             memberNameArea.innerHTML = friendList[i].friend_nick_name;
         }
     }
-//    memberNameArea.innerHTML = member;
 
-    //채팅 공간 토글 처리
-    if (chattingAreaMemberName != member) {
-        chattingAreaMemberName = member;
-    } else {
-        chattingAreaIsTrue = !chattingAreaIsTrue;
-    }
     //채팅 공간이 열려있을 때
     if (chattingAreaIsTrue) {
-        chattingArea.style.display = 'none';
-    } else {
+        chattingData=[];
+        chattingData = await getRequest(`/member/getChatting?member_id=${getMember()}`);
         chatContentArea.innerHTML = '';
-        inputAllChattingData(member);
+        inputChattingData(chattingData);
         chattingArea.style.display = 'block';
         chatContentArea.scrollTop = chatContentArea.scrollHeight;
+    } else {
+        chattingArea.style.display = 'none';
+        setMember('');
     }
+
+
 }
-//채팅공간에 채팅 데이터 입력
-function inputAllChattingData(member) {
-    chatContentArea.innerHTML = '';
-    for(let i = 0; i<friendList.length; i++){
-        if(member == friendList[i].friend_id){
-            if(chattingData[i] != undefined){
-                for(let j = 0; j<chattingData[i].length; j++){
-                    if (chattingData[i][j].sender == myId) {
-                        chatContentArea.innerHTML += `
-                            <div class="chatBallonArea">
-                                <p class="chat-ballon1">${chattingData[i][j].content}</p>
-                            </div>
-                        `;
-                    } else {
-                        chatContentArea.innerHTML += `
-                            <div class="chatBallonArea">
-                                <p class="chat-ballon2">${chattingData[i][j].content}</p>
-                            </div>
-                        `;
-                    }
-                }
-            }
+function chattingAreaClose(){
+    chattingArea.style.display = 'none';
+    chattingAreaIsTrue = false;
+}
+function inputChattingData(chattingData){
+    //채팅 데이터 입력
+    for(let i = 0; i < chattingData.length; i++){
+        if(chattingData[i].sender == myId){
+            chatContentArea.innerHTML += `
+                <div class="chatBallonArea">
+                    <p class="chat-ballon1">${chattingData[i].content}</p>
+                </div>
+            `;
+        }
+        if(chattingData[i].sender == getMember()){
+            chatContentArea.innerHTML += `
+                <div class="chatBallonArea">
+                    <p class="chat-ballon2">${chattingData[i].content}</p>
+                </div>
+            `;
         }
     }
+    chatContentArea.scrollTop = chatContentArea.scrollHeight;
 }
 //메시지 set
-function setMessage() {
+function sendMessage() {
     const data = new Data('sendMessage', { 'receiver' : getMember(), 'content' : message.value});
     send(data);
     message.value = '';
@@ -525,20 +504,6 @@ function setMessage() {
 function send(requestParam) {
     ws.send(JSON.stringify(requestParam));
 }
-document
-  .querySelector('#chattingArea')
-  .addEventListener('click', function (e) {
-    if (e.target == document.querySelector('.down')) {
-      document.querySelector('.chattingBig').style.display = 'none';
-      document.querySelector('#chattingArea').style.padding = '0';
-    } else if (e.target == document.querySelector('.close')) {
-      document.querySelector('#chattingArea').style.display = 'none';
-    } else if (e.target == document.querySelector('.chatUserName')) {
-      document.querySelector('.chatUserName').innerHTML = getMember();
-      document.querySelector('.chattingBig').style.display = 'block';
-      document.querySelector('#chattingArea').style.padding = '10px 20px';
-    }
-  });
 //=============//
 //===모달창====//
 //============//
@@ -550,41 +515,6 @@ document.querySelector('.black-area').addEventListener('click', (e) => {
     document.querySelector('.black-area').style.display = 'none';
   }
 });
-//===============//
-//===회원정보====//
-//===============//
-let show = false;
-async function getMemberInfo(){
-    const url = `/member/getMemberInfo`;
-    let result = await getRequest(url);
-    document.querySelector('.profile-black').style.display = 'block';
-    document.querySelector('.profile-white').style.display = 'block';
-    document.querySelector('.profile-white').innerHTML = `
-        <h2>회원정보</h2>
-        <ul>
-            <li>
-                <p>아이디 : ${result.id}</p>
-                <input type="text" placeholder="아이디" />
-            </li>
-            <li>
-                <p>비밀번호 : ${result.password}</p>
-                <input type="text" placeholder="비밀번호" />
-            </li>
-            <li>
-                <p>이름 : ${result.name}</p>
-                <input type="text" placeholder="이름" />
-            </li>
-            <li>
-                <p>이메일 : ${result.email}</p>
-                <input type="email" placeholder="email@naver.com" />
-            </li>
-        </ul>
-        <div class="profile-btn">
-            <button>수정</button>
-            <button>닫기</button>
-        </div>
-    `;
-}
 document
     .querySelector('.profile-black')
     .addEventListener('click', (e) => {

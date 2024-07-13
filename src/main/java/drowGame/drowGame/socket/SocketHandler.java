@@ -69,9 +69,6 @@ public class SocketHandler extends TextWebSocketHandler {
         socketService.addSessionInfo(session);
         socketService.sendLoginMemberList(session);
         socketService.sendFriendInfo(session);
-
-        //삭제 예정
-        socketService.sendChattingData(session);
     }
 
 
