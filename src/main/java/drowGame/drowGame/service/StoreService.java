@@ -6,32 +6,51 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.dto.ItemDTO;
 import drowGame.drowGame.dto.MyItemsDTO;
 import drowGame.drowGame.entity.ItemEntity;
+import drowGame.drowGame.entity.MemberEntity;
 import drowGame.drowGame.entity.MyItemsEntity;
+import drowGame.drowGame.repository.MemberRepository;
 import drowGame.drowGame.repository.StoreRepository;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class StoreService {
     private final StoreRepository storeRepository;
+    private final MemberRepository memberRepository;
     private final MemberSessionService memberSessionService;
     @Transactional
-    public void itemRegistration(String data) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        ItemDTO itemDTO = new ItemDTO();
-        try {
-            itemDTO = objectMapper.readValue(data, ItemDTO.class);
-        } catch (JsonMappingException e) {
-            throw new RuntimeException(e);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+    public void itemRegistration(MultipartFile itemPicture, String name, int price) throws IOException {
+        String originalFileName = itemPicture.getOriginalFilename();
+        String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
+
+        String windowSavePath = "C:/images/" + storedFileName;
+        String ec2SavePath = "/home/images/" + storedFileName;
+
+        File saveFile = new File(windowSavePath);
+
+        //폴더가 없을 경우 폴더 생성!
+        if(!saveFile.exists()){
+            saveFile.mkdirs();
         }
+
+        //file 저장
+        itemPicture.transferTo(saveFile);
+
+        ItemDTO itemDTO = new ItemDTO();
+        itemDTO.setName(name);
+        itemDTO.setPrice(price);
+        itemDTO.setOriginal_file_name(originalFileName);
+        itemDTO.setStored_file_name(storedFileName);
         ItemEntity itemEntity = new ItemEntity(itemDTO);
         storeRepository.itemRegistration(itemEntity);
     }
@@ -44,17 +63,6 @@ public class StoreService {
             result.add(itemDTO);
         }
         return result;
-    }
-
-    public List<MyItemsDTO> getMyItems(HttpSession httpSession) {
-        String myId = memberSessionService.getMemberId(httpSession.getId());
-        List<MyItemsEntity> myItemsEntityList = storeRepository.getMyItems(myId);
-        List<MyItemsDTO> myItems = new ArrayList<>();
-        for(MyItemsEntity m : myItemsEntityList){
-            MyItemsDTO myItemsDTO = new MyItemsDTO(m);
-            myItems.add(myItemsDTO);
-        }
-        return myItems;
     }
 
     @Transactional
@@ -70,10 +78,8 @@ public class StoreService {
             throw new RuntimeException(e);
         }
         
-        //게임 포인트로 구매하기
-        
         //아이템 존재 체크
-        List<MyItemsEntity> myItems = storeRepository.getMyItems(myId);
+        List<MyItemsEntity> myItems = memberRepository.getMyItems(myId);
         boolean isAlreadyGet = false;
         String name = null;
         for(MyItemsEntity m : myItems){
@@ -81,7 +87,14 @@ public class StoreService {
                 isAlreadyGet = true;
             }
         }
-        
+
+        //게임 포인트 차감
+        Optional<MemberEntity> byIdOptional = memberRepository.findById(myId);
+        if (byIdOptional.isPresent()){
+            MemberEntity byId = byIdOptional.get();
+            byId.setGame_point(byId.getGame_point() - myItemsDTO.getPrice());
+        }
+
         //가지고 있는 아이템이면 count+1
         if(isAlreadyGet){
             for(MyItemsEntity m : myItems){

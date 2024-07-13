@@ -2,6 +2,7 @@ package drowGame.drowGame.repository;
 
 import drowGame.drowGame.entity.FriendEntity;
 import drowGame.drowGame.entity.MemberEntity;
+import drowGame.drowGame.entity.MyItemsEntity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.stereotype.Repository;
@@ -28,5 +29,11 @@ public class MemberRepository {
     public String memberSave(MemberEntity memberEntity) {
         em.persist(memberEntity);
         return memberEntity.getId();
+    }
+
+    public List<MyItemsEntity> getMyItems(String myId) {
+        return em.createQuery("select m from MyItemsEntity m where m.member_id=:member_id", MyItemsEntity.class)
+                .setParameter("member_id", myId)
+                .getResultList();
     }
 }

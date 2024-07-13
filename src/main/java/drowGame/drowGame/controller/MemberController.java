@@ -2,6 +2,7 @@ package drowGame.drowGame.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import drowGame.drowGame.dto.MemberDTO;
+import drowGame.drowGame.dto.MyItemsDTO;
 import drowGame.drowGame.dto.ProfilePictureDTO;
 import drowGame.drowGame.dto.ResultDTO;
 import drowGame.drowGame.service.MemberService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 
 @Controller
 @RequestMapping("/member")
@@ -96,7 +98,29 @@ public class MemberController {
     @ResponseBody
     public ResponseEntity<Void> setBasicProfileProfile(@RequestParam(name = "file") MultipartFile file, HttpSession session) throws IOException {
         memberService.selectBasicProfile(file, session);
-
         return ResponseEntity.ok().build();
+    }
+    @GetMapping("/getMyGamePoint")
+    @ResponseBody
+    public int getMyGamePoint(HttpSession httpSession){
+        return memberService.getMyGamePoint(httpSession);
+    }
+
+    @PostMapping("/updateProfilePicture")
+    @ResponseBody
+    public int updateProfilePicture(@RequestParam(name = "picture") MultipartFile multipartFile, HttpSession httpSession) throws IOException {
+        memberService.updateProfilePicture(httpSession, multipartFile);
+        return 1;
+    }
+
+    @GetMapping("/getMyItems")
+    public ResponseEntity<List<MyItemsDTO>> getMyItems(HttpSession httpSession){
+        return ResponseEntity.ok(memberService.getMyItems(httpSession));
+    }
+    @PostMapping("/updateNickName")
+    @ResponseBody
+    public int updateNickName(@RequestParam(name = "nick_name")String nick_name, HttpSession httpSession){
+        memberService.updateNickName(httpSession, nick_name);
+        return 1;
     }
 }

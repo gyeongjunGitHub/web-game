@@ -5,120 +5,264 @@
     <meta charset="UTF-8" />
     <title>Chating</title>
 </head>
+<style>
+    body {
+      margin: 0;
+    }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .side_menu_box {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+    .side_menu_box > li {
+      width: 150px;
+      text-align: center;
+      padding: 10px 0 10px 10px;
+      margin: 10px 0;
+      box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.5s;
+    }
+    .side_menu_box > li:hover {
+      transform: scale(1.1);
+      background-color: rgb(70, 134, 70);
+      color: white;
+    }
+    .nav {
+      box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 15px;
+      font-size: 13px;
+    }
+    .nav > * {
+      color: gray;
+    }
+    .nav > *::after {
+      content: '|';
+      padding: 0 10px;
+    }
+    .nav a {
+      text-decoration: none;
+      color: gray;
+      font-size: 13px;
+    }
+    .page_tit {
+      text-align: center;
+    }
+    .admin_container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      max-width: 1200px;
+      margin: 30px auto;
+    }
+    .profile {
+      display: block;
+      padding: 20px;
+      margin-right: 20px;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid #ddd;
+    }
+    .profile_img_box,
+    .item_img_box {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      border: 1px solid green;
+    }
+    .register {
+      display: none;
+      width: 500px;
+      padding: 10px 0 0;
+      border: 2px solid #ddd;
+      text-align: center;
+    }
+    .register > h2 {
+      margin-bottom: 50px;
+    }
+
+    .item_inform_box > div {
+      margin-bottom: 10px;
+    }
+    .item_inform_box > input:not(:last-child) {
+      width: 200px;
+      padding: 5px 10px;
+      border: 1px solid rgba(9, 120, 9, 0.806);
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 0;
+    }
+    .register_btn {
+      margin-top: 20px;
+      border: none;
+    }
+</style>
 <body>
-<h2>기본 프로필 사진 설정</h2>
-<div class="container">
-    기본 프로필 사진 파일 선택 -> <input type="file" id="file" multiple>
-    <br><button class="picture_selectBtn" onclick="setProfile()">기본사진 선택 완료</button>
-    <img id="dynamicImage" width="100" height="100">
-    <br>
-    <h2>상점 아이템 등록</h2>
-    <br>
-    아이템 이름 : <input id="name" type="text"><br>
-    아이템 가격 : <input id="price" type="text"><br>
-    <button onclick="itemRegistration()">등록</button>
+<ul class="side_menu_box">
+    <li class="side_list1" onclick="set_side_list(0)">프로필 사진 선택</li>
+    <li class="side_list2" onclick="set_side_list(1)">상점 아이템 등록</li>
+</ul>
+<!--상단 바-->
+<div class="nav">
+    <span id="myIdArea"></span>
+    <a href="/member/logout">로그아웃</a>
+    <a href="/store">상점</a>
+    <a href="/myItems">내 아이템</a>
+    <a href="/myPage">마이페이지</a>
 </div>
+<div class="wrap">
+    <h1 class="page_tit">관리자 페이지</h1>
+    <div class="admin_container">
+        <div class="profile">
+            <div class="profile_setting_box">
+                <div class="profile_img_box">
+                    <input type="file" id="file" multiple />
+                </div>
+                <button class="picture_selectBtn" onclick="setProfile()">
+                    기본사진 선택 완료
+                </button>
+            </div>
+        </div>
+        <div class="register">
+            <h2>상점 아이템 등록</h2>
+            <div class="item_inform_box">
+                <div>아이템 이름</div>
+                <input id="name" type="text" />
+                <div>아이템 가격</div>
+                <input id="price" type="text" />
+                <div>아이템 사진</div>
+                <div class="item_img_box">
+                    <input type="file" id="itemPicture" multiple />
+                </div>
+            </div>
+            <div>
+                <button class="register_btn" onclick="itemRegistration()">
+                    등록
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    const side_list = [document.querySelector('.profile'), document.querySelector('.register')]
+    function set_side_list(number){
+        for(let i = 0; i<side_list.length; i++){
+            if(i == number){
+                side_list[i].style.display = 'block';
+            }else{
+                side_list[i].style.display = 'none';
+            }
+        }
+    }
+
+    //----------------------------------------------------//
     const file = document.getElementById('file');
+    const itemPicture = document.getElementById('itemPicture');
     const name = document.getElementById('name');
     const price = document.getElementById('price');
     const picture_selectBtn = document.querySelector('.picture_selectBtn');
 
-    async function itemRegistration(){
-        const url = '/store/itemRegistration';
-        let data = {
-            name : name.value,
-            price : price.value
-        };
-        const result = await postRequest(url, data);
-        console.log(result);
+    async function itemRegistration() {
+      const url = '/store/itemRegistration';
+      const formData = new FormData();
+      formData.append('name', name.value);
+      formData.append('price', price.value);
+      if (itemPicture.files.length == 1) {
+        formData.append('itemPicture', itemPicture.files[0]);
+      }
+      postFileRequest(url, formData);
     }
-    async function setProfile(){
-        let result = await getRequest('/member/profileCheck');
+    async function setProfile() {
+      let result = await getRequest('/member/profileCheck');
 
-        // result : 1 프로필 설정 가능
-        // result : 0 이미 프로필 사진 존재
-        // result : 2 로그인 화면으로 보내버리기
+      // result : 1 프로필 설정 가능
+      // result : 0 이미 프로필 사진 존재
+      // result : 2 로그인 화면으로 보내버리기
 
-        if(result == 1){
-            const formData = new FormData();
-            if(file.files.length == 1){
-                formData.append('file', file.files[0]);
-                const url = '/member/selectBasicProfile';
-                postFileRequest(url, formData);
-            }
+      if (result == 1) {
+        const formData = new FormData();
+        if (file.files.length == 1) {
+          formData.append('file', file.files[0]);
+          const url = '/member/selectBasicProfile';
+          postFileRequest(url, formData);
         }
-        if(result == 2){
-            location.href = '/';
-        }
+      }
+      if (result == 2) {
+        location.href = '/';
+      }
     }
     async function getRequest(url = '') {
-        try {
-            const response = await fetch(url, { method: 'GET' });
-            if (!response.ok) {
-                throw new Error(
-                    'Network response was not ok ' + response.statusText
-                );
-            }
-            const responseData = await response.json();
-            return responseData;
-        } catch (error) {
-            console.error('Fetch operation failed:', error);
+      try {
+        const response = await fetch(url, { method: 'GET' });
+        if (!response.ok) {
+          throw new Error(
+            'Network response was not ok ' + response.statusText
+          );
         }
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Fetch operation failed:', error);
+      }
     }
     //post file 요청
     async function postFileRequest(url = '', formData) {
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData
-            });
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          body: formData,
+        });
 
         if (!response.ok) {
-            throw new Error(
-                'Network response was not ok ' + response.statusText
-            );
+          throw new Error(
+            'Network response was not ok ' + response.statusText
+          );
+        } else {
+          console.log('등록 성공!!');
         }
-        else{
-            console.log("ok!");
-        }
-
-        } catch (error) {
-            console.error('Fetch operation failed:', error);
-        }
+      } catch (error) {
+        console.error('Fetch operation failed:', error);
+      }
     }
     //post 요청
     async function postRequest(url = '', data = {}) {
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
-            });
+      try {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
 
-            if (!response.ok) {
-                throw new Error(
-                    'Network response was not ok ' + response.statusText
-                );
-            }
-
-            // JSON 형식으로 변환된 데이터를 가져옴.
-            const responseData = await response.json();
-            return responseData;
-        } catch (error) {
-            console.error('Fetch operation failed:', error);
+        if (!response.ok) {
+          throw new Error(
+            'Network response was not ok ' + response.statusText
+          );
         }
+
+        // JSON 형식으로 변환된 데이터를 가져옴.
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Fetch operation failed:', error);
+      }
     }
-</script>
-<script>
-        // 파일 이름을 동적으로 설정하거나, 서버에서 받아온 정보를 사용할 수 있습니다.
-        var fileName = "1720425031205_기본.png"; // 여기에 파일 이름을 할당합니다.
-
-        var imageUrl = '/images/' + fileName; // 이미지 경로를 설정합니다.
-
-        // 이미지 태그의 src 속성에 이미지 경로 설정
-        var imageElement = document.getElementById('dynamicImage');
-        imageElement.src = imageUrl;
 </script>
 </body>
 </html>

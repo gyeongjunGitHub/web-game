@@ -1,6 +1,7 @@
 package drowGame.drowGame.socket.data;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import drowGame.drowGame.dto.ChattingDTO;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -46,6 +47,16 @@ public class SocketRequest {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(socketRequest.getData());
             return objectMapper.readValue(json, Request1.class);
+        }catch (Exception e){
+            System.out.println("실패");
+        }
+        return null;
+    }
+    public ChattingDTO typeChatting(SocketRequest socketRequest){
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            String json = objectMapper.writeValueAsString(socketRequest.getData());
+            return objectMapper.readValue(json, ChattingDTO.class);
         }catch (Exception e){
             System.out.println("실패");
         }

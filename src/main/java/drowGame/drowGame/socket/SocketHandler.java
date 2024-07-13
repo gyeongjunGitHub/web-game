@@ -25,7 +25,6 @@ public class SocketHandler extends TextWebSocketHandler {
         String requestName = socketRequest.getType();
 
         if(requestType.getRequest1().contains(requestName)){
-            System.out.println(msg);
             socketService.setRequest1(socketRequest, myId, session);
         }
         if(requestType.getRequest2().contains(requestName)){
@@ -50,9 +49,9 @@ public class SocketHandler extends TextWebSocketHandler {
         if(requestName.equals("matchingCancleDrowGame")){
             socketService.removeMatchingQueue(session);
         }
-//        if (requestName.equals("sendMessage")) {
-//            socketService.sendChatting(session, socketRequest);
-//        }
+        if (requestName.equals("sendMessage")) {
+            socketService.sendChatting(session, socketRequest);
+        }
         if(requestName.equals("score")){
             System.out.println(msg);
         }

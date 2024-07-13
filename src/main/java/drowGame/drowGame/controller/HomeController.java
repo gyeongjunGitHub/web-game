@@ -42,11 +42,11 @@ public class HomeController {
 
     @GetMapping("/myPage")
     public String myPage(HttpSession httpSession){
-        String myId = memberSessionService.getMemberId(httpSession.getId());
-        if(myId == null){
+        String role = memberSessionService.getMemberRole(httpSession.getId());
+        if(role == null){
             return "loginForm";
         }
-        if (myId.equals("admin")){
+        if (role.equals("ROLE_ADMIN")){
             return "adminPage";
         }
         return "myPage";

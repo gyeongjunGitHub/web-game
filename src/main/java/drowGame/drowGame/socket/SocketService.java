@@ -183,27 +183,24 @@ public class SocketService {
             e.printStackTrace();
         }
     }
-//    @Transactional
-//    public void sendChatting(WebSocketSession session, SocketRequest socketRequest){
-//        String myId = sm.getMyId(session);
-//        ChattingDTO chattingDTO = new ChattingDTO();
-//        chattingDTO.setSender(myId);
-//        chattingDTO.setReceiver(socketRequest.getReceiver());
-//        chattingDTO.setContent(socketRequest.getData());
-//        ChattingEntity chattingEntity = new ChattingEntity(chattingDTO);
-//
-//        ChattingDTO saveResult = new ChattingDTO(chattingRepository.chatContentSave(chattingEntity));
-//        saveResult.setRequest("sendMessage");
-//
-//        WebSocketSession[] sessions = new WebSocketSession[2];
-//        sessions[0] = findReceiverSession(saveResult.getReceiver());
-//        sessions[1] = findReceiverSession(myId);
-//        for(WebSocketSession wss : sessions){
-//            if(wss != null){
-//                sendMessage(wss, dtoToJson(saveResult));
-//            }
-//        }
-//    }
+    @Transactional
+    public void sendChatting(WebSocketSession session, SocketRequest socketRequest){
+        String myId = sm.getMyId(session);
+        ChattingDTO chatting = socketRequest.typeChatting(socketRequest);
+        chatting.setSender(myId);
+        ChattingEntity chattingEntity = new ChattingEntity(chatting);
+        ChattingDTO saveResult = new ChattingDTO(chattingRepository.chatContentSave(chattingEntity));
+        saveResult.setType("sendMessage");
+
+        WebSocketSession[] sessions = new WebSocketSession[2];
+        sessions[0] = findReceiverSession(saveResult.getReceiver());
+        sessions[1] = findReceiverSession(myId);
+        for(WebSocketSession wss : sessions){
+            if(wss != null){
+                sendMessage(wss, dtoToJson(saveResult));
+            }
+        }
+    }
     @Transactional
     public void addFriend(SocketRequest socketRequest, WebSocketSession session) {
         String myId = sm.getMyId(session);

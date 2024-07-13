@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
 
 @Getter @Setter
 public class ChattingDTO {
-    private String request = "chattingData";
+    private String type = "chattingData";
     private Long id;
     private String sender;
     private String receiver;

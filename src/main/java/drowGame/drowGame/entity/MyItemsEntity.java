@@ -19,6 +19,10 @@ public class MyItemsEntity {
     private int price;
     @Column
     private int count;
+    @Column(name = "original_file_name")
+    private String original_file_name;
+    @Column(name = "stored_file_name")
+    private String stored_file_name;
     @Column
     private String member_id;
 
@@ -28,6 +32,8 @@ public class MyItemsEntity {
         this.name = m.getName();
         this.price = m.getPrice();
         this.count = m.getCount();
+        this.original_file_name = m.getOriginal_file_name();
+        this.stored_file_name = m.getStored_file_name();
         this.member_id = m.getMember_id();
     }
 }

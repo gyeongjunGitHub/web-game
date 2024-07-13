@@ -3,26 +3,149 @@
 <head>
     <meta charset="UTF-8" />
     <style>
+        body {
+          margin: 0;
+        }
+
         .nav {
-            box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 15px;
-            font-size: 13px;
+          box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          padding: 15px;
+          font-size: 13px;
         }
         .nav > * {
-            color: gray;
+          color: gray;
         }
         .nav > *::after {
-            content: '|';
-            padding: 0 10px;
+          content: '|';
+          padding: 0 10px;
         }
         .nav a {
-            text-decoration: none;
-            color: gray;
-            font-size: 13px;
+          text-decoration: none;
+          color: gray;
+          font-size: 13px;
         }
+        .container {
+          width: 100%;
+
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .shop {
+          max-width: 1000px;
+        }
+        .shop_item_wrap {
+          width: 100%;
+          padding-left: 0;
+          margin: 0;
+          display: grid;
+          grid-template-columns: repeat(3, 250px);
+          grid-template-rows: repeat(2, 1fr);
+          gap: 15px;
+          list-style: none;
+        }
+
+        .shop_item {
+          padding: 20px;
+          border: 1px solid rgb(26, 76, 26);
+        }
+        .shop_tit {
+          margin: 50px 0 20px;
+          text-align: center;
+        }
+        .item_img > img {
+          display: block;
+          width: 120px;
+          height: 120px;
+          margin: 0 auto;
+        }
+        .item_tit {
+          margin: 20px 0 5px;
+
+          font-weight: 600;
+        }
+        .item_price {
+          margin: 0;
+          color: gray;
+        }
+        .buy_btn {
+          width: 100%;
+          padding: 10px 0;
+          margin-top: 20px;
+          background-color: rgba(54, 80, 54, 0.527);
+          border: none;
+          border-radius: 10px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .shop_modal{
+        width:100vw;
+        height:100vh;
+        display:none;
+        justify-content:center;
+        align-items:center;
+        background-color:#00000070;
+        position:absolute;
+        top:0;
+        }
+        .shop_content{
+        background-color:white;
+        width:800px;
+        padding:20px;
+
+        }
+        .shop_content>h2{
+        margin-bottom:50px;
+        text-align:center;
+        font-size:30px;
+        }
+       .item_inform{
+       width:70%;
+       margin:0 auto;
+       padding:10px 30px;
+       background-color:#eee;
+       font-size:20px;
+       }
+       .item_name,.item_price{
+        display:flex;
+        padding:10px 0;
+       }
+       .item_name>span:first-child,
+       .item_price>span:first-child{
+       display:block;
+        width:30%;
+
+       }
+       .modal_btn_wrap{
+
+       text-align:center;
+       }
+       .buy_ok_btn{
+       background-color:rgba(54, 80, 54, 0.527);
+       }
+       .buy_cancel_btn{
+       background-color:#ae6975;
+       }
+        .buy_ok_btn,.buy_cancel_btn{
+        display:inline-block;
+        width:15%;
+        padding:5px 0;
+        margin:30px 0 10px;
+
+        border:none;
+        color:white;
+        font-size:20px;
+        cursor:pointer;
+        }
+        .img_box{
+        text-align:center;
+        margin-bottom:20px;
+        }
+
     </style>
 </head>
 <body>
@@ -35,63 +158,214 @@
     <a href="/myItems">내 아이템</a>
     <a href="/myPage">마이페이지</a>
 </div>
+<div class="shop_modal">
+    <div class="shop_content"></div>
+</div>
 <div class="container">
-    <div class="my_items_area"></div>
+    <div class="shop">
+        <h1 class="shop_tit">내 아이템</h1>
+        <h3 class="game_point"></h3>
+        <ul class="shop_item_wrap"></ul>
+    </div>
 </div>
 <script>
-    const my_items_area = document.querySelector('.my_items_area');
+    const shop_item_wrap = document.querySelector('.shop_item_wrap');
+    const shop_content = document.querySelector('.shop_content');
+    const shop_modal = document.querySelector('.shop_modal');
 
+    let myItems = [];
+    let nickNameIsTrue = false;
+
+    //내 아이템 목록 요청
     getMyItems();
-
     async function getMyItems(){
-        my_items_area.style.display = 'block';
+        myItems = await Request('GET', '/member/getMyItems');
+        shop_item_wrap.innerHTML = '';
+        for (let i = 0; i < myItems.length; i++) {
+            if(myItems[i].count > 0){
+                const imageUrl = '/images/' + myItems[i].stored_file_name;
+                shop_item_wrap.innerHTML += `
+                    <li class="shop_item">
+                    <div class="item_img">
+                    <img src="${imageUrl}" alt="" s />
+                    </div>
+                        <p class="item_tit">${myItems[i].name} X ${myItems[i].count}</p>
+                        <button class="buy_btn" onclick="showModal(${i})">사용하기</button>
+                    </li>
+                `;
+            }
+        }
+    }
+    function showModal(i) {
+        shop_modal.style.display = 'flex';
+        const imageUrl = '/images/' + myItems[i].stored_file_name;
+        shop_content.innerHTML = `
+            <h2>이 아이템을 사용하시겠습니까?</h2>
+            <div class="img_box"><img class="item_image"  width="200px" height="200px" src="${imageUrl}"></div>
+            <div class="item_inform">
+                <div class="item_name">
+                    <span>아이템이름 : </span>
+                    <span>${myItems[i].name}</span>
+                </div>
+            </div>
+            <div class="modal_btn_wrap">
+                <button class="buy_ok_btn" onclick="itemUse(myItems[${i}])">사용</button>
+                <button class="buy_cancel_btn" onclick="shop_modal.style.display = 'none';">취소</button>
+            </div>
+        `;
+    }
+    function itemUse(myItem){
+        if(myItem.name == '프로필 사진 변경권'){
+            shop_content.innerHTML = `
+                <h2>프로필 사진 변경</h2>
+                <img id="imagePreview" src="#" alt="Image Preview" style="display: none; width: 100px; height: 100px; margin:0 auto;">
+                <div style="text-align: center;">
+                    <input type="file" id="fileInput" style="margin-left:100px;margin-top:20px;" multiple>
 
-        my_items_area.innerHTML = '';
-        let myItems = await getRequest('/store/getMyItems');
+                </div>
+                <div class="modal_btn_wrap">
+                    <button class="buy_ok_btn" onclick="selectDone()">선택 완료</button>
+                    <button class="buy_cancel_btn" onclick="shop_modal.style.display = 'none';">취소</button>
+                </div>
+            `;
 
-        for(let i = 0; i<myItems.length; i++){
-            my_items_area.innerHTML += `
-                <div class="item">
-                    <span class="item-name">${myItems[i].name}</span>
-                    <span class="price">${myItems[i].price}</span>
-                    <span class="count">${myItems[i].count}</span>
+            document.getElementById('fileInput').addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                const imagePreview = document.getElementById('imagePreview');
+                const fileURL = URL.createObjectURL(file);
+
+                if (file.type.startsWith('image/')) {
+                    imagePreview.style.display = 'block';
+                    imagePreview.src = fileURL;
+                } else {
+                    imagePreview.style.display = 'none';
+                    alert('이미지 파일을 선택하세요.');
+                }
+            });
+        }
+        if(myItem.name == '닉네임 변경권'){
+            shop_content.innerHTML = `
+                <h2>닉네임 변경</h2>
+                <div id="nickNameMessageBox"></div>
+                <input type="text" placeholder="닉네임" id="nick_name"/>
+                <button onclick="nickNameDuplicateCheck()">중복체크</button>
+                <div class="modal_btn_wrap">
+                    <button class="buy_ok_btn" onclick="updateNickName()">선택 완료</button>
+                    <button class="buy_cancel_btn" onclick="shop_modal.style.display = 'none';">취소</button>
                 </div>
             `;
         }
     }
-    async function getRequest(url = '') {
-        try {
-            const response = await fetch(url, { method: 'GET' });
-            if (!response.ok) {
-                throw new Error(
-                    'Network response was not ok ' + response.statusText
-                );
-            }
-            const responseData = await response.json();
-            return responseData;
-        } catch (error) {
-            console.error('Fetch operation failed:', error);
+    async function nickNameDuplicateCheck(){
+        let url = '/member/nickNameDuplicateCheck';
+        const nick_name = document.getElementById('nick_name');
+        const nickNameMessageBox = document.getElementById('nickNameMessageBox');
+        let checkParam = {
+            nick_name: nick_name.value,
+        };
+        let result = await Request('POST', url, checkParam);
+        if (result == 1) {
+            //사용 가능
+            nickNameIsTrue = true;
+            nickNameMessageBox.innerHTML = `<span style="color: green;">사용 가능한 닉네임 입니다.</span>`;
+        } else if (result == 0) {
+            //사용 불가능
+            nickNameIsTrue = false;
+            nickNameMessageBox.innerHTML = `<span style="color: red;">존재하는 닉네임 입니다.</span>`;
         }
     }
-    //post 요청
-    async function postRequest(url = '', data = {}) {
+    async function updateNickName(){
+        const url = '/member/updateNickName';
+        const nick_name = document.getElementById('nick_name');
+        const formData = new FormData();
+
+        if(nickNameIsTrue){
+
+            formData.append('nick_name', nick_name.value)
+            let result = await postFileRequest(url, formData);
+            console.log(result);
+            if(result == 1){
+                alert('변경 완료.');
+                shop_modal.style.display = 'none';
+                getMyItems();
+            }
+        }else{
+            alert('중복체크바람');
+        }
+    }
+    async function selectDone(){
+        const fileInput = document.getElementById('fileInput');
+        const url = '/member/updateProfilePicture';
+
+        const formData = new FormData();
+        if(fileInput.files.length == 0){
+            alert('이미지 파일을 선택하세요.');
+        }
+        if(fileInput.files.length == 1){
+            formData.append('picture', fileInput.files[0]);
+        }
+        const result = await postFileRequest(url, formData);
+        if(result == 1){
+            shop_modal.style.display = 'none';
+            getMyItems();
+        }
+    }
+    async function Request(method, url, data = ''){
+        if(method == 'GET'){
+            try {
+                const response = await fetch(url, { method: 'GET' });
+                if (!response.ok) {
+                    throw new Error(
+                        'Network response was not ok ' + response.statusText
+                    );
+                }
+                const responseData = await response.json();
+                return responseData;
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+            }
+        }
+        if(method == 'POST'){
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+
+                if (!response.ok) {
+                    throw new Error(
+                        'Network response was not ok ' + response.statusText
+                    );
+                }
+
+                const responseData = await response.json();
+                return responseData.result;
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+            }
+        }
+    }
+    //post file 요청
+    async function postFileRequest(url = '', formData) {
         try {
             const response = await fetch(url, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
+                body: formData
             });
 
-            if (!response.ok) {
-                throw new Error(
-                    'Network response was not ok ' + response.statusText
-                );
-            }
+        if (!response.ok) {
+            throw new Error(
+                'Network response was not ok ' + response.statusText
+            );
+        }
 
-            // JSON 형식으로 변환된 데이터를 가져옴.
-            const responseData = await response.json();
+        // JSON 형식으로 변환된 데이터를 가져옴.
+        const responseData = await response.json();
+        return responseData;
 
-            return responseData.result;
         } catch (error) {
             console.error('Fetch operation failed:', error);
         }

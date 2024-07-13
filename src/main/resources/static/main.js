@@ -126,7 +126,6 @@ async function searchMember() {
     }
 }
 //생성자
-
 function Data(type='', data = ''){
     this.type = type;
     this.data = data;
@@ -273,7 +272,7 @@ async function receiveMessageHandler(msg) {
                     <span>score : ${score[i]}</span>
                 `;
                 userPictureBoxList[i].innerHTML = `
-                    <img src="/images/${userProfile[i]}" width="100" height="100">
+                    <img src="/images/${userProfile[i]}" width="200" height="200">
                 `;
                 userAnswerBoxList[i].style.display = 'block';
             }else{
@@ -314,6 +313,7 @@ async function receiveMessageHandler(msg) {
                         data.push(msg[j]);
                     }
                 }
+                console.log(data);
                 chattingData.push(data);
             }
         }
@@ -328,16 +328,11 @@ async function receiveMessageHandler(msg) {
             inputFriendList(friendList);
         }
     }
-    //myId
     if(msg.type == 'myId') {
         myIdArea.innerHTML = `${msg.data}`;
         myId = msg.data;
     }
-    //myNickName
-    if(msg.type == 'myNickName'){
-        myNickName = msg.data;
-    }
-    //다른 유저 로그인 status 수정
+    if(msg.type == 'myNickName'){ myNickName = msg.data; }
     if(msg.type == 'login'){
         for(let i = 0; i<friendList.length; i++){
             if(msg.data == friendList[i].friend_id){
@@ -347,7 +342,6 @@ async function receiveMessageHandler(msg) {
             }
         }
     }
-    //다른 유저 로그아웃 status 수정
     if (msg.type == "logout") {
         for(let i = 0; i<friendList.length; i++){
             if(msg.data == friendList[i].friend_id){
@@ -357,7 +351,6 @@ async function receiveMessageHandler(msg) {
             }
         }
     }
-    //request -> duplicateLogin
     if(msg.type == 'duplicateLogin'){
         alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
         location.href = '/';
@@ -492,41 +485,40 @@ function chat(member) {
         chattingArea.style.display = 'none';
     } else {
         chatContentArea.innerHTML = '';
-//        inputAllChattingData(member);
+        inputAllChattingData(member);
         chattingArea.style.display = 'block';
         chatContentArea.scrollTop = chatContentArea.scrollHeight;
     }
 }
 //채팅공간에 채팅 데이터 입력
-//function inputAllChattingData(member) {
-//    chatContentArea.innerHTML = '';
-//    for(let i = 0; i<friendList.length; i++){
-//        if(member == friendList[i].friend_id){
-//            for(let j = 0; j<chattingData[i].length; j++){
-//                if (chattingData[i][j].sender == myId) {
-//                    chatContentArea.innerHTML += `
-//                        <div class="chatBallonArea">
-//                            <p class="chat-ballon1">${chattingData[i][j].content}</p>
-//                        </div>
-//                    `;
-//                } else {
-//                    chatContentArea.innerHTML += `
-//                        <div class="chatBallonArea">
-//                            <p class="chat-ballon2">${chattingData[i][j].content}</p>
-//                        </div>
-//                    `;
-//                }
-//            }
-//        }
-//    }
-//}
+function inputAllChattingData(member) {
+    chatContentArea.innerHTML = '';
+    for(let i = 0; i<friendList.length; i++){
+        if(member == friendList[i].friend_id){
+            if(chattingData[i] != undefined){
+                for(let j = 0; j<chattingData[i].length; j++){
+                    if (chattingData[i][j].sender == myId) {
+                        chatContentArea.innerHTML += `
+                            <div class="chatBallonArea">
+                                <p class="chat-ballon1">${chattingData[i][j].content}</p>
+                            </div>
+                        `;
+                    } else {
+                        chatContentArea.innerHTML += `
+                            <div class="chatBallonArea">
+                                <p class="chat-ballon2">${chattingData[i][j].content}</p>
+                            </div>
+                        `;
+                    }
+                }
+            }
+        }
+    }
+}
 //메시지 set
 function setMessage() {
-    const requestParam = new RequestParam('sendMessage'
-        ,memberNameArea.innerHTML
-        ,message.value
-    );
-    send(requestParam);
+    const data = new Data('sendMessage', { 'receiver' : getMember(), 'content' : message.value});
+    send(data);
     message.value = '';
 }
 //메시지 전송

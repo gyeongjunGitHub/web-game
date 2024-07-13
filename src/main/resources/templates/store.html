@@ -82,6 +82,70 @@
           font-weight: 600;
           cursor: pointer;
         }
+        .shop_modal{
+        width:100vw;
+        height:100vh;
+        display:none;
+        justify-content:center;
+        align-items:center;
+        background-color:#00000070;
+        position:absolute;
+        top:0;
+        }
+        .shop_content{
+        background-color:white;
+        width:800px;
+        padding:20px;
+
+        }
+        .shop_content>h2{
+        margin-bottom:50px;
+        text-align:center;
+        font-size:30px;
+        }
+       .item_inform{
+       width:70%;
+       margin:0 auto;
+       padding:10px 30px;
+       background-color:#eee;
+       font-size:20px;
+       }
+       .item_name,.item_price{
+        display:flex;
+        padding:10px 0;
+       }
+       .item_name>span:first-child,
+       .item_price>span:first-child{
+       display:block;
+        width:30%;
+
+       }
+       .modal_btn_wrap{
+
+       text-align:center;
+       }
+       .buy_ok_btn{
+       background-color:rgba(54, 80, 54, 0.527);
+       }
+       .buy_cancel_btn{
+       background-color:#ae6975;
+       }
+        .buy_ok_btn,.buy_cancel_btn{
+        display:inline-block;
+        width:15%;
+        padding:5px 0;
+        margin:30px 0 10px;
+
+        border:none;
+        color:white;
+        font-size:20px;
+        cursor:pointer;
+        }
+        .img_box{
+        text-align:center;
+        margin-bottom:20px;
+        }
+
     </style>
 </head>
 <body>
@@ -91,129 +155,131 @@
     <a href="/main">메인</a>
     <a href="/member/logout">로그아웃</a>
     <a href="/store">상점</a>
+    <a href="/myItems">내 아이템</a>
     <a href="/myPage">마이페이지</a>
 </div>
+<div class="shop_modal">
+    <div class="shop_content">
+
+    </div>
+</div>
 <div class="container">
-    <!-- <a href="#" onclick="getItems()">상점</a>
-    <div class="items_area"></div> -->
     <div class="shop">
         <h1 class="shop_tit">상점</h1>
-        <ul class="shop_item_wrap">
-            <li class="shop_item">
-                <div class="item_img">
-                    <img src="./images.png" alt="" s />
-                </div>
-                <p class="item_tit">닉네임 변경권</p>
-                <p class="item_price">10000원</p>
-                <button class="buy_btn">구매하기</button>
-            </li>
-            <li class="shop_item">
-                <div class="item_img">
-                    <img src="./images.png" alt="" width="100%" />
-                </div>
-                <p class="item_tit">닉네임 변경권</p>
-                <p class="item_price">10000원</p>
-                <button class="buy_btn">구매하기</button>
-            </li>
-            <li class="shop_item">
-                <div class="item_img">
-                    <img src="./images.png" alt="" width="100%" />
-                </div>
-                <p class="item_tit">닉네임 변경권</p>
-                <p class="item_price">10000원</p>
-                <button class="buy_btn">구매하기</button>
-            </li>
-            <li class="shop_item">
-                <div class="item_img">
-                    <img src="./images.png" alt="" width="100%" />
-                </div>
-                <p class="item_tit">닉네임 변경권</p>
-                <p class="item_price">10000원</p>
-                <button class="buy_btn">구매하기</button>
-            </li>
-            <li class="shop_item">
-                <div class="item_img">
-                    <img src="./images.png" alt="" width="100%" />
-                </div>
-                <p class="item_tit">닉네임 변경권</p>
-                <p class="item_price">10000원</p>
-                <button class="buy_btn">구매하기</button>
-            </li>
-            <li class="shop_item">
-                <div class="item_img">
-                    <img src="./images.png" alt="" width="100%" />
-                </div>
-                <p class="item_tit">닉네임 변경권</p>
-                <p class="item_price">10000원</p>
-                <button class="buy_btn">구매하기</button>
-            </li>
-        </ul>
+        <h3 class="game_point"></h3>
+        <ul class="shop_item_wrap"></ul>
     </div>
 </div>
 <script>
-    const items_area = document.querySelector('.items_area');
-
+    const shop_item_wrap = document.querySelector('.shop_item_wrap');
+    const shop_content = document.querySelector('.shop_content');
+    const shop_modal = document.querySelector('.shop_modal');
+    const game_point = document.querySelector('.game_point');
     let items = [];
+    let myGamePoint;
+    //아이템 목록 요청
+    getMyGamePoint();
     getItems();
 
+    async function getMyGamePoint(){
+        myGamePoint = await Request('GET', '/member/getMyGamePoint');
+        game_point.innerHTML = `내 게임포인트 : ${myGamePoint}`;
+    }
     async function getItems() {
-      items_area.style.display = 'block';
-
-      // [ '/store/getItems' ] -> items = [{ name : ㅁㅁㅁ , price : xxx , count : xxx}, ..... ]
-      items = await getRequest('/store/getItems');
-
-      items_area.innerHTML = '';
-      for (let i = 0; i < items.length; i++) {
-        items_area.innerHTML += `
-              <div class="item">
-                  <span class="item-name">${items[i].name}</span>
-                  <span class="price">${items[i].price}</span>
-                  <button onclick="buy(${i})">구매</button>
-              </div>
-          `;
-      }
-    }
-
-    function buy(i) {
-      postRequest('/store/buy', items[i]);
-    }
-
-    async function getRequest(url = '') {
-      try {
-        const response = await fetch(url, { method: 'GET' });
-        if (!response.ok) {
-          throw new Error(
-            'Network response was not ok ' + response.statusText
-          );
+        items = await Request('GET', '/store/getItems');
+        shop_item_wrap.innerHTML = '';
+        for (let i = 0; i < items.length; i++) {
+            const imageUrl = '/images/' + items[i].stored_file_name;
+            shop_item_wrap.innerHTML += `
+                <li class="shop_item">
+                <div class="item_img">
+                <img src="${imageUrl}" alt="" s />
+                </div>
+                    <p class="item_tit">${items[i].name}</p>
+                    <p class="item_price">${items[i].price}</p>
+                    <button class="buy_btn" onclick="showModal(${i})">구매하기</button>
+                </li>
+            `;
         }
-        const responseData = await response.json();
-        return responseData;
-      } catch (error) {
-        console.error('Fetch operation failed:', error);
-      }
     }
-    //post 요청
-    async function postRequest(url = '', data = {}) {
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(data),
-        });
-
-        if (!response.ok) {
-          throw new Error(
-            'Network response was not ok ' + response.statusText
-          );
+    async function buy(item){
+        shop_modal.style.display = 'none'
+        const result = await Request('POST', '/store/buy', item)
+        console.log(result);
+        if(result == 1){
+            getMyGamePoint();
         }
+    }
+    function showModal(i) {
+        shop_modal.style.display = 'flex';
+        const imageUrl = '/images/' + items[i].stored_file_name;
+        shop_content.innerHTML = `
+            <h2>이 아이템을 구매하시겠습니까?</h2>
+            <div class="img_box"><img class="item_image"  width="200px" height="200px" src="${imageUrl}"></div>
 
-        // JSON 형식으로 변환된 데이터를 가져옴.
-        const responseData = await response.json();
+            <div class="item_inform">
+                <div class="item_name">
+                    <span>아이템이름 : </span>
+                    <span>${items[i].name}</span>
+                </div>
+                <div class="item_price">
+                    <span>아이템가격 : </span>
+                    <span>${items[i].price}</span>
+                </div>
+            </div>
+        `;
+        if(myGamePoint >= items[i].price){
+            shop_content.innerHTML += `
+                <div class="modal_btn_wrap">
+                    <button class="buy_ok_btn" onclick="buy(items[${i}])">확인</button>
+                    <button class="buy_cancel_btn" onclick="shop_modal.style.display = 'none';">취소</button>
+                </div>
+            `;
+        }else{
+            shop_content.innerHTML += `
+                <div class="modal_btn_wrap">
+                    <span style="font-size : 22px; color :  red; display: inline-block; margin-top:15px;">게임 포인트 부족.</span><br>
+                    <button class="buy_cancel_btn" onclick="shop_modal.style.display = 'none';">취소</button>
+                </div>
+            `;
+        }
+    }
 
-        return responseData.result;
-      } catch (error) {
-        console.error('Fetch operation failed:', error);
-      }
+
+    async function Request(method, url, data = ''){
+        if(method == 'GET'){
+            try {
+                const response = await fetch(url, { method: 'GET' });
+                if (!response.ok) {
+                    throw new Error(
+                        'Network response was not ok ' + response.statusText
+                    );
+                }
+                const responseData = await response.json();
+                return responseData;
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+            }
+        }
+        if(method == 'POST'){
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+                });
+                if (!response.ok) {
+                    throw new Error(
+                        'Network response was not ok ' + response.statusText
+                    );
+                }
+                const responseData = await response.json();
+                console.log(response);
+                return responseData;
+            } catch (error) {
+                console.error('Fetch operation failed:', error);
+            }
+        }
     }
 </script>
 </body>
