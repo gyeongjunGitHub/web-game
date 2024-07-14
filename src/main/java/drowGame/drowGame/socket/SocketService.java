@@ -94,18 +94,14 @@ public class SocketService {
         // socket sessionMap 순회
         for(String memberKey : sm.getSessionMap().keySet()){
             WebSocketSession wss = sm.getSessionMap().get(memberKey);
+
             // 소캣에 등록된 Member 아이디와 myId가 같지 않으면 (자기 자신 제외)
             String memberId = sm.getMemberId(memberKey);
             if(!myId.equals(memberId)){
-                for (String membersKey : sm.getSessionMap().keySet()) {
-                    // 메시지를 받는 사람 ID와 보내려는 member ID가 동일하지 않으면 전송
-                    if (!memberId.equals(sm.getMemberId(membersKey))) {
-                        Data data = new Data();
-                        data.setType("logout");
-                        data.setData(sm.getMemberId(membersKey));
-                        sendMessage(wss, dtoToJson(data));
-                    }
-                }
+                Data data = new Data();
+                data.setType("logout");
+                data.setData(myId);
+                sendMessage(wss, dtoToJson(data));
             }
         }
     }

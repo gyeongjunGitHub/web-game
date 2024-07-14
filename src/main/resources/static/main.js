@@ -418,6 +418,7 @@ async function receiveMessageHandler(msg) {
         }
     }
     if (msg.type == "logout") {
+        console.log(msg);
         for(let i = 0; i<friendList.length; i++){
             if(msg.data == friendList[i].friend_id){
                 friendList[i].status = 'offline';
