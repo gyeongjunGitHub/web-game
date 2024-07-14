@@ -172,28 +172,57 @@ public class MemberService {
         }
     }
     @Transactional
-    public void selectBasicProfile(MultipartFile file, HttpSession session) throws IOException {
-        String originalFileName = file.getOriginalFilename();
-        String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
+    public boolean selectBasicProfile(MultipartFile file, HttpSession session) throws IOException {
+        String myId = memberSessionService.getMemberId(session.getId());
+        ProfilePictureEntity byId = profilePictureRepository.findById(myId);
+        if(byId == null){
+            String originalFileName = file.getOriginalFilename();
+            String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
 
-        String windowSavePath = "C:/images/" + storedFileName;
-        String ec2SavePath = "/home/images/" + storedFileName;
+            String windowSavePath = "C:/images/" + storedFileName;
+            String ec2SavePath = "/home/images/" + storedFileName;
 
-        File saveFile = new File(windowSavePath);
+            File saveFile = new File(ec2SavePath);
 
-        //폴더가 없을 경우 폴더 생성!
-        if(!saveFile.exists()){
-            saveFile.mkdirs();
+            //폴더가 없을 경우 폴더 생성!
+            if(!saveFile.exists()){
+                saveFile.mkdirs();
+            }
+
+            //file 저장
+            file.transferTo(saveFile);
+
+            ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
+            profilePictureEntity.setOriginal_file_name(originalFileName);
+            profilePictureEntity.setStored_file_name(storedFileName);
+            profilePictureEntity.setMember_id(myId);
+            return profilePictureRepository.saveProfilePicture(profilePictureEntity);
+        }else{
+            try {
+                String originalFileName = file.getOriginalFilename();
+                String storedFileName = System.currentTimeMillis() + "_" + originalFileName;
+
+                String windowSavePath = "C:/images/" + storedFileName;
+                String ec2SavePath = "/home/images/" + storedFileName;
+
+                File saveFile = new File(ec2SavePath);
+
+                //폴더가 없을 경우 폴더 생성!
+                if(!saveFile.exists()){
+                    saveFile.mkdirs();
+                }
+
+                //file 저장
+                file.transferTo(saveFile);
+
+                ProfilePictureEntity byId1 = profilePictureRepository.findById(myId);
+                byId1.setOriginal_file_name(originalFileName);
+                byId1.setStored_file_name(storedFileName);
+                return true;
+            }catch (Exception e){
+                return false;
+            }
         }
-
-        //file 저장
-        file.transferTo(saveFile);
-
-        ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
-        profilePictureEntity.setOriginal_file_name(originalFileName);
-        profilePictureEntity.setStored_file_name(storedFileName);
-        profilePictureEntity.setMember_id(memberSessionService.getMemberId(session.getId()));
-        profilePictureRepository.saveProfilePicture(profilePictureEntity);
     }
     @Transactional
     public void updateProfilePicture(HttpSession httpSession, MultipartFile file) throws IOException {
@@ -205,7 +234,7 @@ public class MemberService {
         String windowSavePath = "C:/images/" + storedFileName;
         String ec2SavePath = "/home/images/" + storedFileName;
 
-        File saveFile = new File(windowSavePath);
+        File saveFile = new File(ec2SavePath);
 
         //폴더가 없을 경우 폴더 생성!
         if(!saveFile.exists()){
@@ -234,16 +263,20 @@ public class MemberService {
         Optional<MemberEntity> byId = memberRepository.findById(memberDTO.getId());
         if (byId.isPresent()){
             MemberEntity memberEntity = byId.get();
-            ProfilePictureEntity basicFile = ProfilePictureEntity.getBasicFile(memberEntity);
-            profilePictureRepository.saveProfilePicture(basicFile);
+            ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
+            ProfilePictureDTO basicFile = getBasicFile();
+
+            profilePictureEntity.setMember_id(memberEntity.getId());
+            profilePictureEntity.setOriginal_file_name(basicFile.getOriginal_file_name());
+            profilePictureEntity.setStored_file_name(basicFile.getStored_file_name());
+
+            profilePictureRepository.saveProfilePicture(profilePictureEntity);
         }
     }
-    public int profileCheck(HttpSession session) {
-        ProfilePictureEntity byId = profilePictureRepository.findById(memberSessionService.getMemberId(session.getId()));
-        if(byId == null){
-            return 1; // 기본 프로필 사진이 없음
-        }
-        return 0; // 기본 프로필 사진이 이미 있음
+
+    public ProfilePictureDTO getBasicFile(){
+        ProfilePictureEntity byId = profilePictureRepository.findById("admin");
+        return new ProfilePictureDTO(byId);
     }
 
     public ProfilePictureDTO getProfilePicture(String id) {
@@ -298,5 +331,15 @@ public class MemberService {
             chattingDTOList.add(chattingDTO);
         }
         return chattingDTOList;
+    }
+    @Transactional
+    public void setIsRead(HttpSession httpSession, String memberId) {
+        String myId = memberSessionService.getMemberId(httpSession.getId());
+        List<ChattingEntity> chatting = chattingRepository.getChatting(myId, memberId);
+        for (ChattingEntity c : chatting){
+            if(c.getReceiver().equals(myId)){
+                c.setReceiver_is_read(true);
+            }
+        }
     }
 }

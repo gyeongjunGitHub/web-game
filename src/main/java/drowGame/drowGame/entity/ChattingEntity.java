@@ -30,6 +30,9 @@ public class ChattingEntity {
     @Column(name = "date")
     private LocalDateTime date;
 
+    @Column(name = "receiver_is_read")
+    private boolean receiver_is_read;
+
     public ChattingEntity(){}
     public ChattingEntity(ChattingDTO chattingDTO){
         this.sender = chattingDTO.getSender();

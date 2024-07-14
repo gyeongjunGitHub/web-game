@@ -85,17 +85,10 @@ public class MemberController {
         return memberService.getProfilePicture(id);
     }
 
-    @GetMapping("/profileCheck")
-    @ResponseBody
-    public int profileCheck(HttpSession session){
-        return memberService.profileCheck(session);
-    }
-
     @PostMapping("/selectBasicProfile")
     @ResponseBody
-    public ResponseEntity<Void> setBasicProfileProfile(@RequestParam(name = "file") MultipartFile file, HttpSession session) throws IOException {
-        memberService.selectBasicProfile(file, session);
-        return ResponseEntity.ok().build();
+    public boolean setBasicProfileProfile(@RequestParam(name = "file") MultipartFile file, HttpSession session) throws IOException {
+        return memberService.selectBasicProfile(file, session);
     }
     @GetMapping("/getMyGamePoint")
     @ResponseBody
@@ -124,6 +117,13 @@ public class MemberController {
     @GetMapping("/getChatting")
     @ResponseBody
     public ResponseEntity<List<ChattingDTO>> getChatting(@RequestParam(name = "member_id")String member_id, HttpSession httpSession) {
+
         return ResponseEntity.ok(memberService.getChatting(httpSession, member_id));
+    }
+
+    @GetMapping("/setIsRead")
+    @ResponseBody
+    public void setIsRead(@RequestParam(name = "member_id")String member_id, HttpSession httpSession){
+        memberService.setIsRead(httpSession, member_id);
     }
 }

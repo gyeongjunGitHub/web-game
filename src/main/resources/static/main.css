@@ -488,6 +488,15 @@ div {
   height: 15px;
   border-radius: 50%;
 }
+ .chat-alarm {
+      display: inline-block;
+      background-color: rgb(228, 173, 71);
+      color: white;
+
+      padding: 0 5px;
+      border-radius: 20px;
+      font-size: 12px;
+    }
 .message-area {
   display: flex;
   margin: 0 -20px;

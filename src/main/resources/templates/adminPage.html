@@ -187,27 +187,37 @@
       if (itemPicture.files.length == 1) {
         formData.append('itemPicture', itemPicture.files[0]);
       }
-      postFileRequest(url, formData);
+      const result = await postFileRequest(url, formData);
+      if(result){
+        alert('등록 성공!!');
+        name.value = '';
+        price.value = '';
+        itemPicture.value = '';
+      }else{
+        alert('등록 실패.');
+        name.value = '';
+        price.value = '';
+        itemPicture.value = '';
+      }
     }
+
     async function setProfile() {
-      let result = await getRequest('/member/profileCheck');
-
-      // result : 1 프로필 설정 가능
-      // result : 0 이미 프로필 사진 존재
-      // result : 2 로그인 화면으로 보내버리기
-
-      if (result == 1) {
         const formData = new FormData();
         if (file.files.length == 1) {
-          formData.append('file', file.files[0]);
-          const url = '/member/selectBasicProfile';
-          postFileRequest(url, formData);
+            formData.append('file', file.files[0]);
+            const url = '/member/selectBasicProfile';
+
+            const result = await postFileRequest(url, formData);
+            if(result){
+                alert('등록 성공!!');
+                file.value = '';
+            }else{
+                alert('등록 실패.');
+                file.value = '';
+            }
         }
-      }
-      if (result == 2) {
-        location.href = '/';
-      }
     }
+
     async function getRequest(url = '') {
       try {
         const response = await fetch(url, { method: 'GET' });
@@ -235,7 +245,7 @@
             'Network response was not ok ' + response.statusText
           );
         } else {
-          console.log('등록 성공!!');
+          return response.json();
         }
       } catch (error) {
         console.error('Fetch operation failed:', error);

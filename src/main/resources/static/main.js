@@ -37,7 +37,8 @@ let chattingAreaMemberName = '';
 let chattingAreaIsTrue = false;
 let memberList = [];
 let friendList = [];
-let chattingData = [];
+let chattingDataList = [];
+let chattingIsReadFalseCount = [];
 let myTurn;
 let cycle = 0;
 let isCorrect = false;
@@ -90,8 +91,12 @@ async function getRequest(url = '') {
                 'Network response was not ok ' + response.statusText
             );
         }
-        const responseData = await response.json();
-        return responseData;
+        const text = await response.text();
+        // 응답이 비어 있지 않은지 확인
+        if (text.length != 0) {
+            const responseData = JSON.parse(text);
+            return responseData;
+        }
     } catch (error) {
         console.error('Fetch operation failed:', error);
     }
@@ -302,28 +307,101 @@ async function receiveMessageHandler(msg) {
     }
     if(msg.type == 'addFriendRequest'){ addFriendProc(msg); }
     if (msg.type == 'sendMessage') {
-        console.log(msg);
         if (chattingAreaIsTrue){
             if(msg.sender == getMember() && msg.receiver == myId){
-                chattingData.push(msg);
-                inputChattingData(chattingData);
+                //c.getReceiver().equals(myId)
+                getRequest(`/member/setIsRead?member_id=${getMember()}`);
+                msg.receiver_is_read = true;
+                for(let i = 0; i < friendList.length; i++){
+                    if(msg.sender == friendList[i].friend_id){
+                        chattingDataList[i].push(msg);
+                        chatContentArea.innerHTML = '';
+                        inputChattingData(chattingDataList[i]);
+                    }
+                }
             }
-            if(msg.sender == myId && msg.receiver == getMember()){
-                chattingData.push(msg);
-                inputChattingData(chattingData);
+            else if(msg.sender == myId && msg.receiver == getMember()){
+                for(let i = 0; i < friendList.length; i++){
+                    if(msg.receiver == friendList[i].friend_id){
+                        chattingDataList[i].push(msg);
+                        chatContentArea.innerHTML = '';
+                        inputChattingData(chattingDataList[i]);
+                    }
+                }
             }
+            else{
+                for(let i = 0; i<friendList.length; i++){
+                    if(msg.sender == myId && msg.receiver == friendList[i].friend_id){
+                        chattingDataList[i].push(msg);
+                    }
+                    if(msg.sender == friendList[i].friend_id && msg.receiver == myId){
+                        chattingDataList[i].push(msg);
+                    }
+                }
+
+                chattingIsReadFalseCount = [];
+                for(let i = 0; i<chattingDataList.length; i++){
+                    let count = 0;
+                    for(let j = 0; j<chattingDataList[i].length; j++){
+                        if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
+                            count++;
+                        }
+                    }
+                    chattingIsReadFalseCount.push(count);
+                }
+                document.querySelector('.user-menu').innerHTML = '';
+                inputFriendList(friendList);
+            }
+        }
+        else{
+            for(let i = 0; i<friendList.length; i++){
+                if(msg.sender == myId && msg.receiver == friendList[i].friend_id){
+                    chattingDataList[i].push(msg);
+                }
+                if(msg.sender == friendList[i].friend_id && msg.receiver == myId){
+                    chattingDataList[i].push(msg);
+                }
+            }
+
+            chattingIsReadFalseCount = [];
+            for(let i = 0; i<chattingDataList.length; i++){
+                let count = 0;
+                for(let j = 0; j<chattingDataList[i].length; j++){
+                    if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
+                        count++;
+                    }
+                }
+                chattingIsReadFalseCount.push(count);
+            }
+            document.querySelector('.user-menu').innerHTML = '';
+            inputFriendList(friendList);
         }
     }
     if (Array.isArray(msg)) {
         if(msg[0].type == 'friend'){
+            chattingIsReadFalseCount = [];
+            chattingDataList = [];
             friendList = [];
             for(let i = 0; i<msg.length; i++){
                 const friend = new Friend(msg[i].data);
                 friendList.push(friend);
             }
-            document.querySelector('.user-menu').innerHTML = '';
-            inputFriendList(friendList);
         }
+        for(let i = 0; i<friendList.length; i++){
+            let result = await getRequest(`/member/getChatting?member_id=${friendList[i].friend_id}`);
+            chattingDataList.push(result);
+        }
+        for(let i = 0; i<chattingDataList.length; i++){
+            let count = 0;
+            for(let j = 0; j<chattingDataList[i].length; j++){
+                if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
+                    count++;
+                }
+            }
+            chattingIsReadFalseCount.push(count);
+        }
+        document.querySelector('.user-menu').innerHTML = '';
+        inputFriendList(friendList);
     }
     if(msg.type == 'myId') {
         myIdArea.innerHTML = `${msg.data}`;
@@ -413,25 +491,57 @@ function inputFriendList(friendList){
 }
 //유저 온라인 상태 set
 function setMemberStateOnline(id, nick_name){
-    document.querySelector('.user-menu').innerHTML +=
-        `
-            <li class="user-list" onclick="chat('${id}')">
-                <div class="user-name">${nick_name}</div>
-                <div class="user-online"></div>
-            </li>
-        `
-    ;
+    for(let i = 0; i<friendList.length; i++){
+        if(id == friendList[i].friend_id){
+            if(chattingIsReadFalseCount[i] == 0){
+                document.querySelector('.user-menu').innerHTML +=
+                    `
+                        <li class="user-list" onclick="chat('${id}')">
+                            <div class="user-name">${nick_name}</div>
+                            <div class="user-online"></div>
+                        </li>
+                    `
+                ;
+            }
+            else{
+                document.querySelector('.user-menu').innerHTML +=
+                    `
+                        <li class="user-list" onclick="chat('${id}')">
+                            <div class="user-name">${nick_name} <span class="chat-alarm">${chattingIsReadFalseCount[i]}</span></div>
+                            <div class="user-online"></div>
+                        </li>
+                    `
+                ;
+            }
+        }
+    }
 }
 //유저 오프라인 상태 set
 function setMemberStateOffline(id, nick_name){
-    document.querySelector('.user-menu').innerHTML +=
-        `
-            <li class="user-list" onclick="chat('${id}')">
-                <div class="user-name">${nick_name}</div>
-                <div class="user-offline"></div>
-            </li>
-        `
-    ;
+    for(let i = 0; i<friendList.length; i++){
+        if(id == friendList[i].friend_id){
+            if(chattingIsReadFalseCount[i] == 0){
+                document.querySelector('.user-menu').innerHTML +=
+                    `
+                        <li class="user-list" onclick="chat('${id}')">
+                            <div class="user-name">${nick_name}</div>
+                            <div class="user-offline"></div>
+                        </li>
+                    `
+                ;
+            }
+            else{
+                document.querySelector('.user-menu').innerHTML +=
+                    `
+                        <li class="user-list" onclick="chat('${id}')">
+                            <div class="user-name">${nick_name} <span class="chat-alarm">${chattingIsReadFalseCount[i]}</span></div>
+                            <div class="user-offline"></div>
+                        </li>
+                    `
+                ;
+            }
+        }
+    }
 }
 //현재 열려있는 채팅창의 member 를 저장
 let member;
@@ -457,10 +567,32 @@ async function chat(member) {
 
     //채팅 공간이 열려있을 때
     if (chattingAreaIsTrue) {
-        chattingData=[];
-        chattingData = await getRequest(`/member/getChatting?member_id=${getMember()}`);
-        chatContentArea.innerHTML = '';
-        inputChattingData(chattingData);
+        getRequest(`/member/setIsRead?member_id=${getMember()}`);
+        for(let i = 0; i < friendList.length; i++){
+            if(getMember() == friendList[i].friend_id){
+                chatContentArea.innerHTML = '';
+                for(let j = 0; j < chattingDataList[i].length; j++){
+                    if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read != true){
+                        chattingDataList[i][j].receiver_is_read = true;
+                    }
+                }
+                inputChattingData(chattingDataList[i]);
+            }
+        }
+
+        chattingIsReadFalseCount = [];
+        for(let i = 0; i<chattingDataList.length; i++){
+            let count = 0;
+            for(let j = 0; j<chattingDataList[i].length; j++){
+                if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
+                    count++;
+                }
+            }
+            chattingIsReadFalseCount.push(count);
+        }
+        document.querySelector('.user-menu').innerHTML = '';
+        inputFriendList(friendList);
+
         chattingArea.style.display = 'block';
         chatContentArea.scrollTop = chatContentArea.scrollHeight;
     } else {

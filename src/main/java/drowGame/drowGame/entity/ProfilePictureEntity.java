@@ -22,11 +22,4 @@ public class ProfilePictureEntity extends Time{
     @Column(name = "member_id")
     private String member_id;
 
-    public static ProfilePictureEntity getBasicFile(MemberEntity memberEntity){
-        ProfilePictureEntity profilePictureEntity = new ProfilePictureEntity();
-        profilePictureEntity.setOriginal_file_name("기본.png");
-        profilePictureEntity.setStored_file_name("1720427482598_기본.png");
-        profilePictureEntity.setMember_id(memberEntity.getId());
-        return profilePictureEntity;
-    }
 }

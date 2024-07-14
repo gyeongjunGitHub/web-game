@@ -14,6 +14,7 @@ public class ChattingDTO {
     private String receiver;
     private String content;
     private String date;
+    private boolean receiver_is_read;
 
     public ChattingDTO (){}
     public ChattingDTO(ChattingEntity chattingEntity){
@@ -22,5 +23,7 @@ public class ChattingDTO {
         this.receiver = chattingEntity.getReceiver();
         this.content = chattingEntity.getContent();
         this.date = chattingEntity.getDate().toString();
+        this.receiver_is_read = chattingEntity.isReceiver_is_read();
+
     }
 }

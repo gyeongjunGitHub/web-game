@@ -22,10 +22,10 @@ public class StoreController {
     private final StoreService storeService;
 
     @PostMapping("/itemRegistration")
-    public void itemRegistration(@RequestParam(name = "itemPicture") MultipartFile itemPicture,
+    public boolean itemRegistration(@RequestParam(name = "itemPicture") MultipartFile itemPicture,
                                  @RequestParam(name = "name") String name,
                                  @RequestParam(name = "price") int price) throws IOException {
-        storeService.itemRegistration(itemPicture, name, price);
+        return storeService.itemRegistration(itemPicture, name, price);
     }
 
     @GetMapping("/getItems")
@@ -34,8 +34,7 @@ public class StoreController {
     }
 
     @PostMapping("/buy")
-    public int buy(@RequestBody String item, HttpSession httpSession){
-        storeService.buy(item, httpSession);
-        return 1;
+    public boolean buy(@RequestBody String item, HttpSession httpSession){
+        return storeService.buy(item, httpSession);
     }
 }

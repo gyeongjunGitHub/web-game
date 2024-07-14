@@ -205,9 +205,11 @@
     async function buy(item){
         shop_modal.style.display = 'none'
         const result = await Request('POST', '/store/buy', item)
-        console.log(result);
-        if(result == 1){
+        if(result){
+            alert('구매 성공!!');
             getMyGamePoint();
+        }else{
+            alert('구매 실패.');
         }
     }
     function showModal(i) {
@@ -274,7 +276,6 @@
                     );
                 }
                 const responseData = await response.json();
-                console.log(response);
                 return responseData;
             } catch (error) {
                 console.error('Fetch operation failed:', error);

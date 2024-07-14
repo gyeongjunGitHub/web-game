@@ -13,15 +13,25 @@ public class StoreRepository {
 
     @PersistenceContext
     EntityManager em;
-    public void itemRegistration(ItemEntity itemEntity) {
-        em.persist(itemEntity);
+    public boolean itemRegistration(ItemEntity itemEntity) {
+        try {
+            em.persist(itemEntity);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
     public List<ItemEntity> getItems() {
         return em.createQuery("select i from ItemEntity as i", ItemEntity.class)
                 .getResultList();
     }
 
-    public void buy(MyItemsEntity myItemsEntity) {
-        em.persist(myItemsEntity);
+    public boolean buy(MyItemsEntity myItemsEntity) {
+        try {
+            em.persist(myItemsEntity);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
     }
 }
