@@ -27,6 +27,16 @@ public class MemberSessionService {
         }
         return null;
     }
+    public String getMemberIdByNickName(String nick_name){
+        for(String key : memberSession.keySet()){
+            MemberDTO memberDTO = memberSession.get(key);
+            System.out.println(memberDTO.getNick_name());
+            if(memberDTO.getNick_name().equals(nick_name)){
+                return memberDTO.getId();
+            }
+        }
+        return null;
+    }
     public String getMemberNickName(String httpSessionId){
         if(memberSession.get(httpSessionId) != null){
             return memberSession.get(httpSessionId).getNick_name();

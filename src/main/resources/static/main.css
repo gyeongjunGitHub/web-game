@@ -255,6 +255,21 @@ div {
   top: 0;
   z-index: -1;
 }
+.chat-time1,.chat-time2{
+display:inline-block;
+position:absolute;
+font-size:10px;
+}
+.chat-time1{
+left:-5px;
+bottom:0;
+transform:translateX(-100%);
+}
+.chat-time2{
+left:calc(100% + 4px);
+bottom:0;
+
+}
 #message {
   border: none;
   margin: 0;

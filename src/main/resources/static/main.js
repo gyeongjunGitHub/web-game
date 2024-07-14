@@ -104,29 +104,34 @@ async function getRequest(url = '') {
 //유저 검색 함수
 async function searchMember() {
     if(searchMemberValue.value != myId){
-        const url1 = `/member/isAlreadyFriend?id=${searchMemberValue.value}&myId=${myId}`;
+        const url1 = `/member/isAlreadyFriend?nick_name=${searchMemberValue.value}&myId=${myId}`;
         let isAlreadyFriend = await getRequest(url1);
 
         // result == 0 친구 아님, result == 1 이미 친구
         if(isAlreadyFriend.result == 0){
-            const url = `/member/searchMember?id=${searchMemberValue.value}`;
+            const url = `/member/searchMember?nick_name=${searchMemberValue.value}`;
             let result = await getRequest(url);
             if (result.id != null) {
                 searchResult.innerHTML = `
-                    <div class="result-name">${result.id}</div>
+                    <div class="result-name">${result.nick_name}</div>
                     <button class="plus-btn" onclick="addFriendRequest('${result.id}')">+</button>
                 `;
             }
         }
         if(isAlreadyFriend.result == 1){
-            const url = `/member/searchMember?id=${searchMemberValue.value}`;
+            const url = `/member/searchMember?nick_name=${searchMemberValue.value}`;
             let result = await getRequest(url);
             if (result.id != null) {
                 searchResult.innerHTML = `
-                    <div class="result-name">${result.id}</div>
+                    <div class="result-name">${result.nick_name}</div>
                     <div style="color: red; font-size:10px;">이미친구입니다.</div>
                 `;
             }
+        }
+        if(isAlreadyFriend.result == -1){
+            searchResult.innerHTML = `
+                <div style="color: red; font-size:10px;">없는 유저입니다.</div>
+            `;
         }
     }
 }
@@ -610,17 +615,22 @@ function chattingAreaClose(){
 function inputChattingData(chattingData){
     //채팅 데이터 입력
     for(let i = 0; i < chattingData.length; i++){
+        let hour = chattingData[i].date.split('T')[1].split(':')[0];
+        let minute = chattingData[i].date.split('T')[1].split(':')[1];
+        let time = hour+':'+minute;
         if(chattingData[i].sender == myId){
             chatContentArea.innerHTML += `
                 <div class="chatBallonArea">
-                    <p class="chat-ballon1">${chattingData[i].content}</p>
+
+                    <p class="chat-ballon1">${chattingData[i].content}<span class="chat-time1">${time}</span></p>
                 </div>
             `;
         }
         if(chattingData[i].sender == getMember()){
             chatContentArea.innerHTML += `
                 <div class="chatBallonArea">
-                    <p class="chat-ballon2">${chattingData[i].content}</p>
+
+                    <p class="chat-ballon2">${chattingData[i].content}<span class="chat-time2">${time}</span></p>
                 </div>
             `;
         }

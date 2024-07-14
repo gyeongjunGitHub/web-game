@@ -63,14 +63,14 @@ public class MemberController {
 
     @GetMapping("/searchMember")
     @ResponseBody
-    public MemberDTO searchMember(@RequestParam(name = "id") String id) {
-        return memberService.findById(id);
+    public MemberDTO searchMember(@RequestParam(name = "nick_name") String nick_name) {
+        return memberService.findByNickName(nick_name);
     }
 
     @GetMapping("/isAlreadyFriend")
     @ResponseBody
-    public ResultDTO alreadyFriendCheck(@RequestParam(name = "id") String id, @RequestParam(name = "myId") String myId) {
-        return memberService.alreadyFriendCheck(id, myId);
+    public ResultDTO alreadyFriendCheck(@RequestParam(name = "nick_name") String nick_name, @RequestParam(name = "myId") String myId) {
+        return memberService.alreadyFriendCheck(nick_name, myId);
     }
 
     @GetMapping("/getMemberInfo")

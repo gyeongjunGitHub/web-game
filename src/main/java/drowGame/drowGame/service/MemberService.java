@@ -106,11 +106,11 @@ public class MemberService {
         ObjectMapper objectMapper = new ObjectMapper();
         MemberDTO memberDTO = objectMapper.readValue(data, MemberDTO.class);
 
-        List<MemberEntity> byNickName = memberRepository.findByNickName(memberDTO.getNick_name());
+        MemberEntity byNickName = memberRepository.findByNickName(memberDTO.getNick_name());
 
         ResultDTO resultDTO = new ResultDTO();
 
-        if (!byNickName.isEmpty()) {
+        if (byNickName != null) {
             resultDTO.setResult(0); // 사용 불가능
         } else {
             resultDTO.setResult(1); // 사용가능
@@ -127,16 +127,27 @@ public class MemberService {
             return memberDTO;
         }
     }
-    public ResultDTO alreadyFriendCheck(String id, String myId) {
-        FriendId friendId = new FriendId();
+    public MemberDTO findByNickName(String nick_name){
+        return new MemberDTO(memberRepository.findByNickName(nick_name));
+    }
+    public ResultDTO alreadyFriendCheck(String nick_name, String myId) {
         ResultDTO resultDTO = new ResultDTO();
+
+        MemberEntity byNickName = memberRepository.findByNickName(nick_name);
+        if(byNickName == null){
+            resultDTO.setResult(-1); //없는 유저
+            return resultDTO;
+        }
+        String id = byNickName.getId();
+        FriendId friendId = new FriendId();
+        
         friendId.setMember_id(myId);
         friendId.setFriend_id(id);
         Optional<FriendEntity> byId = friendRepository.findById(friendId);
         if(byId.isPresent()){
             resultDTO.setResult(1); //친구 존재
         }else {
-            resultDTO.setResult(0); // 존재하지 않음
+            resultDTO.setResult(0); //친구 아님
         }
         return resultDTO;
     }
