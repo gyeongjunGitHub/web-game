@@ -109,9 +109,8 @@ public class MemberController {
     }
     @PostMapping("/updateNickName")
     @ResponseBody
-    public int updateNickName(@RequestParam(name = "nick_name")String nick_name, HttpSession httpSession){
-        memberService.updateNickName(httpSession, nick_name);
-        return 1;
+    public boolean updateNickName(@RequestParam(name = "nick_name")String nick_name, HttpSession httpSession){
+        return memberService.updateNickName(httpSession, nick_name);
     }
 
     @GetMapping("/getChatting")

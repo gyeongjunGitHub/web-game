@@ -286,10 +286,13 @@
             formData.append('nick_name', nick_name.value)
             let result = await postFileRequest(url, formData);
             console.log(result);
-            if(result == 1){
+            if(result){
                 alert('변경 완료.');
                 shop_modal.style.display = 'none';
                 getMyItems();
+            }else{
+                alert('변경 실패');
+                shop_modal.style.display = 'none';
             }
         }else{
             alert('중복체크바람');

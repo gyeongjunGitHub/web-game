@@ -307,18 +307,34 @@ public class MemberService {
     }
 
     @Transactional
-    public void updateNickName(HttpSession httpSession, String nick_name) {
+    public boolean updateNickName(HttpSession httpSession, String nick_name) {
         String myId = memberSessionService.getMemberId(httpSession.getId());
-        Optional<MemberEntity> byIdOptional = memberRepository.findById(myId);
-        if (byIdOptional.isPresent()){
-            MemberEntity byId = byIdOptional.get();
-            byId.setNick_name(nick_name);
-        }
-        List<MyItemsEntity> myItems = memberRepository.getMyItems(myId);
-        for (MyItemsEntity m : myItems){
-            if(m.getName().equals("닉네임 변경권")){
-                m.setCount(m.getCount() - 1);
+
+        try {
+            //member 테이블 수정
+            Optional<MemberEntity> byIdOptional = memberRepository.findById(myId);
+            if (byIdOptional.isPresent()){
+                MemberEntity byId = byIdOptional.get();
+                byId.setNick_name(nick_name);
             }
+
+            //friend 테이블 수정
+            List<FriendEntity> byFriendId = friendRepository.findByFriendId(myId);
+            for(FriendEntity f : byFriendId){
+                f.setFriend_nick_name(nick_name);
+            }
+
+            //myItem 테이블 수정
+            List<MyItemsEntity> myItems = memberRepository.getMyItems(myId);
+            for (MyItemsEntity m : myItems){
+                if(m.getName().equals("닉네임 변경권")){
+                    m.setCount(m.getCount() - 1);
+                }
+            }
+
+            return true;
+        }catch (Exception e){
+            return false;
         }
     }
 

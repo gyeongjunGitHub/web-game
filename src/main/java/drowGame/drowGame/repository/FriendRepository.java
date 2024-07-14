@@ -29,4 +29,10 @@ public class FriendRepository {
         FriendEntity friendEntity = em.find(FriendEntity.class, friendId);
         return Optional.ofNullable(friendEntity);
     }
+
+    public List<FriendEntity> findByFriendId(String myId) {
+        return em.createQuery("select f from FriendEntity f where f.id.friend_id=:myId", FriendEntity.class)
+                .setParameter("myId", myId)
+                .getResultList();
+    }
 }
