@@ -1,6 +1,7 @@
 package drowGame.drowGame.socket;
 
 import drowGame.drowGame.service.MemberSessionService;
+import drowGame.drowGame.socket.data.Request1;
 import drowGame.drowGame.socket.data.RequestType;
 import drowGame.drowGame.socket.data.SocketRequest;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,9 @@ import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 @Component
 @RequiredArgsConstructor
@@ -30,11 +34,18 @@ public class SocketHandler extends TextWebSocketHandler {
         if(requestType.getRequest2().contains(requestName)){
             socketService.sendMessageSameRoom(1,session, socketRequest);
         }
-        if(requestName.equals("nextTurn")) {
-            socketService.nextTurn(session, socketRequest);
+        if(requestName.equals("answer")){
+            Request1 result = socketRequest.typeRequest1(socketRequest);
+            result.setSender(myId);
+            socketRequest.setData(result);
+            socketService.sendMessageSameRoom(0, session, socketRequest);
+            socketService.answerCheck(session, result);
         }
-        if(requestName.equals("gameStart")){
-            socketService.gameStart(session, socketRequest);
+        if(requestName.equals("startRound")) {
+            socketService.startRound(session);
+        }
+        if (requestName.equals("start")) {
+            socketService.gameStart(session);
         }
         if(requestName.equals("addFriendRequest")){
             socketService.addFriendRequest(session, socketRequest);

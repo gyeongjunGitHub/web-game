@@ -7,6 +7,5 @@ import lombok.Setter;
 @Setter
 public class Request1 {
     private String answer;
-    private int timeCount;
     private String sender;
 }

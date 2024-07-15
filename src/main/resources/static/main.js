@@ -161,6 +161,9 @@ function wsEvt() {
 }
 //메시지 처리 핸들러 함수
 async function receiveMessageHandler(msg) {
+    if(msg.timeCount != undefined){
+        timeBox.innerHTML = `${msg.timeCount}`;
+    }
     if(msg.type == 'addFriendResponse'){
         if(msg.data == 'true'){
             document.querySelector('.user-menu').innerHTML = '';
@@ -181,7 +184,8 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(msg.data.sender == userList[i]){
                     quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
-                    score[i] += 10;
+
+                    score[i] += time/6;
                     userScoreBoxList[i].innerHTML = `
                         <span>score : ${score[i]}</span>
                     `;
@@ -208,44 +212,63 @@ async function receiveMessageHandler(msg) {
             }, 1000);
         }
     }
-    if(msg.type == 'timeCount'){ timeBox.innerHTML = `${msg.data.timeCount}`; }
-    if(msg.type == 'gameStart' || msg.type == 'nextTurn'){
+    if(msg.type == 'quizData'){
+        //퀴즈, 정답
         quiz = msg.data.quiz;
         answer = msg.data.answer;
+
+        //내 차례
         if(msg.data.yourTurn == myTurn){
+            //채팅 금지
             sendBtn.removeEventListener('click', sendAnswer);
-            if(myTurn == 2){ cycle++; }
+            //그리기 이벤트 리스너 추가
             addListener();
-            time = 60;
+            //quiz 출력
             quizBox.innerHTML = `${answer}`;
-            timeBox.innerHTML = `${time}`;
-            const data = new Data('timeCount', '', time);
-            timeCalculation1();
-            function timeCalculation1(){
-                setTimeout(function() {
-                    if(time > 1){
-                        time--;
-                        data.data = {"timeCount" : time };
-                        send(data);
-                        timeCalculation1();
-                    }else{
-                        if(cycle == 2 && myTurn == 2){
-                            data.type = 'gameOver';
-                            send(data);
-                            cycle = 0;
-                        }else{
-                            removeListener();
-                            const data = new Data('nextTurn', {"myTurn" : myTurn});
-                            send(data);
-                            clear();
-                            clear_no_send();
-                        }
-                    }
-                }, 1000);
-            }
+
+            const data = new Data('start');
+            send(data);
         }else{
+            //채팅 활성화
             sendBtn.addEventListener('click', sendAnswer);
+            //그리기 이벤트 리스너 삭제
+            removeListener();
+            //quiz 출력
             quizBox.innerHTML = `${quiz}`;
+        }
+    }
+    if(msg.type == 'nextTurn'){
+
+        //퀴즈, 정답
+        quiz = msg.data.quiz;
+        answer = msg.data.answer;
+
+        //자기 자신의 턴 일 경우
+        if(msg.data.yourTurn == myTurn){
+
+            //채팅 금지
+            sendBtn.removeEventListener('click', sendAnswer);
+
+            //그리기 이벤트 리스너 추가
+            addListener();
+
+            //quiz 출력
+            quizBox.innerHTML = `${answer}`;
+
+            const data = new Data('startRound');
+            send(data);
+
+        }else{
+
+            //채팅 활성화
+            sendBtn.addEventListener('click', sendAnswer);
+
+            //그리기 이벤트 리스너 삭제
+            removeListener();
+
+            //quiz 출력
+            quizBox.innerHTML = `${quiz}`;
+
         }
     }
     if(msg.type == 'rollBack'){ rollBack_no_send(); }
@@ -293,22 +316,6 @@ async function receiveMessageHandler(msg) {
         matchingArea.style.display = 'none';
         gameArea.style.display = 'block';
         quizBox.innerHTML = `잠시 후 게임이 시작됩니다.`;
-
-        time = 3;
-        timeCalculation(time, timeBox)
-        function timeCalculation(time, box){
-            box.innerHTML = time;
-            setTimeout(function() {
-                if(time > 1){
-                    time--;
-                    timeCalculation(time, box);
-                }
-                else{
-                    const data = new Data('gameStart');
-                    send(data);
-                }
-            }, 1000);
-        }
     }
     if(msg.type == 'addFriendRequest'){ addFriendProc(msg); }
     if (msg.type == 'sendMessage') {
@@ -466,8 +473,8 @@ function matching(request) {
     }
 
     if (request == 'drowGameCancle') {
-        const requestParam = new RequestParam('matchingCancleDrowGame');
-        send(requestParam);
+        const data = new Data('matchingCancleDrowGame');
+        send(data);
 
         matchingStartBtn.style.display = 'block';
         matchingCancleBtn.style.display = 'none';

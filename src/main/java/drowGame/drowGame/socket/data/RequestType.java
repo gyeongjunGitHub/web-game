@@ -12,9 +12,7 @@ public class RequestType {
 //    List<String> request3 = new ArrayList<>();
 
     public RequestType(){
-        this.request1.add("answer");
         this.request1.add("gameOver");
-        this.request1.add("timeCount");
 
         this.request2.add("rollBack");
         this.request2.add("clear");

@@ -23,6 +23,8 @@ import org.springframework.web.socket.WebSocketSession;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -224,19 +226,6 @@ public class SocketService {
             throw new RuntimeException(e);
         }
     }
-    public QuizDTO getQuiz() {
-        int min = 1;
-        int max = 7955;
-        int randomQuizNumber = ThreadLocalRandom.current().nextInt(min, max + 1);
-
-        QuizEntity quiz = quizRepository.getQuiz(randomQuizNumber);
-
-        QuizDTO quizDTO = new QuizDTO();
-        quizDTO.setNum(quiz.getNum());
-        quizDTO.setQuiz(quiz.getQuiz());
-        quizDTO.setAnswer(quiz.getAnswer());
-        return quizDTO;
-    }
     public SocketRequest socketRequestMapping(String msg){
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -290,25 +279,18 @@ public class SocketService {
                 socketRequest.setData(matchingInfo);
                 sendMessage(wss, dtoToJson(socketRequest));
             }
+
+            gm.startBeforeGameTimer(session);
         }
     }
-    public void nextTurn(WebSocketSession session, SocketRequest socketRequest){
-        NextTurn nextTurn = socketRequest.typeNextTurn(socketRequest);
-        int turn = nextTurn.getMyTurn() + 1;
-        if(turn > 2){ turn = 1; } //사이클 종료
-        QuizDTO quiz = getQuiz();
-        quiz.setYourTurn(turn);
-        socketRequest.setData(quiz);
-        sendMessageSameRoom(0, session, socketRequest);
+    public void gameStart(WebSocketSession session){
+        gm.startGameRoundTimer(session);
     }
-    public void gameStart(WebSocketSession session, SocketRequest socketRequest){
-        if(gm.getTurn(session) == 1){
-            QuizDTO quiz = getQuiz();
-            quiz.setYourTurn(1);
-            socketRequest.setData(quiz);
-            sendMessageSameRoom(0, session, socketRequest);
-        }
+    public void startRound(WebSocketSession session) {
+        gm.startGameRoundTimer(session);
     }
+
+
     public void sendMessageSameRoom(int num, WebSocketSession session, SocketRequest socketRequest) {
         if (num == 0) {
             for (WebSocketSession wss : gm.getSameRoomMemberSession(session)) {
@@ -349,5 +331,10 @@ public class SocketService {
         result.setSender(myId);
         socketRequest.setData(result);
         sendMessageSameRoom(0, session, socketRequest);
+    }
+
+
+    public void answerCheck(WebSocketSession session, Request1 result) {
+        gm.answerCheck(session, result.getAnswer());
     }
 }

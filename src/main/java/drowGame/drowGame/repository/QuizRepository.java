@@ -11,7 +11,7 @@ public class QuizRepository {
     EntityManager em;
 
 
-    public QuizEntity getQuiz(int randomQuizNumber) {
+    public QuizEntity getQuizEntity(int randomQuizNumber) {
         return em.find(QuizEntity.class, randomQuizNumber);
     }
 }
