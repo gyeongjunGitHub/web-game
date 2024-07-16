@@ -232,7 +232,7 @@ public class SocketService {
             SocketRequest socketRequest = new SocketRequest();
             return objectMapper.readValue(msg, SocketRequest.class);
         }catch (Exception e){
-            System.out.println("socket request 매핑 실패");
+            e.printStackTrace();
         }
         return null;
     }
@@ -269,17 +269,25 @@ public class SocketService {
                     }
                 }
             }
-            gm.createGameRoom(player_session);
+
+            //game room 생성
+            gm.createGameRoom(player_session, memebersNickName);
+
             MatchingInfo matchingInfo = new MatchingInfo();
             matchingInfo.setRoomUsers(members);
             matchingInfo.setRoomUsersNickName(memebersNickName);
             matchingInfo.setResponse("success");
-            for(WebSocketSession wss : player_session){
-                matchingInfo.setYourTurn(gm.getTurn(wss));
+
+            //매칭 성공 메시지 전송
+            int roomId = gm.getGameRoomId(session);
+            int count = gm.gameRoomMemberCount(roomId);
+            for (int i = 0; i<count; i++){
+                WebSocketSession wss = gm.getPlayerSession(roomId).get(i);
+                int turn = gm.getMyTurn(roomId).get(i);
+                matchingInfo.setYourTurn(turn);
                 socketRequest.setData(matchingInfo);
                 sendMessage(wss, dtoToJson(socketRequest));
             }
-
             gm.startBeforeGameTimer(session);
         }
     }
@@ -290,41 +298,42 @@ public class SocketService {
         gm.startGameRoundTimer(session);
     }
 
-
     public void sendMessageSameRoom(int num, WebSocketSession session, SocketRequest socketRequest) {
+        int roomId = gm.getGameRoomId(session);
         if (num == 0) {
-            for (WebSocketSession wss : gm.getSameRoomMemberSession(session)) {
+            for (WebSocketSession wss : gm.getPlayerSession(roomId)) {
                 sendMessage(wss, dtoToJson(socketRequest));
             }
         }
         if (num == 1) {
-            for (WebSocketSession wss : gm.getSameRoomMemberSession(session)){
+            for (WebSocketSession wss : gm.getPlayerSession(roomId)){
                 if(!session.equals(wss)){
                     sendMessage(wss, dtoToJson(socketRequest));
                 }
             }
         }
     }
+
     public void removeMatchingQueue(WebSocketSession session) {
         String myId = sm.getMyId(session);
         gm.removeMatchingQueue(myId);
     }
-    public void removeGameRoom(WebSocketSession session) {
-
-        //게임중 일 경우
-        if (gm.isDuringGame(session)){
-            int roomId = gm.getGameRoomId(session);
-            gm.removeSessionGameRoom(session);
-            if (gm.getRoomMemberCount(roomId) == 1) {
-                SocketRequest socketRequest = new SocketRequest();
-                socketRequest.setType("leaveOtherMember");
-                for (WebSocketSession wss : gm.getSameRoomMemberSession(roomId)) {
-                    sendMessage(wss, dtoToJson(socketRequest));
-                    gm.removeSessionGameRoom(wss);
-                }
-            }
-        }
-    }
+//    public void removeGameRoom(WebSocketSession session) {
+//
+//        //게임중 일 경우
+//        if (gm.isDuringGame(session)){
+//            int roomId = gm.getGameRoomId(session);
+//            gm.removeSessionGameRoom(session);
+//            if (gm.getRoomMemberCount(roomId) == 1) {
+//                SocketRequest socketRequest = new SocketRequest();
+//                socketRequest.setType("leaveOtherMember");
+//                for (WebSocketSession wss : gm.getSameRoomMemberSession(roomId)) {
+//                    sendMessage(wss, dtoToJson(socketRequest));
+//                    gm.removeSessionGameRoom(wss);
+//                }
+//            }
+//        }
+//    }
 
     public void setRequest1(SocketRequest socketRequest, String myId, WebSocketSession session) {
         Request1 result = socketRequest.typeRequest1(socketRequest);
@@ -335,6 +344,6 @@ public class SocketService {
 
 
     public void answerCheck(WebSocketSession session, Request1 result) {
-        gm.answerCheck(session, result.getAnswer());
+        gm.answerCheck(session, result.getAnswer(), result.getTimeCount());
     }
 }

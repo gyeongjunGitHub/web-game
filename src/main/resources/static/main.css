@@ -684,3 +684,58 @@ margin-top:10px;}
 padding-top:0;
 font-size:16px;}
 }
+
+.finalScore_wrapBox {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      height: 100vh;
+      background-color: rgba(21, 21, 18, 0.58);
+      position: absolute;
+      z-index:99;
+      top: 0;
+    }
+    .finalScore_container {
+      background-color: #eee;
+      width: 600px;
+      height: 500px;
+      padding: 30px;
+      position: relative;
+    }
+    .finalScore_container > h2 {
+      text-align: center;
+      margin-bottom: 50px;
+      font-size: 36px;
+    }
+    .finalScore_content {
+      display: flex;
+      width: 400px;
+      margin: 0 auto;
+      font-size: 24px;
+    }
+    .finalScore_name_box {
+      border-right: 1px solid black;
+    }
+    .finalScore_score_box,
+    .finalScore_name-box {
+      width: 50%;
+      text-align: center;
+    }
+    .finalScore_name_txt,
+    .finalScore_score_num {
+      padding: 10px 0;
+      margin-right: 30px;
+    }
+
+    .finalScore_btnWrap {
+      position: absolute;
+      bottom: 30px;
+      left: 50%;
+      transform: translate(-50%);
+    }
+    .finalScore_okBtn {
+      font-size: 20px;
+      padding: 5px 10px;
+      cursor: pointer;
+    }

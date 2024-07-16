@@ -1,7 +1,9 @@
 package drowGame.drowGame.service;
 
 import drowGame.drowGame.dto.MemberDTO;
+import drowGame.drowGame.entity.MemberEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -58,4 +60,6 @@ public class MemberSessionService {
         }
         memberSession.remove(httpSessionId);
     }
+
+
 }

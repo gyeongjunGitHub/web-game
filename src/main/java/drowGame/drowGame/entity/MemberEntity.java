@@ -22,6 +22,8 @@ public class MemberEntity {
     private String gender;
     @Column(name = "email")
     private String email;
+    @Column(name = "ranking_point")
+    private int ranking_point;
     @Column(name = "game_point")
     private int game_point;
     @Column(name = "role")

@@ -21,6 +21,10 @@ const userScoreBoxList = [document.querySelector('.user1_score'), document.query
 const userPictureBoxList = [document.querySelector('.user1_picture'), document.querySelector('.user2_picture'), document.querySelector('.user3_picture'), document.querySelector('.user4_picture')]
 const inGameMenu = document.querySelector('.inGameMenu');
 const gameArea = document.querySelector('.gameArea');
+const finalScore_wrapBox = document.querySelector('.finalScore_wrapBox');
+const finalScore_name_box = document.querySelector('.finalScore_name_box');
+const finalScore_score_box = document.querySelector('.finalScore_score_box');
+
 //id 변수
 const memberListTable = document.getElementById('memberListTable');
 const chattingArea = document.getElementById('chattingArea');
@@ -42,7 +46,6 @@ let chattingIsReadFalseCount = [];
 let myTurn;
 let cycle = 0;
 let isCorrect = false;
-let time = 0;
 let color = 'black'; //색깔 변수 기본 black
 let turn = 0;
 let xy = [];
@@ -62,7 +65,11 @@ let mouseState = {
     isout : false
 };
 var ws;
+
+
 gameArea.style.display = 'none';
+finalScore_wrapBox.style.display = 'none';
+
 class Friend{
     #member_id;
     #friend_id;
@@ -184,33 +191,35 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(msg.data.sender == userList[i]){
                     quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
-
-                    score[i] += time/6;
-                    userScoreBoxList[i].innerHTML = `
-                        <span>score : ${score[i]}</span>
-                    `;
                 }
             }
-            time = 5;
+        }
+
+    }
+    if(msg.type == 'finalScore'){
+
+        finalScore_wrapBox.style.display = 'flex';
+        timeBox.innerHTML ='';
+        finalScore_name_box.innerHTML ='';
+        finalScore_score_box.innerHTML ='';
+        for(let i = 0; msg.data.length; i++){
+            console.log(msg.data[i].nick_name);
+            finalScore_name_box.innerHTML += `
+                <div class="finalScore_name_txt">${msg.data[i].nick_name}</div>
+            `;
+            finalScore_score_box.innerHTML += `
+                <div class="finalScore_score_num">${msg.data[i].score.toFixed(2)}</div>
+            `;
         }
     }
-    if(msg.type == 'gameOver'){
-        quizBox.innerHTML = `잠시 후 게임이 종료됩니다.`;
-        time = 5;
-        timeCalculation(time, timeBox)
-        function timeCalculation(time, box){
-            box.innerHTML = time;
-            setTimeout(function() {
-                if(time > 1){
-                    time--;
-                    timeCalculation(time, box);
-                }
-                else{
-                    matchingArea.style.display = 'block';
-                    gameArea.style.display = 'none';
-                }
-            }, 1000);
+    if(msg.type == 'score'){
+        score = msg.data;
+        for(let i = 0; i<userList.length; i++){
+            userScoreBoxList[i].innerHTML = `
+                <span>score : ${msg.data[i].toFixed(2)}</span>
+            `;
         }
+
     }
     if(msg.type == 'quizData'){
         //퀴즈, 정답
@@ -238,6 +247,7 @@ async function receiveMessageHandler(msg) {
         }
     }
     if(msg.type == 'nextTurn'){
+
 
         //퀴즈, 정답
         quiz = msg.data.quiz;
@@ -811,10 +821,15 @@ function rollBack_no_send(){
     }
 }
 function sendAnswer(){
-    const data = new Data('answer', { "answer" : answerBox.value });
+    const data = new Data('answer', { "answer" : answerBox.value , "timeCount" : timeBox.innerHTML});
     answerBox.value = '';
     send(data);
 }
 function blackBtnClickHandler() { color = 'black'; };
 function blueBtnClickHandler() { color = 'blue'; };
 function redBtnClickHandler() { color = 'red'; };
+function goMain(){
+    matchingArea.style.display = 'flex';
+    gameArea.style.display = 'none';
+    finalScore_wrapBox.style.display = 'none';
+}

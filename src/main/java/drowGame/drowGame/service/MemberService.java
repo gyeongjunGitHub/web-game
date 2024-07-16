@@ -72,6 +72,7 @@ public class MemberService {
         memberEntity.setName(memberDTO.getName());
         memberEntity.setGender(memberDTO.getGender());
         memberEntity.setEmail(memberDTO.getEmail());
+        memberEntity.setRanking_point(0);
         memberEntity.setGame_point(0);
         memberEntity.setRole("ROLE_USER");
 
@@ -368,5 +369,11 @@ public class MemberService {
                 c.setReceiver_is_read(true);
             }
         }
+    }
+    @Transactional
+    public void updateRankingAndGamePoint(String nick_name, int ranking_pint, int game_point){
+        MemberEntity byNickName = memberRepository.findByNickName(nick_name);
+        byNickName.setRanking_point(byNickName.getRanking_point() + ranking_pint);
+        byNickName.setGame_point(byNickName.getGame_point() + game_point);
     }
 }

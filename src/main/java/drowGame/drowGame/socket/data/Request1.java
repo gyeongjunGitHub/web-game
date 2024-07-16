@@ -8,4 +8,5 @@ import lombok.Setter;
 public class Request1 {
     private String answer;
     private String sender;
+    private int timeCount;
 }

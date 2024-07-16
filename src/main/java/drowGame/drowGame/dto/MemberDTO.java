@@ -13,6 +13,7 @@ public class MemberDTO {
     private String name;
     private String gender;
     private String email;
+    private int ranking_point;
     private int game_point;
     private String role;
     private ProfilePictureDTO profilePictureDTO;
@@ -24,6 +25,7 @@ public class MemberDTO {
         this.name = memberEntity.getName();
         this.gender = memberEntity.getGender();
         this.email = memberEntity.getEmail();
+        this.ranking_point = memberEntity.getRanking_point();
         this.game_point = memberEntity.getGame_point();
         this.role = memberEntity.getRole();
     }

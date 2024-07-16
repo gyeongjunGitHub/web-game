@@ -88,7 +88,7 @@ public class SocketHandler extends TextWebSocketHandler {
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         socketService.sendLogoutMember(session);//로그아웃 시 싹다 빨간불 오류
         socketService.removeMatchingQueue(session);
-        socketService.removeGameRoom(session);
+        //socketService.removeGameRoom(session);
         socketService.removeSessionInfo(session);
         super.afterConnectionClosed(session, status);
     }
