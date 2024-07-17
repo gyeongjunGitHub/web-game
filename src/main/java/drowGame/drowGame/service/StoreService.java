@@ -113,4 +113,17 @@ public class StoreService {
             return false;
         }
     }
+
+    @Transactional
+    public boolean removeItem(String item) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        ItemDTO itemDTO = new ItemDTO();
+        try {
+            itemDTO = objectMapper.readValue(item, ItemDTO.class);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+        return storeRepository.removeItem(itemDTO.getId());
+    }
 }

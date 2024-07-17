@@ -112,21 +112,143 @@
       margin-top: 20px;
       border: none;
     }
+    .shop {
+          max-width: 1000px;
+        }
+        .shop_item_wrap {
+          width: 100%;
+          padding-left: 0;
+          margin: 0;
+          display: none;
+          grid-template-columns: repeat(3, 250px);
+          grid-template-rows: repeat(2, 1fr);
+          gap: 15px;
+          list-style: none;
+        }
+
+        .shop_item {
+          padding: 20px;
+          border: 1px solid rgb(26, 76, 26);
+        }
+        .shop_tit {
+          margin: 50px 0 20px;
+          text-align: center;
+        }
+        .item_img > img {
+          display: block;
+          width: 120px;
+          height: 120px;
+          margin: 0 auto;
+        }
+        .item_tit {
+          margin: 20px 0 5px;
+
+          font-weight: 600;
+        }
+        .item_price {
+          margin: 0;
+          color: gray;
+        }
+        .buy_btn {
+          width: 100%;
+          padding: 10px 0;
+          margin-top: 20px;
+          background-color: rgba(54, 80, 54, 0.527);
+          border: none;
+          border-radius: 10px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .shop_modal{
+        width:100vw;
+        height:100vh;
+        display:none;
+        justify-content:center;
+        align-items:center;
+        background-color:#00000070;
+        position:absolute;
+        top:0;
+        }
+        .shop_content{
+        background-color:white;
+        width:800px;
+        padding:20px;
+
+        }
+        .shop_content>h2{
+        margin-bottom:50px;
+        text-align:center;
+        font-size:30px;
+        }
+       .item_inform{
+       width:70%;
+       margin:0 auto;
+       padding:10px 30px;
+       background-color:#eee;
+       font-size:20px;
+       }
+       .item_name,.item_price{
+        display:flex;
+        padding:10px 0;
+       }
+       .item_name>span:first-child,
+       .item_price>span:first-child{
+       display:block;
+        width:30%;
+
+       }
+       .modal_btn_wrap{
+
+       text-align:center;
+       }
+       .buy_ok_btn{
+       background-color:rgba(54, 80, 54, 0.527);
+       }
+       .buy_cancel_btn{
+       background-color:#ae6975;
+       }
+        .buy_ok_btn,.buy_cancel_btn{
+        display:inline-block;
+        width:15%;
+        padding:5px 0;
+        margin:30px 0 10px;
+
+        border:none;
+        color:white;
+        font-size:20px;
+        cursor:pointer;
+        }
+        .img_box{
+        text-align:center;
+        margin-bottom:20px;
+        }
+    .game_setting{
+        display: none;
+    }
 </style>
 <body>
 <ul class="side_menu_box">
     <li class="side_list1" onclick="set_side_list(0)">프로필 사진 선택</li>
     <li class="side_list2" onclick="set_side_list(1)">상점 아이템 등록</li>
+    <li class="side_list3" onclick="set_side_list(2)">상점 아이템 삭제</li>
+    <li class="side_list3" onclick="set_side_list(3)">게임 설정 세팅</li>
 </ul>
 <!--상단 바-->
 <div class="nav">
     <span id="myIdArea"></span>
+    <a href="/main">메인</a>
     <a href="/member/logout">로그아웃</a>
     <a href="/store">상점</a>
     <a href="/myItems">내 아이템</a>
     <a href="/myPage">마이페이지</a>
 </div>
 <div class="wrap">
+    <div class="shop_modal">
+        <div class="shop_content">
+
+        </div>
+    </div>
     <h1 class="page_tit">관리자 페이지</h1>
     <div class="admin_container">
         <div class="profile">
@@ -157,15 +279,25 @@
                 </button>
             </div>
         </div>
+        <div class="shop_item_wrap"></div>
+        <div class="game_setting"></div>
     </div>
 </div>
 
 <script>
-    const side_list = [document.querySelector('.profile'), document.querySelector('.register')]
+    const side_list = [document.querySelector('.profile'), document.querySelector('.register'), document.querySelector('.shop_item_wrap'), document.querySelector('.game_setting')]
     function set_side_list(number){
         for(let i = 0; i<side_list.length; i++){
             if(i == number){
-                side_list[i].style.display = 'block';
+                if(side_list[i] == document.querySelector('.shop_item_wrap')){
+                    getItems();
+                    side_list[i].style.display = 'grid';
+                }else if(side_list[i] == document.querySelector('.game_setting')){
+                    getSetting();
+                    side_list[i].style.display = 'block';
+                }else{
+                    side_list[i].style.display = 'block';
+                }
             }else{
                 side_list[i].style.display = 'none';
             }
@@ -178,6 +310,13 @@
     const name = document.getElementById('name');
     const price = document.getElementById('price');
     const picture_selectBtn = document.querySelector('.picture_selectBtn');
+    const shop_item_wrap = document.querySelector('.shop_item_wrap');
+    const shop_content = document.querySelector('.shop_content');
+    const shop_modal = document.querySelector('.shop_modal');
+    const game_setting = document.querySelector('.game_setting');
+
+
+
 
     async function itemRegistration() {
       const url = '/store/itemRegistration';
@@ -217,7 +356,86 @@
             }
         }
     }
+    async function getSetting(){
+        let setting = await getRequest('/game/getSetting');
+        game_setting.innerHTML = '';
+        for(let i = 0; i < setting.length; i++){
+            game_setting.innerHTML += `
+                <p>${setting[i].name} : ${setting[i].value}<button onclick="updateGameSetting('${setting[i].name}')">변경</button></p>
+            `;
+        }
+    }
+    let settingName = '';
 
+    function updateGameSetting(id){
+        settingName = id;
+        game_setting.innerHTML = `<input id="round_time_value" type="text"/><button onclick="updateGameSettingDone()">완료</button>`;
+
+    }
+    async function updateGameSettingDone(){
+        let value = document.getElementById('round_time_value').value;
+        const result = await postRequest('/game/updateSetting', { "name" : settingName , "value" : value});
+        if(result){
+            alert('변경 성공!!');
+            getSetting();
+        }else{
+            alert('변경 실패.');
+
+        }
+    }
+
+    async function getItems() {
+        items = await getRequest('/store/getItems');
+        shop_item_wrap.innerHTML = '';
+        for (let i = 0; i < items.length; i++) {
+            const imageUrl = '/images/' + items[i].stored_file_name;
+            shop_item_wrap.innerHTML += `
+                <li class="shop_item">
+                <div class="item_img">
+                <img src="${imageUrl}" alt="" s />
+                </div>
+                    <p class="item_tit">${items[i].name}</p>
+                    <p class="item_price">${items[i].price}</p>
+                    <button class="buy_btn" onclick="showModal(${i})">아이템 삭제</button>
+                </li>
+            `;
+        }
+    }
+    function showModal(i) {
+        shop_modal.style.display = 'flex';
+        const imageUrl = '/images/' + items[i].stored_file_name;
+        shop_content.innerHTML = `
+            <h2>이 아이템을 삭제하시겠습니까?</h2>
+            <div class="img_box"><img class="item_image"  width="200px" height="200px" src="${imageUrl}"></div>
+
+            <div class="item_inform">
+                <div class="item_name">
+                    <span>아이템이름 : </span>
+                    <span>${items[i].name}</span>
+                </div>
+                <div class="item_price">
+                    <span>아이템가격 : </span>
+                    <span>${items[i].price}</span>
+                </div>
+            </div>
+        `;
+        shop_content.innerHTML += `
+            <div class="modal_btn_wrap">
+                <button class="buy_ok_btn" onclick="removeItem(items[${i}])">확인</button>
+                <button class="buy_cancel_btn" onclick="shop_modal.style.display = 'none';">취소</button>
+            </div>
+        `;
+    }
+    async function removeItem(item){
+        shop_modal.style.display = 'none'
+        const result = await deleteRequest('/store/removeItem', item)
+        if(result){
+            alert('삭제 성공!!');
+            getItems();
+        }else{
+            alert('삭제 실패.');
+        }
+    }
     async function getRequest(url = '') {
       try {
         const response = await fetch(url, { method: 'GET' });
@@ -256,6 +474,28 @@
       try {
         const response = await fetch(url, {
           method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+
+        if (!response.ok) {
+          throw new Error(
+            'Network response was not ok ' + response.statusText
+          );
+        }
+
+        // JSON 형식으로 변환된 데이터를 가져옴.
+        const responseData = await response.json();
+        return responseData;
+      } catch (error) {
+        console.error('Fetch operation failed:', error);
+      }
+    }
+    //delete 요청
+    async function deleteRequest(url = '', data = {}) {
+      try {
+        const response = await fetch(url, {
+          method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(data),
         });

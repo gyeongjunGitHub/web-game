@@ -321,7 +321,7 @@ async function receiveMessageHandler(msg) {
                     <span>score : ${score[i]}</span>
                 `;
                 userPictureBoxList[i].innerHTML = `
-                    <img src="/images/${userProfile[i]}" width="200" height="200">
+                    <img src="/images/${userProfile[i]}" width="120" height="120">
                 `;
                 userAnswerBoxList[i].style.display = 'block';
             }else{

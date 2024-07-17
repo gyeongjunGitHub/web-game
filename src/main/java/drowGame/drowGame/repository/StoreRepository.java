@@ -34,4 +34,14 @@ public class StoreRepository {
             return false;
         }
     }
+
+    public boolean removeItem(Long id) {
+        try {
+            ItemEntity itemEntity = em.find(ItemEntity.class, id);
+            em.remove(itemEntity);
+            return true;
+        }catch (Exception e){
+            return false;
+        }
+    }
 }

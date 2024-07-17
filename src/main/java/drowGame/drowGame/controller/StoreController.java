@@ -37,4 +37,8 @@ public class StoreController {
     public boolean buy(@RequestBody String item, HttpSession httpSession){
         return storeService.buy(item, httpSession);
     }
+    @DeleteMapping("/removeItem")
+    public boolean removeItem(@RequestBody String item){
+        return storeService.removeItem(item);
+    }
 }

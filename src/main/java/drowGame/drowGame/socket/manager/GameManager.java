@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import drowGame.drowGame.dto.QuizDTO;
 import drowGame.drowGame.entity.QuizEntity;
+import drowGame.drowGame.repository.GameSettingRepository;
 import drowGame.drowGame.repository.QuizRepository;
 import drowGame.drowGame.service.MemberService;
 import drowGame.drowGame.socket.GameRoom;
@@ -22,6 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameManager {
     private final QuizRepository quizRepository;
     private final MemberService memberService;
+    private final GameSettingRepository gameSettingRepository;
     private final ConcurrentLinkedQueue<String> matchingQueue2Member = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<String> matchingQueue3Member = new ConcurrentLinkedQueue<>();
     private final ConcurrentHashMap<Integer, GameRoom> gameRoomMap = new ConcurrentHashMap<>();
@@ -39,7 +41,6 @@ public class GameManager {
         if (this.matchingQueue3Member.size() == 3){
             return true;
         }
-        System.out.println(matchingQueue3Member.size());
         return false;
     }
     public void removeMatchingQueue2Member(String myId){
@@ -47,7 +48,6 @@ public class GameManager {
     }
     public void removeMatchingQueue3Member(String myId){
         matchingQueue3Member.removeIf(s -> s.equals(myId));
-        System.out.println(matchingQueue3Member.size());
     }
     public String pollMatchingQueue2Member(){
         return this.matchingQueue2Member.poll();
@@ -79,7 +79,6 @@ public class GameManager {
 
         //gameRoomMap1 에 정보 추가
         gameRoomMap.put(roomId, gameRoom);
-        System.out.println("game room map size : " + gameRoomMap.size());
         //roomIdMap 에 정보 추가
         for(WebSocketSession session : player_session){
             roomIdMap.put(session, roomId);
@@ -136,6 +135,8 @@ public class GameManager {
         gameRoomMap.get(roomId).getTimer().scheduleAtFixedRate(task, 0, 1000);
     }
     public void startGameRoundTimer(WebSocketSession session){
+        int round_time = gameSettingRepository.findByName("round_time").getValue();
+
         int roomId = getGameRoomId(session);
         int currentTurn = getGameTurn(roomId);
         List<WebSocketSession> sameRoomMemberSession = getPlayerSession(roomId);
@@ -147,7 +148,7 @@ public class GameManager {
         int turn = getGameTurn(roomId);
         int cycle = gameRoomMap.get(roomId).getCycle();
         TimerTask task = new TimerTask() {
-            int count = 3;
+            int count = round_time;
             @Override
             public void run() {
                 if (count >= 0) {
@@ -307,7 +308,6 @@ public class GameManager {
                 }
                 if(i == 1){
                     memberService.updateRankingAndGamePoint(nick_name, 5, 30);
-
                 }
             }
         }
@@ -315,6 +315,18 @@ public class GameManager {
             //1등 ranking_point +11, game_point +55
             //2등 ranking_point +8 , game_point +45
             //3등 ranking_point +6 , game_point +35
+            for (int i = 0; i < 3; i++){
+                String nick_name = finalScoreList.get(i).getNick_name();
+                if(i == 0){
+                    memberService.updateRankingAndGamePoint(nick_name, 11, 55);
+                }
+                if(i == 1){
+                    memberService.updateRankingAndGamePoint(nick_name, 8, 45);
+                }
+                if(i == 2){
+                    memberService.updateRankingAndGamePoint(nick_name, 6, 35);
+                }
+            }
         }
         if(finalScoreList.size() == 4){
             //1등 ranking_point +16, game_point +58
