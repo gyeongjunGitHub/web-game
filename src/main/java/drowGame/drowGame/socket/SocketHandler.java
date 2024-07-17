@@ -53,13 +53,22 @@ public class SocketHandler extends TextWebSocketHandler {
         if (requestName.equals("addFriendResponse")){
             socketService.addFriend(socketRequest, session);
         }
-        /////////////////////////////////////////////////////
+
         if (requestName.equals("matchingStartDrowGame")) {
-            socketService.startMatching(session, socketRequest);
+            socketService.startMatching(session, socketRequest, 2);
         }
         if(requestName.equals("matchingCancleDrowGame")){
-            socketService.removeMatchingQueue(session);
+            socketService.removeMatchingQueue(session, 2);
         }
+
+        if(requestName.equals("matchingStartDrowGame3")){
+            socketService.startMatching(session, socketRequest, 3);
+        }
+        if(requestName.equals("matchingCancleDrowGame3")){
+            socketService.removeMatchingQueue(session, 3);
+        }
+
+
         if (requestName.equals("sendMessage")) {
             socketService.sendChatting(session, socketRequest);
         }
@@ -87,7 +96,8 @@ public class SocketHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         socketService.sendLogoutMember(session);//로그아웃 시 싹다 빨간불 오류
-        socketService.removeMatchingQueue(session);
+        socketService.removeMatchingQueue(session, 2);
+        socketService.removeMatchingQueue(session, 3);
         //socketService.removeGameRoom(session);
         socketService.removeSessionInfo(session);
         super.afterConnectionClosed(session, status);

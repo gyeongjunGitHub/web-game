@@ -22,22 +22,38 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class GameManager {
     private final QuizRepository quizRepository;
     private final MemberService memberService;
-    private final ConcurrentLinkedQueue<String> matchingQueue = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<String> matchingQueue2Member = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<String> matchingQueue3Member = new ConcurrentLinkedQueue<>();
     private final ConcurrentHashMap<Integer, GameRoom> gameRoomMap = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<WebSocketSession, Integer> roomIdMap = new ConcurrentHashMap<>();
     private final AtomicInteger roomIdGenerator = new AtomicInteger();
-    public boolean addMatchingQueue(String Id){
-        this.matchingQueue.add(Id);
-        if (this.matchingQueue.size() == 2){
+    public boolean addMatchingQueue2Member(String Id){
+        this.matchingQueue2Member.add(Id);
+        if (this.matchingQueue2Member.size() == 2){
             return true;
         }
         return false;
     }
-    public void removeMatchingQueue(String myId){
-        matchingQueue.removeIf(s -> s.equals(myId));
+    public boolean addMatchingQueue3Member(String Id){
+        this.matchingQueue3Member.add(Id);
+        if (this.matchingQueue3Member.size() == 3){
+            return true;
+        }
+        System.out.println(matchingQueue3Member.size());
+        return false;
     }
-    public String pollMatchingQueue(){
-        return this.matchingQueue.poll();
+    public void removeMatchingQueue2Member(String myId){
+        matchingQueue2Member.removeIf(s -> s.equals(myId));
+    }
+    public void removeMatchingQueue3Member(String myId){
+        matchingQueue3Member.removeIf(s -> s.equals(myId));
+        System.out.println(matchingQueue3Member.size());
+    }
+    public String pollMatchingQueue2Member(){
+        return this.matchingQueue2Member.poll();
+    }
+    public String pollMatchingQueue3Member(){
+        return this.matchingQueue3Member.poll();
     }
     public void createGameRoom(List<WebSocketSession> player_session, List<String> memebersNickName){
         int roomId = roomIdGenerator.incrementAndGet();

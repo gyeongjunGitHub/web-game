@@ -246,50 +246,96 @@ public class SocketService {
         WebSocketSession receiverSession = findReceiverSession(addFriend.getReceiver());
         sendMessage(receiverSession, dtoToJson(socketRequest));
     }
-    public void startMatching(WebSocketSession session, SocketRequest socketRequest){
+    public void startMatching(WebSocketSession session, SocketRequest socketRequest, int inGameMemberSize){
         String myId = sm.getMyId(session);
-        int inGameMemberSize = 2;
 
-        // 매칭 큐 인원 충족 시
-        if(gm.addMatchingQueue(myId)){
-            List<WebSocketSession> player_session = new ArrayList<>();
-            List<String> members = new ArrayList<>();
-            List<String> memebersNickName = new ArrayList<>();
+        if(inGameMemberSize == 2){
+            // 매칭 큐 인원 충족 시
+            if(gm.addMatchingQueue2Member(myId)){
+                List<WebSocketSession> player_session = new ArrayList<>();
+                List<String> members = new ArrayList<>();
+                List<String> memebersNickName = new ArrayList<>();
 
-            for (int i = 0; i < inGameMemberSize; i++) {
-                //memberId
-                String player = gm.pollMatchingQueue();
-                members.add(player);
+                for (int i = 0; i < inGameMemberSize; i++) {
+                    //memberId
+                    String player = gm.pollMatchingQueue2Member();
+                    members.add(player);
 
-                //memberSession, memberNickName
-                for (String sessionId : sm.getMemberIdMap().keySet()) {
-                    if (sm.getMemberIdMap().get(sessionId).equals(player)) {
-                        memebersNickName.add(sm.getMemberNickName(sessionId));
-                        player_session.add(sm.getSessionMap().get(sessionId));
+                    //memberSession, memberNickName
+                    for (String sessionId : sm.getMemberIdMap().keySet()) {
+                        if (sm.getMemberIdMap().get(sessionId).equals(player)) {
+                            memebersNickName.add(sm.getMemberNickName(sessionId));
+                            player_session.add(sm.getSessionMap().get(sessionId));
+                        }
                     }
                 }
+
+                //game room 생성
+                gm.createGameRoom(player_session, memebersNickName);
+
+                MatchingInfo matchingInfo = new MatchingInfo();
+                matchingInfo.setRoomUsers(members);
+                matchingInfo.setRoomUsersNickName(memebersNickName);
+                matchingInfo.setResponse("success");
+
+                //매칭 성공 메시지 전송
+                int roomId = gm.getGameRoomId(session);
+                int count = gm.gameRoomMemberCount(roomId);
+                for (int i = 0; i<count; i++){
+                    WebSocketSession wss = gm.getPlayerSession(roomId).get(i);
+                    int turn = gm.getMyTurn(roomId).get(i);
+                    matchingInfo.setYourTurn(turn);
+                    socketRequest.setData(matchingInfo);
+                    sendMessage(wss, dtoToJson(socketRequest));
+                }
+                gm.startBeforeGameTimer(session);
             }
-
-            //game room 생성
-            gm.createGameRoom(player_session, memebersNickName);
-
-            MatchingInfo matchingInfo = new MatchingInfo();
-            matchingInfo.setRoomUsers(members);
-            matchingInfo.setRoomUsersNickName(memebersNickName);
-            matchingInfo.setResponse("success");
-
-            //매칭 성공 메시지 전송
-            int roomId = gm.getGameRoomId(session);
-            int count = gm.gameRoomMemberCount(roomId);
-            for (int i = 0; i<count; i++){
-                WebSocketSession wss = gm.getPlayerSession(roomId).get(i);
-                int turn = gm.getMyTurn(roomId).get(i);
-                matchingInfo.setYourTurn(turn);
-                socketRequest.setData(matchingInfo);
-                sendMessage(wss, dtoToJson(socketRequest));
-            }
-            gm.startBeforeGameTimer(session);
         }
+        ////////////////////////////////////여기 수정중////////////////////////////////
+        if (inGameMemberSize == 3){
+            // 매칭 큐 인원 충족 시
+            if(gm.addMatchingQueue3Member(myId)) {
+
+                List<WebSocketSession> player_session = new ArrayList<>();
+                List<String> members = new ArrayList<>();
+                List<String> memebersNickName = new ArrayList<>();
+
+                for (int i = 0; i < inGameMemberSize; i++) {
+                    //memberId
+                    String player = gm.pollMatchingQueue3Member();
+                    members.add(player);
+
+                    //memberSession, memberNickName
+                    for (String sessionId : sm.getMemberIdMap().keySet()) {
+                        if (sm.getMemberIdMap().get(sessionId).equals(player)) {
+                            memebersNickName.add(sm.getMemberNickName(sessionId));
+                            player_session.add(sm.getSessionMap().get(sessionId));
+                        }
+                    }
+                }
+
+                //game room 생성
+                gm.createGameRoom(player_session, memebersNickName);
+
+                MatchingInfo matchingInfo = new MatchingInfo();
+                matchingInfo.setRoomUsers(members);
+                matchingInfo.setRoomUsersNickName(memebersNickName);
+                matchingInfo.setResponse("success");
+
+                //매칭 성공 메시지 전송
+                int roomId = gm.getGameRoomId(session);
+                int count = gm.gameRoomMemberCount(roomId);
+                for (int i = 0; i<count; i++){
+                    WebSocketSession wss = gm.getPlayerSession(roomId).get(i);
+                    int turn = gm.getMyTurn(roomId).get(i);
+                    matchingInfo.setYourTurn(turn);
+                    socketRequest.setData(matchingInfo);
+                    sendMessage(wss, dtoToJson(socketRequest));
+                }
+                gm.startBeforeGameTimer(session);
+            }
+        }
+
     }
     public void gameStart(WebSocketSession session){
         gm.startGameRoundTimer(session);
@@ -314,9 +360,15 @@ public class SocketService {
         }
     }
 
-    public void removeMatchingQueue(WebSocketSession session) {
+    public void removeMatchingQueue(WebSocketSession session, int inGameMemberSize) {
         String myId = sm.getMyId(session);
-        gm.removeMatchingQueue(myId);
+        if(inGameMemberSize == 2){
+            gm.removeMatchingQueue2Member(myId);
+        }
+        if(inGameMemberSize == 3){
+            gm.removeMatchingQueue3Member(myId);
+        }
+
     }
 //    public void removeGameRoom(WebSocketSession session) {
 //

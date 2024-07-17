@@ -34,6 +34,12 @@ const message = document.getElementById('message');
 const myIdArea = document.getElementById('myIdArea');
 const matchingStartBtn = document.getElementById('matchingStartBtn');
 const matchingCancleBtn = document.getElementById('matchingCancleBtn');
+const matchingStartBtn3 = document.getElementById('matchingStartBtn3');
+const matchingCancleBtn3 = document.getElementById('matchingCancleBtn3');
+matchingCancleBtn3.style.display = 'none';
+const matchingStartBtn4 = document.getElementById('matchingStartBtn4');
+const matchingCancleBtn4 = document.getElementById('matchingCancleBtn4');
+matchingCancleBtn4.style.display = 'none';
 
 let myId = '';
 let myNickName = '';
@@ -481,13 +487,39 @@ function matching(request) {
         matchingStartBtn.style.display = 'none';
         matchingCancleBtn.style.display = 'block';
     }
-
     if (request == 'drowGameCancle') {
         const data = new Data('matchingCancleDrowGame');
         send(data);
 
         matchingStartBtn.style.display = 'block';
         matchingCancleBtn.style.display = 'none';
+    }
+}
+function matching3(request){
+    if(request == 'drowGameStart3'){
+        const data = new Data('matchingStartDrowGame3');
+        send(data);
+        matchingStartBtn3.style.display = 'none';
+        matchingCancleBtn3.style.display = 'block';
+    }
+    if (request == 'drowGameCancle3') {
+        const data = new Data('matchingCancleDrowGame3');
+        send(data);
+        matchingStartBtn3.style.display = 'block';
+        matchingCancleBtn3.style.display = 'none';
+    }
+}
+function matching4(request){
+    if(request == 'drowGameStart4'){
+        const data = new Data('matchingStartDrowGame4');
+        matchingStartBtn4.style.display = 'none';
+        matchingCancleBtn4.style.display = 'block';
+    }
+    if (request == 'drowGameCancle4') {
+        const data = new Data('matchingCancleDrowGame4');
+
+        matchingStartBtn4.style.display = 'block';
+        matchingCancleBtn4.style.display = 'none';
     }
 }
 // 친구 추가 요청 전송
