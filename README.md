@@ -35,11 +35,35 @@ GameManager 클래스를 만들어 관리.
 
 ![alt text](image-37.png)
 
-매칭시작을 요청한 USER의 ID를 Queue에 저장.
+
+
+매칭시작을 요청한 USER의 ID를 Queue에 저장. 
+멀티 스레드 환경을 고려하여 ConcurrentLinkedQueue 사용
+
+
 
 ex) 2인 게임
 
-Queue의 size == 2를 만족하면 저장된 유저 2명을 꺼냄.
+Queue의 size == 2를 만족(매칭 성공!) 하면 저장된 유저 2명을 꺼냄.
+
+GameRoom객체 생성
+
+![alt text](image-38.png)
+
+USER1, USER2의 web socket session, nick_name정보 및 turn, score, cycle, roomId
+정보를 GameRoom객체에 저장
+
+roomId는 AtomicInteger 를 사용하여 1씩 증가시키며 생성
+
+gameRoomMap<Integer(roomId), GameRoom> 에 추가. ConcurrentHashMap 사용.
+
+게임 종료 시 gameRoomMap에서 제거.
+
+gameRoomMap의의 정보를 토대로 같은 roomId를 가진 유저끼리 소통.
+
+![alt text](image-39.png)
+
+
 
 ------------------------------------------------------------------------------
 

@@ -86,7 +86,7 @@ public class GameManager {
         gameRoom.setTimer(new Timer());
         gameRoom.setCycle(0);
 
-        //gameRoomMap1 에 정보 추가
+        //gameRoomMap 에 정보 추가
         gameRoomMap.put(roomId, gameRoom);
         //roomIdMap 에 정보 추가
         for(WebSocketSession session : player_session){
