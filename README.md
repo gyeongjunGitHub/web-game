@@ -15,3 +15,17 @@ Spring Boot, Mysql, 인텔리제이
 메인 화면입니다.
 ![alt text](image-6.png)
 
+상점 입니다. 게임포인트가 부족하면 살 수 없습니다.
+게임 포인트는 게임을 통하여 얻을 수 있습니다.
+![alt text](image-7.png)
+![alt text](image-8.png)
+
+내 아이템 화면입니다. 아이템을 사용하면 개수가 차감됩니다.
+![alt text](image-9.png)
+![alt text](image-10.png)
+![alt text](image-11.png)
+![alt text](image-12.png)
+![alt text](image-13.png)
+
+마이페이지 입니다. 회원정보 수정 기능은 이후 만들 예정입니다.
+![alt text](image-14.png)
