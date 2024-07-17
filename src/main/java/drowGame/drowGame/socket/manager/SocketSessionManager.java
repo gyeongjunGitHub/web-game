@@ -14,9 +14,7 @@ public class SocketSessionManager {
     //웹 소켓 세션 Id, Member Id
     @Getter
     private final ConcurrentHashMap<String, String> memberIdMap = new ConcurrentHashMap<>();
-
     @Getter final ConcurrentHashMap<String, String> memberNickNameMap = new ConcurrentHashMap<>();
-
     public void addSessionMap(String sessionId, WebSocketSession session){
         this.sessionMap.put(sessionId, session);
     }

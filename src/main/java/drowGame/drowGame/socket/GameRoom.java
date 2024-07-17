@@ -27,7 +27,6 @@ public class GameRoom {
     private QuizDTO quizDTO;
     private int cycle;
 
-
     public static List<FinalScore> finalScore(GameRoom gameRoom) {
         List<FinalScore> finalScoreList = new ArrayList<>();
 
@@ -48,7 +47,6 @@ public class GameRoom {
         }
         return finalScoreList;
     }
-
     @Getter
     @Setter
     public static class FinalScore{
