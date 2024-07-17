@@ -297,7 +297,7 @@ async function receiveMessageHandler(msg) {
         draw(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4]);
         ram.push({ x: msg.data[0], y: msg.data[1], lastX: msg.data[2], lastY: msg.data[3], color: msg.data[4] });
     }
-    if(msg.type == 'matchingStartDrowGame' && msg.data.response == 'success'){
+    if((msg.type == 'matchingStartDrowGame' || msg.type == 'matchingStartDrowGame3') && msg.data.response == 'success'){
         score = [0, 0, 0, 0];
         myTurn = msg.data.yourTurn;
         userList = msg.data.roomUsers;

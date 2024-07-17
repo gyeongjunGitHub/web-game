@@ -79,7 +79,7 @@ public class GameManager {
 
         //gameRoomMap1 에 정보 추가
         gameRoomMap.put(roomId, gameRoom);
-
+        System.out.println("game room map size : " + gameRoomMap.size());
         //roomIdMap 에 정보 추가
         for(WebSocketSession session : player_session){
             roomIdMap.put(session, roomId);
