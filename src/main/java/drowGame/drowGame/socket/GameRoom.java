@@ -55,17 +55,17 @@ public class GameRoom {
             }
         }
 
-        System.out.println("게임을 나가는 유저의 turn : " + gameRoom.getTurnList().get(index));
+//        System.out.println("게임을 나가는 유저의 turn : " + gameRoom.getTurnList().get(index));
 
         gameRoom.getPlayer_session().remove(index);
         gameRoom.getPlayer_nick_name().remove(index);
         gameRoom.getScore().remove(index);
         gameRoom.getTurnList().remove(gameRoom.getTurnList().size()-1);
 
-        System.out.println(gameRoom.getPlayer_session().toString());
-        System.out.println(gameRoom.getPlayer_nick_name().toString());
-        System.out.println(gameRoom.getScore().toString());
-        System.out.println(gameRoom.getTurnList().toString());
+//        System.out.println(gameRoom.getPlayer_session().toString());
+//        System.out.println(gameRoom.getPlayer_nick_name().toString());
+//        System.out.println(gameRoom.getScore().toString());
+//        System.out.println(gameRoom.getTurnList().toString());
 
         return gameRoom.getPlayer_session().size();
     }

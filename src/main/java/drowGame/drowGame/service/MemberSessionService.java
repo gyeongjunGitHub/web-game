@@ -5,6 +5,7 @@ import drowGame.drowGame.entity.MemberEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -19,9 +20,10 @@ public class MemberSessionService {
             }
         }
         memberSession.put(httpSessionId, memberDTO);
-        System.out.println("-----------------------------------------------------------------------");
+        System.out.println("---------------------------------------------------------------------------------------------------------");
         System.out.println("로그인 -> session ID : "+httpSessionId+", member ID : "+memberDTO.getId()+", nick name : "+memberDTO.getNick_name());
-        System.out.println("-----------------------------------------------------------------------");
+        System.out.println("시간 : " + LocalDateTime.now());
+        System.out.println("---------------------------------------------------------------------------------------------------------");
     }
     public String getMemberId(String httpSessionId) {
         if(memberSession.get(httpSessionId) != null){
@@ -54,9 +56,10 @@ public class MemberSessionService {
 
     public void removeSession(String httpSessionId) {
         if(memberSession.get(httpSessionId) != null){
-            System.out.println("-----------------------------------------------------------------------");
+            System.out.println("---------------------------------------------------------------------------------------------------------");
             System.out.println("로그아웃 -> session ID : " + httpSessionId + ", member ID : " + memberSession.get(httpSessionId).getId());
-            System.out.println("-----------------------------------------------------------------------");
+            System.out.println("시간 : " + LocalDateTime.now());
+            System.out.println("---------------------------------------------------------------------------------------------------------");
         }
         memberSession.remove(httpSessionId);
     }

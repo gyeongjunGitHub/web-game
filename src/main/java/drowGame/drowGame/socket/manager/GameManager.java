@@ -393,25 +393,27 @@ public class GameManager {
         String nick_name = GameRoom.findMemberNickname(mySession, gameRoomMap.get(roomId));
         int size = GameRoom.removeMemberInfo(mySession, gameRoomMap.get(roomId));
 
-        //턴 정보도 새로 보내야 함
-        //현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
-        SocketRequest sr = new SocketRequest();
-        sr.setType("leaveMember");
-        sr.setData(nick_name);
-        sendMessageSameRoom(1, mySession, sr);
-
-        MatchingInfo matchingInfo = new MatchingInfo();
-        List<WebSocketSession> playerSession = getPlayerSession(roomId);
-        for(int i = 0; i< playerSession.size(); i++){
-            sr.setType("newTurn");
-            matchingInfo.setYourTurn(getTurnList(roomId).get(i));
-            sr.setData(matchingInfo);
-            sendMessage(playerSession.get(i), dtoToJson(sr));
-        }
-
-
         if(size == 1){
-            System.out.println("혼자남음");
+            List<WebSocketSession> playerSession = getPlayerSession(roomId);
+            SocketRequest sr = new SocketRequest();
+            sr.setType("alone");
+            sendMessage(playerSession.get(0), dtoToJson(sr));
+        }else{
+            //턴 정보도 새로 보내야 함
+            //현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
+            SocketRequest sr = new SocketRequest();
+            sr.setType("leaveMember");
+            sr.setData(nick_name);
+            sendMessageSameRoom(1, mySession, sr);
+
+            MatchingInfo matchingInfo = new MatchingInfo();
+            List<WebSocketSession> playerSession = getPlayerSession(roomId);
+            for(int i = 0; i< playerSession.size(); i++){
+                sr.setType("newTurn");
+                matchingInfo.setYourTurn(getTurnList(roomId).get(i));
+                sr.setData(matchingInfo);
+                sendMessage(playerSession.get(i), dtoToJson(sr));
+            }
         }
     }
 
