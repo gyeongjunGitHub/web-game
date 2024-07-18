@@ -401,10 +401,13 @@ public class SocketService {
 
     }
     public void removeGameRoom(WebSocketSession session) {
-
+/////////////////////////////////////이부분에서 에러발생 해결 해야함//////////////////////////////////////////
         //게임중 일 경우
         if (gm.isDuringGame(session)){
+            System.out.println("게임중 !");
             gm.removeMember(session);
+        }else {
+            System.out.println("게임중 아님");
         }
     }
 

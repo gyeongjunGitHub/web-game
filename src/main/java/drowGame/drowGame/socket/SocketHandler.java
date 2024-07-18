@@ -91,6 +91,7 @@ public class SocketHandler extends TextWebSocketHandler {
     //소켓 종료
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
+        System.out.println("소캣 연결 종료");
         socketService.sendLogoutMember(session);
 
         //매칭 큐 에서 정보 삭제

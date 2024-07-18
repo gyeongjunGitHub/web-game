@@ -384,37 +384,41 @@ public class GameManager {
         //해결방법 : 마지막 바로 전 턴이 수행중 일 때 마지막 턴 유저가 게임을 나간다면 nextTurn을 1로 초기화 하면 됨
         int roomId = roomIdMap.get(mySession);
 
-        //마지막 바로 전 턴 수행중 and 나가는 유저의 턴이 마지막 턴 일 경우 턴 초기화
-        int count = gameRoomMemberCount(roomId);
-        if (count == getGameTurn(roomId) && count == GameRoom.getMyTurn(mySession,gameRoomMap.get(roomId))){
-            increaseTurn(roomId);
-        }
+//        //마지막 바로 전 턴 수행중 and 나가는 유저의 턴이 마지막 턴 일 경우 턴 초기화
+//        int count = gameRoomMemberCount(roomId);
+//        if (count == getGameTurn(roomId) && count == GameRoom.getMyTurn(mySession,gameRoomMap.get(roomId))){
+//            increaseTurn(roomId);
+//        }
 
-        String nick_name = GameRoom.findMemberNickname(mySession, gameRoomMap.get(roomId));
-        int size = GameRoom.removeMemberInfo(mySession, gameRoomMap.get(roomId));
-
-        if(size == 1){
-            List<WebSocketSession> playerSession = getPlayerSession(roomId);
-            SocketRequest sr = new SocketRequest();
-            sr.setType("alone");
-            sendMessage(playerSession.get(0), dtoToJson(sr));
-        }else{
-            //턴 정보도 새로 보내야 함
-            //현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
-            SocketRequest sr = new SocketRequest();
-            sr.setType("leaveMember");
-            sr.setData(nick_name);
-            sendMessageSameRoom(1, mySession, sr);
-
-            MatchingInfo matchingInfo = new MatchingInfo();
-            List<WebSocketSession> playerSession = getPlayerSession(roomId);
-            for(int i = 0; i< playerSession.size(); i++){
-                sr.setType("newTurn");
-                matchingInfo.setYourTurn(getTurnList(roomId).get(i));
-                sr.setData(matchingInfo);
-                sendMessage(playerSession.get(i), dtoToJson(sr));
-            }
-        }
+//        String nick_name = GameRoom.findMemberNickname(mySession, gameRoomMap.get(roomId));
+//
+//        //턴 정보도 새로 보내야 함
+//        //현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
+//        SocketRequest sr = new SocketRequest();
+//        sr.setType("leaveMember");
+//        sr.setData(nick_name);
+//        sendMessageSameRoom(1, mySession, sr);
+//        int size = GameRoom.removeMemberInfo(mySession, gameRoomMap.get(roomId));
+//        if(size == 1){
+//            removeGameRoom(roomId);
+//        }
+//        MatchingInfo matchingInfo = new MatchingInfo();
+//        List<WebSocketSession> playerSession = getPlayerSession(roomId);
+//        for(int i = 0; i< playerSession.size(); i++){
+//            sr.setType("newTurn");
+//            matchingInfo.setYourTurn(getTurnList(roomId).get(i));
+//            sr.setData(matchingInfo);
+//            sendMessage(playerSession.get(i), dtoToJson(sr));
+//        }
+//        if(size == 1){
+//            List<WebSocketSession> playerSession = getPlayerSession(roomId);
+//            SocketRequest sr = new SocketRequest();
+//            sr.setType("alone");
+//            sendMessage(playerSession.get(0), dtoToJson(sr));
+//            removeGameRoom(roomId);
+//        }else{
+//
+//        }
     }
 
     public void nextTurnProc(int roomId, int turn, WebSocketSession session){
