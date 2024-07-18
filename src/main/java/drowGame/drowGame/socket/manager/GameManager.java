@@ -2,12 +2,14 @@ package drowGame.drowGame.socket.manager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.deser.DataFormatReaders;
 import drowGame.drowGame.dto.QuizDTO;
 import drowGame.drowGame.entity.QuizEntity;
 import drowGame.drowGame.repository.GameSettingRepository;
 import drowGame.drowGame.repository.QuizRepository;
 import drowGame.drowGame.service.MemberService;
 import drowGame.drowGame.socket.GameRoom;
+import drowGame.drowGame.socket.data.MatchingInfo;
 import drowGame.drowGame.socket.data.SocketRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -38,6 +40,23 @@ public class GameManager {
     // roomId generator
     private final AtomicInteger roomIdGenerator = new AtomicInteger();
 
+    public List<String> getQueueSize(int inGameMemberSize){
+        if(inGameMemberSize == 2){
+            List<String> queueMember = new ArrayList<>();
+            for(String member : matchingQueue2Member){
+                queueMember.add(member);
+            }
+            return queueMember;
+        }
+        if (inGameMemberSize == 3){
+            List<String> queueMember = new ArrayList<>();
+            for(String member : matchingQueue3Member){
+                queueMember.add(member);
+            }
+            return queueMember;
+        }
+        return null;
+    }
     public boolean addMatchingQueue2Member(String Id){
         this.matchingQueue2Member.add(Id);
         if (this.matchingQueue2Member.size() == 2){
@@ -73,11 +92,14 @@ public class GameManager {
 
         int turn = 1;
         double score = 0;
+        int status = 1;
         List<Integer> turnList = new ArrayList<>();
         List<Double> scoreList = new ArrayList<>();
+        List<Integer> statusList = new ArrayList<>();
         for (int i = 0; i < player_session.size(); i++){
             turnList.add(turn);
             scoreList.add(score);
+            statusList.add(status);
             turn++;
         }
         gameRoom.setTurnList(turnList);
@@ -102,7 +124,7 @@ public class GameManager {
     public int getGameTurn(int roomId) {
         return gameRoomMap.get(roomId).getTurn();
     }
-    public List<Integer> getMyTurn(int roomId) {
+    public List<Integer> getTurnList(int roomId) {
         return gameRoomMap.get(roomId).getTurnList();
     }
     public List<WebSocketSession> getPlayerSession(int roomId){
@@ -110,7 +132,6 @@ public class GameManager {
     }
     public void startBeforeGameTimer(WebSocketSession session){
         int roomId = getGameRoomId(session);
-        int turn = getGameTurn(roomId);
         List<WebSocketSession> sameRoomMemberSession = getPlayerSession(roomId);
         /////////////////////////////////////////////
         TimerTask task = new TimerTask() {
@@ -135,7 +156,7 @@ public class GameManager {
 
                     gameRoomMap.get(roomId).setQuizDTO(quiz);
 
-                    quiz.setYourTurn(turn);
+                    quiz.setYourTurn(getGameTurn(roomId));
                     sr.setData(quiz);
                     sendMessageSameRoom(0, session, sr);
                 }
@@ -154,7 +175,6 @@ public class GameManager {
         increaseTurn(roomId);
 
         int maxCycle = 2;
-        int turn = getGameTurn(roomId);
         int cycle = gameRoomMap.get(roomId).getCycle();
         TimerTask task = new TimerTask() {
             int count = round_time;
@@ -170,7 +190,7 @@ public class GameManager {
                     if(cycle == maxCycle && currentTurn == gameRoomMemberCount(roomId)){
                         gameOverProc(roomId, session);
                     }else {
-                        nextTurnProc(roomId, turn, session);
+                        nextTurnProc(roomId, getGameTurn(roomId), session);
                     }
                 }
             }
@@ -350,23 +370,51 @@ public class GameManager {
         gameRoomMap.remove(roomId);
     }
 
+    public boolean isDuringGame(WebSocketSession mySession){
+        if(roomIdMap.get(mySession) == null){
+            return false;
+        }
+        return true;
+    }
+    public void removeMember(WebSocketSession mySession){
+        //인원이 2명일 경우. 현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
+        //인원이 3명이 경우 3턴인 유저가 2턴으로 채워지기 때문에 문제가 발생하지 않음.
+        //2턴이 수행중이고 3턴이 게임을 나가면 문제 발생
+        //결론 : 마지막 바로 전 턴이 수행중일 때 마지막 턴이 게임을 나가면 문제 발생.
+        //해결방법 : 마지막 바로 전 턴이 수행중 일 때 마지막 턴 유저가 게임을 나간다면 nextTurn을 1로 초기화 하면 됨
+        int roomId = roomIdMap.get(mySession);
 
-    ///////////////////////////////////////////////////////////////////////////////////
-//    public boolean isDuringGame(WebSocketSession mySession){
-//        for (WebSocketSession wss : gameRoomMap.keySet()) {
-//            if (mySession.equals(wss)) {
-//                return true;
-//            }
-//        }
-//        return false;
-//    }
-//    public void removeSessionGameRoom(WebSocketSession mySession) {
-//        for (WebSocketSession wss : gameRoomMap.keySet()) {
-//            if (mySession.equals(wss)) {
-//                gameRoomMap.remove(wss);
-//            }
-//        }
-//    }
+        //마지막 바로 전 턴 수행중 and 나가는 유저의 턴이 마지막 턴 일 경우 턴 초기화
+        int count = gameRoomMemberCount(roomId);
+        if (count == getGameTurn(roomId) && count == GameRoom.getMyTurn(mySession,gameRoomMap.get(roomId))){
+            increaseTurn(roomId);
+        }
+
+        String nick_name = GameRoom.findMemberNickname(mySession, gameRoomMap.get(roomId));
+        int size = GameRoom.removeMemberInfo(mySession, gameRoomMap.get(roomId));
+
+        //턴 정보도 새로 보내야 함
+        //현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
+        SocketRequest sr = new SocketRequest();
+        sr.setType("leaveMember");
+        sr.setData(nick_name);
+        sendMessageSameRoom(1, mySession, sr);
+
+        MatchingInfo matchingInfo = new MatchingInfo();
+        List<WebSocketSession> playerSession = getPlayerSession(roomId);
+        for(int i = 0; i< playerSession.size(); i++){
+            sr.setType("newTurn");
+            matchingInfo.setYourTurn(getTurnList(roomId).get(i));
+            sr.setData(matchingInfo);
+            sendMessage(playerSession.get(i), dtoToJson(sr));
+        }
+
+
+        if(size == 1){
+            System.out.println("혼자남음");
+        }
+    }
+
     public void nextTurnProc(int roomId, int turn, WebSocketSession session){
         gameRoomMap.get(roomId).getTimer().cancel();
         gameRoomMap.get(roomId).setTimer(new Timer());

@@ -283,12 +283,20 @@ public class SocketService {
                 int count = gm.gameRoomMemberCount(roomId);
                 for (int i = 0; i<count; i++){
                     WebSocketSession wss = gm.getPlayerSession(roomId).get(i);
-                    int turn = gm.getMyTurn(roomId).get(i);
+                    int turn = gm.getTurnList(roomId).get(i);
                     matchingInfo.setYourTurn(turn);
                     socketRequest.setData(matchingInfo);
                     sendMessage(wss, dtoToJson(socketRequest));
                 }
                 gm.startBeforeGameTimer(session);
+            }else {
+                List<String> queueMember = gm.getQueueSize(inGameMemberSize);
+                int count = queueMember.size();
+                for(String s : queueMember){
+                    WebSocketSession receiverSession = findReceiverSession(s);
+                    String matchingUserCount = "{\"matchingUserCount_2\" : \"" + count + "\"}";
+                    sendMessage(receiverSession, matchingUserCount);
+                }
             }
         }
         ////////////////////////////////////여기 수정중////////////////////////////////
@@ -327,12 +335,20 @@ public class SocketService {
                 int count = gm.gameRoomMemberCount(roomId);
                 for (int i = 0; i<count; i++){
                     WebSocketSession wss = gm.getPlayerSession(roomId).get(i);
-                    int turn = gm.getMyTurn(roomId).get(i);
+                    int turn = gm.getTurnList(roomId).get(i);
                     matchingInfo.setYourTurn(turn);
                     socketRequest.setData(matchingInfo);
                     sendMessage(wss, dtoToJson(socketRequest));
                 }
                 gm.startBeforeGameTimer(session);
+            }else {
+                List<String> queueMember = gm.getQueueSize(inGameMemberSize);
+                int count = queueMember.size();
+                for(String s : queueMember){
+                    WebSocketSession receiverSession = findReceiverSession(s);
+                    String matchingUserCount = "{\"matchingUserCount_3\" : \"" + count + "\"}";
+                    sendMessage(receiverSession, matchingUserCount);
+                }
             }
         }
 
@@ -364,28 +380,33 @@ public class SocketService {
         String myId = sm.getMyId(session);
         if(inGameMemberSize == 2){
             gm.removeMatchingQueue2Member(myId);
+            List<String> queueMember = gm.getQueueSize(inGameMemberSize);
+            int count = queueMember.size();
+            for(String s : queueMember){
+                WebSocketSession receiverSession = findReceiverSession(s);
+                String matchingUserCount = "{\"matchingUserCount_2\" : \"" + count + "\"}";
+                sendMessage(receiverSession, matchingUserCount);
+            }
         }
         if(inGameMemberSize == 3){
             gm.removeMatchingQueue3Member(myId);
+            List<String> queueMember = gm.getQueueSize(inGameMemberSize);
+            int count = queueMember.size();
+            for(String s : queueMember){
+                WebSocketSession receiverSession = findReceiverSession(s);
+                String matchingUserCount = "{\"matchingUserCount_3\" : \"" + count + "\"}";
+                sendMessage(receiverSession, matchingUserCount);
+            }
         }
 
     }
-//    public void removeGameRoom(WebSocketSession session) {
-//
-//        //게임중 일 경우
-//        if (gm.isDuringGame(session)){
-//            int roomId = gm.getGameRoomId(session);
-//            gm.removeSessionGameRoom(session);
-//            if (gm.getRoomMemberCount(roomId) == 1) {
-//                SocketRequest socketRequest = new SocketRequest();
-//                socketRequest.setType("leaveOtherMember");
-//                for (WebSocketSession wss : gm.getSameRoomMemberSession(roomId)) {
-//                    sendMessage(wss, dtoToJson(socketRequest));
-//                    gm.removeSessionGameRoom(wss);
-//                }
-//            }
-//        }
-//    }
+    public void removeGameRoom(WebSocketSession session) {
+
+        //게임중 일 경우
+        if (gm.isDuringGame(session)){
+            gm.removeMember(session);
+        }
+    }
 
     public void setRequest1(SocketRequest socketRequest, String myId, WebSocketSession session) {
         Request1 result = socketRequest.typeRequest1(socketRequest);

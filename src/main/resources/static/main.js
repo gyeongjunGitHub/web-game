@@ -24,6 +24,7 @@ const gameArea = document.querySelector('.gameArea');
 const finalScore_wrapBox = document.querySelector('.finalScore_wrapBox');
 const finalScore_name_box = document.querySelector('.finalScore_name_box');
 const finalScore_score_box = document.querySelector('.finalScore_score_box');
+const matching_info = document.querySelector('.matching_info');
 
 //id 변수
 const memberListTable = document.getElementById('memberListTable');
@@ -39,6 +40,7 @@ const matchingCancleBtn3 = document.getElementById('matchingCancleBtn3');
 matchingCancleBtn3.style.display = 'none';
 const matchingStartBtn4 = document.getElementById('matchingStartBtn4');
 const matchingCancleBtn4 = document.getElementById('matchingCancleBtn4');
+matchingStartBtn4.style.display = 'none';
 matchingCancleBtn4.style.display = 'none';
 
 let myId = '';
@@ -61,6 +63,7 @@ let quiz = '';
 let answer = '';
 let userList = [];
 let userNickNameList = [];
+let userProfile = [];
 let score = [];
 let lastXY={
     lastX: 0,
@@ -174,6 +177,16 @@ function wsEvt() {
 }
 //메시지 처리 핸들러 함수
 async function receiveMessageHandler(msg) {
+    if(msg.type == 'newTurn'){
+        console.log(msg.data.yourTurn);
+        myTurn = msg.data.yourTurn;
+    }
+    if(msg.matchingUserCount_2 != undefined){
+        matching_info.innerHTML = `<p>매칭중 ..</p>(${msg.matchingUserCount_2}/2)`;
+    }
+    if(msg.matchingUserCount_3 != undefined){
+        matching_info.innerHTML = `<p>매칭중 ..</p>(${msg.matchingUserCount_3}/3)`;
+    }
     if(msg.timeCount != undefined){
         timeBox.innerHTML = `${msg.timeCount}`;
     }
@@ -181,6 +194,38 @@ async function receiveMessageHandler(msg) {
         if(msg.data == 'true'){
             document.querySelector('.user-menu').innerHTML = '';
             inputFriendList(friendList);
+        }
+    }
+    if(msg.type == 'leaveMember'){
+
+
+        for(let i = 0; i<userNickNameList.length; i++){
+            if(userNickNameList[i] == msg.data){
+                userList.splice(i,1);
+                userNickNameList.splice(i,1);
+                userProfile.splice(i,1);
+
+                for(let i = 0; i<4; i++){
+                    if(i<userNickNameList.length){
+                        userAnswerBoxList[i].innerHTML = '';
+                        userNameBoxList[i].innerHTML = `
+                            <span>${userNickNameList[i]}</span>
+                        `;
+                        if(myId != userList[i]){
+                            userNameBoxList[i].innerHTML += `<button onclick="ttabong('${userNickNameList[i]}')">👍</button>`;
+                        }
+                        userScoreBoxList[i].innerHTML = `
+                            <span>score : ${score[i]}</span>
+                        `;
+                        userPictureBoxList[i].innerHTML = `
+                            <img src="/images/${userProfile[i]}" width="120" height="120">
+                        `;
+                        userAnswerBoxList[i].style.display = 'block';
+                    }else{
+                        userAreaBoxList[i].style.display = 'none';
+                    }
+                }
+            }
         }
     }
     if(msg.type == 'leaveOtherMember'){
@@ -303,7 +348,7 @@ async function receiveMessageHandler(msg) {
         userList = msg.data.roomUsers;
         userNickNameList = msg.data.roomUsersNickName;
 
-        let userProfile = [];
+        userProfile = [];
         for(let i = 0; i<userList.length; i++){
             const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
             userProfile.push(result.stored_file_name);
@@ -485,28 +530,36 @@ function matching(request) {
         const data = new Data('matchingStartDrowGame');
         send(data);
         matchingStartBtn.style.display = 'none';
+        matchingStartBtn3.style.display = 'none';
         matchingCancleBtn.style.display = 'block';
+        matching_info.style.display = 'block';
     }
     if (request == 'drowGameCancle') {
         const data = new Data('matchingCancleDrowGame');
         send(data);
 
         matchingStartBtn.style.display = 'block';
+        matchingStartBtn3.style.display = 'block';
         matchingCancleBtn.style.display = 'none';
+        matching_info.style.display = 'none';
     }
 }
 function matching3(request){
     if(request == 'drowGameStart3'){
         const data = new Data('matchingStartDrowGame3');
         send(data);
+        matchingStartBtn.style.display = 'none';
         matchingStartBtn3.style.display = 'none';
         matchingCancleBtn3.style.display = 'block';
+        matching_info.style.display = 'block';
     }
     if (request == 'drowGameCancle3') {
         const data = new Data('matchingCancleDrowGame3');
         send(data);
+        matchingStartBtn.style.display = 'block';
         matchingStartBtn3.style.display = 'block';
         matchingCancleBtn3.style.display = 'none';
+        matching_info.style.display = 'none';
     }
 }
 function matching4(request){
