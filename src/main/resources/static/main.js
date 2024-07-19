@@ -180,6 +180,7 @@ function wsEvt() {
 //메시지 처리 핸들러 함수
 async function receiveMessageHandler(msg) {
     if(msg.type == 'newTurn'){
+        console.log(msg.data.yourTurn);
         myTurn = msg.data.yourTurn;
     }
     if(msg.matchingUserCount_2 != undefined){
@@ -198,38 +199,23 @@ async function receiveMessageHandler(msg) {
         }
     }
     if(msg.type == 'leaveMember'){
-        for(let i = 0; i<userNickNameList.length; i++){
+        console.log(msg);
+        for(let i = 0; i < userNickNameList.length; i++){
             if(userNickNameList[i] == msg.data){
-                userList.splice(i,1);
-                userNickNameList.splice(i,1);
-                userProfile.splice(i,1);
-
-                for(let i = 0; i<4; i++){
-                    if(i<userNickNameList.length){
-                        userAnswerBoxList[i].innerHTML = '';
-                        userNameBoxList[i].innerHTML = `
-                            <span>${userNickNameList[i]}</span>
-                        `;
-                        if(myId != userList[i]){
-                            userNameBoxList[i].innerHTML += `<button onclick="ttabong('${userNickNameList[i]}')">👍</button>`;
-                        }
-                        userScoreBoxList[i].innerHTML = `
-                            <span>score : ${score[i]}</span>
-                        `;
-                        userPictureBoxList[i].innerHTML = `
-                            <img src="/images/${userProfile[i]}" width="120" height="120">
-                        `;
-                        userAnswerBoxList[i].style.display = 'block';
-                    }else{
-                        userAreaBoxList[i].style.display = 'none';
-                    }
-                }
+                userScoreBoxList[i].style.backgroundColor = 'red';
             }
         }
     }
     if(msg.type == 'alone'){
-        alert('다른 유저가 게임을 떠났습니다.');
-        location.href = '/main';
+        alert('게임 인원이 부족하여 종료됩니다.');
+        matchingArea.style.display = 'flex';
+        gameArea.style.display = 'none';
+        finalScore_wrapBox.style.display = 'none';
+        matchingStartBtn.style.display = 'block';
+        matchingStartBtn3.style.display = 'block';
+        matchingCancleBtn.style.display = 'none';
+        matchingCancleBtn3.style.display = 'none';
+        matching_info.style.display = 'none';
     }
     if(msg.type == 'answer'){
         for(let i = 0; i < userList.length; i++){
@@ -241,14 +227,12 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(msg.data.sender == userList[i]){
                     quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
-                    userNameBoxList[i].style.backgroundColor ='#9393fc';
                 }
             }
         }
 
     }
     if(msg.type == 'finalScore'){
-
         finalScore_wrapBox.style.display = 'flex';
         timeBox.innerHTML ='';
         finalScore_name_box.innerHTML ='';
@@ -277,20 +261,15 @@ async function receiveMessageHandler(msg) {
         quiz = msg.data.quiz;
         answer = msg.data.answer;
 
-
-        for(let i = 0; i<userList.length; i++){
-            if(msg.data.yourTurn-1 == i){
-                userAreaBoxList[i].style.borderColor='blue';
-            }else{
-                userAreaBoxList[i].style.borderColor='black';
-            }
-        }
-
-
         //내 차례
         if(msg.data.yourTurn == myTurn){
-            input.style.display='none';
-            btn.style.display='block';
+            for(let i = 0; i<userList.length; i++){
+                if(i == msg.data.yourTurn -1){
+                    userNameBoxList[i].style.color = 'blue';
+                }else{
+                    userNameBoxList[i].style.color = 'black';
+                }
+            }
             //채팅 금지
             sendBtn.removeEventListener('click', sendAnswer);
             //그리기 이벤트 리스너 추가
@@ -301,8 +280,13 @@ async function receiveMessageHandler(msg) {
             const data = new Data('start');
             send(data);
         }else{
-            input.style.display='block';
-            btn.style.display='none';
+            for(let i = 0; i<userList.length; i++){
+                if(i == msg.data.yourTurn -1){
+                    userNameBoxList[i].style.color = 'blue';
+                }else{
+                    userNameBoxList[i].style.color = 'black';
+                }
+            }
             //채팅 활성화
             sendBtn.addEventListener('click', sendAnswer);
             //그리기 이벤트 리스너 삭제
@@ -312,15 +296,6 @@ async function receiveMessageHandler(msg) {
         }
     }
     if(msg.type == 'nextTurn'){
-        for(let i = 0; i<userList.length; i++){
-            userNameBoxList[i].style.backgroundColor = '';
-
-            if(msg.data.yourTurn-1 == i){
-                userAreaBoxList[i].style.borderColor='blue';
-            }else{
-                userAreaBoxList[i].style.borderColor='black';
-            }
-        }
 
         //퀴즈, 정답
         quiz = msg.data.quiz;
@@ -328,8 +303,15 @@ async function receiveMessageHandler(msg) {
 
         //자기 자신의 턴 일 경우
         if(msg.data.yourTurn == myTurn){
-            input.style.display='none';
-            btn.style.display='block';
+            for(let i = 0; i<userList.length; i++){
+                if(i == msg.data.yourTurn -1){
+                    userNameBoxList[i].style.color = 'blue';
+                }else{
+                    userNameBoxList[i].style.color = 'black';
+                }
+            }
+
+
             //채팅 금지
             sendBtn.removeEventListener('click', sendAnswer);
 
@@ -343,8 +325,13 @@ async function receiveMessageHandler(msg) {
             send(data);
 
         }else{
-            input.style.display='block';
-            btn.style.display='none';
+            for(let i = 0; i<userList.length; i++){
+                if(i == msg.data.yourTurn -1){
+                    userNameBoxList[i].style.color = 'blue';
+                }else{
+                    userNameBoxList[i].style.color = 'black';
+                }
+            }
             //채팅 활성화
             sendBtn.addEventListener('click', sendAnswer);
 
@@ -374,6 +361,11 @@ async function receiveMessageHandler(msg) {
 
         userProfile = [];
         for(let i = 0; i<userList.length; i++){
+            userScoreBoxList[i].style.backgroundColor = '';
+            if(userList[i] == myId){
+                userScoreBoxList[i].style.backgroundColor = '#99e99f';
+            }
+
             const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
             userProfile.push(result.stored_file_name);
         }

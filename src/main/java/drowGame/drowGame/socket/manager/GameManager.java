@@ -2,7 +2,6 @@ package drowGame.drowGame.socket.manager;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.deser.DataFormatReaders;
 import drowGame.drowGame.dto.QuizDTO;
 import drowGame.drowGame.entity.QuizEntity;
 import drowGame.drowGame.repository.GameSettingRepository;
@@ -104,6 +103,7 @@ public class GameManager {
         }
         gameRoom.setTurnList(turnList);
         gameRoom.setScore(scoreList);
+        gameRoom.setStatus(statusList);
         gameRoom.setTurn(1);
         gameRoom.setTimer(new Timer());
         gameRoom.setCycle(0);
@@ -118,6 +118,16 @@ public class GameManager {
     public int gameRoomMemberCount(int roomId) {
         return gameRoomMap.get(roomId).getPlayer_session().size();
     }
+    public int gameRoomOnlineMemberCount(int roomId){
+        int count = 0;
+        List<Integer> statusList = gameRoomMap.get(roomId).getStatus();
+        for(int i = 0; i<statusList.size(); i++){
+            if(statusList.get(i) == 1){
+                count++;
+            }
+        }
+        return count;
+    }
     public int getGameRoomId(WebSocketSession session){
         return roomIdMap.get(session);
     }
@@ -130,6 +140,9 @@ public class GameManager {
     public List<WebSocketSession> getPlayerSession(int roomId){
         return gameRoomMap.get(roomId).getPlayer_session();
     }
+    public List<Integer> getStatusList(int roomId){
+        return gameRoomMap.get(roomId).getStatus();
+    }
     public void startBeforeGameTimer(WebSocketSession session){
         int roomId = getGameRoomId(session);
         List<WebSocketSession> sameRoomMemberSession = getPlayerSession(roomId);
@@ -139,9 +152,14 @@ public class GameManager {
             @Override
             public void run() {
                 if (count >= 0) {
-                    for(WebSocketSession wss : sameRoomMemberSession){
-                        String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
-                        sendMessage(wss, roomIsFull);
+                    List<WebSocketSession> playerSession = getPlayerSession(roomId);
+                    List<Integer> statusList = getStatusList(roomId);
+                    for(int i = 0; i<playerSession.size(); i++){
+                        if(statusList.get(i) == 1){
+                            getStatusList(roomId);
+                            String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
+                            sendMessage(playerSession.get(i), roomIsFull);
+                        }
                     }
                     count--;
                 } else {
@@ -169,7 +187,6 @@ public class GameManager {
 
         int roomId = getGameRoomId(session);
         int currentTurn = getGameTurn(roomId);
-        List<WebSocketSession> sameRoomMemberSession = getPlayerSession(roomId);
 
         //보낼 턴 증가 시키기
         increaseTurn(roomId);
@@ -181,15 +198,23 @@ public class GameManager {
             @Override
             public void run() {
                 if (count >= 0) {
-                    for(WebSocketSession wss : sameRoomMemberSession){
-                        String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
-                        sendMessage(wss, roomIsFull);
+                    List<WebSocketSession> playerSession = getPlayerSession(roomId);
+                    List<Integer> statusList = getStatusList(roomId);
+                    for(int i = 0; i<playerSession.size(); i++){
+                        if(statusList.get(i) == 1){
+                            getStatusList(roomId);
+                            String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
+                            sendMessage(playerSession.get(i), roomIsFull);
+                        }
                     }
                     count--;
                 } else {
-                    if(cycle == maxCycle && currentTurn == gameRoomMemberCount(roomId)){
+                    if(cycle == maxCycle && currentTurn == GameRoom.getLastTurn(gameRoomMap.get(roomId))){
                         gameOverProc(roomId, session);
                     }else {
+                        if(GameRoom.getStatus(getGameTurn(roomId), gameRoomMap.get(roomId)) == 0){
+                            increaseTurn(roomId);
+                        }
                         nextTurnProc(roomId, getGameTurn(roomId), session);
                     }
                 }
@@ -253,14 +278,20 @@ public class GameManager {
     public void sendMessageSameRoom(int num, WebSocketSession session, SocketRequest socketRequest) {
         int roomId = getGameRoomId(session);
         if (num == 0) {
-            for (WebSocketSession wss : getPlayerSession(roomId)) {
-                sendMessage(wss, dtoToJson(socketRequest));
+            List<WebSocketSession> playerSession = getPlayerSession(roomId);
+            List<Integer> statusList = getStatusList(roomId);
+            for(int i = 0; i<getPlayerSession(roomId).size(); i++){
+                if(statusList.get(i) == 1){
+                    sendMessage(playerSession.get(i), dtoToJson(socketRequest));
+                }
             }
         }
         if (num == 1) {
-            for (WebSocketSession wss : getPlayerSession(roomId)){
-                if(!session.equals(wss)){
-                    sendMessage(wss, dtoToJson(socketRequest));
+            List<WebSocketSession> playerSession = getPlayerSession(roomId);
+            List<Integer> statusList = getStatusList(roomId);
+            for(int i = 0; i<getPlayerSession(roomId).size(); i++){
+                if(statusList.get(i) == 1){
+                    sendMessage(playerSession.get(i), dtoToJson(socketRequest));
                 }
             }
         }
@@ -290,7 +321,9 @@ public class GameManager {
     }
     public void sendMessage(WebSocketSession wss, String message){
         try{
-            wss.sendMessage(new TextMessage(message));
+            if(wss != null){
+                wss.sendMessage(new TextMessage(message));
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -376,51 +409,20 @@ public class GameManager {
         }
         return true;
     }
-    public void removeMember(WebSocketSession mySession){
-        //인원이 2명일 경우. 현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
-        //인원이 3명이 경우 3턴인 유저가 2턴으로 채워지기 때문에 문제가 발생하지 않음.
-        //2턴이 수행중이고 3턴이 게임을 나가면 문제 발생
-        //결론 : 마지막 바로 전 턴이 수행중일 때 마지막 턴이 게임을 나가면 문제 발생.
-        //해결방법 : 마지막 바로 전 턴이 수행중 일 때 마지막 턴 유저가 게임을 나간다면 nextTurn을 1로 초기화 하면 됨
-        int roomId = roomIdMap.get(mySession);
+    public void leaveGameProc(WebSocketSession mySession){
+        int roomId = getGameRoomId(mySession);
+        String nick_name = GameRoom.findMemberNickname(mySession, gameRoomMap.get(roomId));
+        GameRoom.updateStatus(nick_name, gameRoomMap.get(roomId));
 
-//        //마지막 바로 전 턴 수행중 and 나가는 유저의 턴이 마지막 턴 일 경우 턴 초기화
-//        int count = gameRoomMemberCount(roomId);
-//        if (count == getGameTurn(roomId) && count == GameRoom.getMyTurn(mySession,gameRoomMap.get(roomId))){
-//            increaseTurn(roomId);
-//        }
+        if(gameRoomOnlineMemberCount(roomId) >= 1){
+            gameRoomMap.get(roomId).getTimer().cancel();
+            SocketRequest sr = new SocketRequest();
+            sr.setType("alone");
+            sendMessageSameRoom(1, mySession, sr);
+            removeGameRoom(roomId);
+        }
 
-//        String nick_name = GameRoom.findMemberNickname(mySession, gameRoomMap.get(roomId));
-//
-//        //턴 정보도 새로 보내야 함
-//        //현재 턴 ex)1턴이 진행 중 일 경우 바로 다음턴이 2턴이 나가면 문제 발생.
-//        SocketRequest sr = new SocketRequest();
-//        sr.setType("leaveMember");
-//        sr.setData(nick_name);
-//        sendMessageSameRoom(1, mySession, sr);
-//        int size = GameRoom.removeMemberInfo(mySession, gameRoomMap.get(roomId));
-//        if(size == 1){
-//            removeGameRoom(roomId);
-//        }
-//        MatchingInfo matchingInfo = new MatchingInfo();
-//        List<WebSocketSession> playerSession = getPlayerSession(roomId);
-//        for(int i = 0; i< playerSession.size(); i++){
-//            sr.setType("newTurn");
-//            matchingInfo.setYourTurn(getTurnList(roomId).get(i));
-//            sr.setData(matchingInfo);
-//            sendMessage(playerSession.get(i), dtoToJson(sr));
-//        }
-//        if(size == 1){
-//            List<WebSocketSession> playerSession = getPlayerSession(roomId);
-//            SocketRequest sr = new SocketRequest();
-//            sr.setType("alone");
-//            sendMessage(playerSession.get(0), dtoToJson(sr));
-//            removeGameRoom(roomId);
-//        }else{
-//
-//        }
     }
-
     public void nextTurnProc(int roomId, int turn, WebSocketSession session){
         gameRoomMap.get(roomId).getTimer().cancel();
         gameRoomMap.get(roomId).setTimer(new Timer());

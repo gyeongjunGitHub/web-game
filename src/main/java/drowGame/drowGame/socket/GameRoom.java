@@ -38,38 +38,28 @@ public class GameRoom {
         }
         return gameRoom.getPlayer_nick_name().get(index);
     }
-    public static int getMyTurn(WebSocketSession session, GameRoom gameRoom){
+    public static int getLastTurn(GameRoom gameRoom){
+        int lastTurn = 0;
+        for(int i = 0; i<gameRoom.getStatus().size(); i++){
+            if(gameRoom.getStatus().get(i) == 1){
+                lastTurn = gameRoom.getTurnList().get(i);
+            }
+        }
+        return lastTurn;
+    }
+    public static void updateStatus(String nick_name, GameRoom gameRoom){
         int index = 0;
         for(int i = 0; i<gameRoom.getPlayer_session().size(); i++){
-            if(session.equals(gameRoom.getPlayer_session().get(i))){
+            if(nick_name.equals(gameRoom.getPlayer_nick_name().get(i))){
                 index = i;
             }
         }
-        return gameRoom.getTurnList().get(index);
+
+        gameRoom.getStatus().set(index, 0);
     }
-    public static int removeMemberInfo(WebSocketSession session, GameRoom gameRoom){
-        int index = 0;
-        for(int i = 0; i<gameRoom.getPlayer_session().size(); i++){
-            if(session.equals(gameRoom.getPlayer_session().get(i))){
-                index = i;
-            }
-        }
-
-//        System.out.println("게임을 나가는 유저의 turn : " + gameRoom.getTurnList().get(index));
-
-        gameRoom.getPlayer_session().remove(index);
-        gameRoom.getPlayer_nick_name().remove(index);
-        gameRoom.getScore().remove(index);
-        gameRoom.getTurnList().remove(gameRoom.getTurnList().size()-1);
-
-//        System.out.println(gameRoom.getPlayer_session().toString());
-//        System.out.println(gameRoom.getPlayer_nick_name().toString());
-//        System.out.println(gameRoom.getScore().toString());
-//        System.out.println(gameRoom.getTurnList().toString());
-
-        return gameRoom.getPlayer_session().size();
+    public static int getStatus(int turn, GameRoom gameRoom){
+        return gameRoom.getStatus().get(turn-1);
     }
-
     public static List<FinalScore> finalScore(GameRoom gameRoom) {
         List<FinalScore> finalScoreList = new ArrayList<>();
 
@@ -101,5 +91,4 @@ public class GameRoom {
             this.score = score;
         }
     }
-
 }

@@ -48,6 +48,7 @@ public class SocketService {
         sm.removeSessionMap(session);
         sm.removeMemberIdMap(session);
         sm.removeMemberNickNameMap(session);
+        System.out.println("세션 제거 완료");
     }
     public WebSocketSession duplicateLoginCheck(WebSocketSession session){
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));
@@ -93,6 +94,8 @@ public class SocketService {
     }
     public void sendLogoutMember(WebSocketSession session) {
         String myId = sm.getMyId(session);
+        String nick_name = sm.getMemberNickName(session.getId());
+
         // socket sessionMap 순회
         for(String memberKey : sm.getSessionMap().keySet()){
             WebSocketSession wss = sm.getSessionMap().get(memberKey);
@@ -105,6 +108,15 @@ public class SocketService {
                 data.setData(myId);
                 sendMessage(wss, dtoToJson(data));
             }
+        }
+
+        //게임중 일 경우
+        if (gm.isDuringGame(session)){
+            SocketRequest sr = new SocketRequest();
+            sr.setType("leaveMember");
+            sr.setData(nick_name);
+            sendMessageSameRoom(1, session, sr);
+            gm.leaveGameProc(session);
         }
     }
     public void sendLoginMemberList(WebSocketSession session) {
@@ -359,7 +371,6 @@ public class SocketService {
     public void startRound(WebSocketSession session) {
         gm.startGameRoundTimer(session);
     }
-
     public void sendMessageSameRoom(int num, WebSocketSession session, SocketRequest socketRequest) {
         int roomId = gm.getGameRoomId(session);
         if (num == 0) {
@@ -375,7 +386,6 @@ public class SocketService {
             }
         }
     }
-
     public void removeMatchingQueue(WebSocketSession session, int inGameMemberSize) {
         String myId = sm.getMyId(session);
         if(inGameMemberSize == 2){
@@ -402,13 +412,7 @@ public class SocketService {
     }
     public void removeGameRoom(WebSocketSession session) {
 /////////////////////////////////////이부분에서 에러발생 해결 해야함//////////////////////////////////////////
-        //게임중 일 경우
-        if (gm.isDuringGame(session)){
-            System.out.println("게임중 !");
-            gm.removeMember(session);
-        }else {
-            System.out.println("게임중 아님");
-        }
+
     }
 
     public void setRequest1(SocketRequest socketRequest, String myId, WebSocketSession session) {

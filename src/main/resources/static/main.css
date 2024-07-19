@@ -386,7 +386,10 @@ bottom:0;
 
 
 #matchingStartBtn,
-#matchingCancleBtn {
+#matchingStartBtn3,
+#matchingCancleBtn,
+#matchingCancleBtn3{
+margin: 21px;
   background: #0c6428aa;
   padding: 5px 10px;
   border-radius: 5px;
@@ -554,7 +557,6 @@ bottom:0;
 .user2_name,
 .user3_name,
 .user4_name{
-
   border-bottom: 1px solid #ccc;
 }
 .user1_answer,
