@@ -256,9 +256,10 @@
                 </div>
             `;
         }
+        const nick_name = document.getElementById('nick_name');
+        nick_name.addEventListener('keyup', nickNameDuplicateCheck);
     }
-    const nick_name = document.getElementById('nick_name');
-    nick_name.addEventListener('keyup', nickNameDuplicateCheck);
+
 
     async function nickNameDuplicateCheck(){
         let url = '/member/nickNameDuplicateCheck';
