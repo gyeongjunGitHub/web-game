@@ -122,7 +122,6 @@
     <div class="input-box">
         <input type="text" id="id" name="id" placeholder="ID" />
         <div class="check-box">
-            <button class="check-btn" onclick="idDuplicateCheck()">중복체크</button>
             <div id="idMessageBox"></div>
         </div>
         <div class="warn"></div>
@@ -135,7 +134,6 @@
         <div class="warn"></div>
         <input type="text" id="nick_name" name="nick_name" placeholder="nick name"/>
         <div class="check-box">
-            <button class="check-btn" onclick="nickNameDuplicateCheck()">중복체크</button>
             <div id="nickNameMessageBox"></div>
         </div>
 
@@ -194,6 +192,44 @@
     let idIsTrue = false;
     let nickNameIsTrue = false;
 
+    id.addEventListener('keyup',idDuplicateCheck);
+    nick_name.addEventListener('keyup', nickNameDuplicateCheck);
+
+    async function idDuplicateCheck(){
+        let url = '/member/idDuplicateCheck';
+        let checkParam = {
+            id: id.value,
+        };
+        let result = await postRequest(url, checkParam);
+
+        if (result == 1) {
+            //사용 가능
+            idIsTrue = true;
+            idMessageBox.innerHTML = `<span style="color: green;">사용 가능한 아이디 입니다.</span>`;
+        } else if (result == 0) {
+            //사용 불가능
+            idIsTrue = false;
+            idMessageBox.innerHTML = `<span style="color: red;">존재하는 아이디 입니다.</span>`;
+        }
+    }
+    async function nickNameDuplicateCheck(){
+        let url = '/member/nickNameDuplicateCheck';
+        let checkParam = {
+            nick_name: nick_name.value,
+        };
+        let result = await postRequest(url, checkParam);
+        if (result == 1) {
+            //사용 가능
+            nickNameIsTrue = true;
+            nickNameMessageBox.innerHTML = `<span style="color: green;">사용 가능한 닉네임 입니다.</span>`;
+        } else if (result == 0) {
+            //사용 불가능
+            nickNameIsTrue = false;
+            nickNameMessageBox.innerHTML = `<span style="color: red;">존재하는 닉네임 입니다.</span>`;
+        }
+    }
+
+
     //Member 생성자
     function Member(id, password, nick_name, name, gender, email) {
       this.id = id;
@@ -228,40 +264,8 @@
       }
     }
 
-    async function idDuplicateCheck() {
-        let url = '/member/idDuplicateCheck';
 
-        let checkParam = {
-            id: id.value,
-        };
-        let result = await postRequest(url, checkParam);
 
-        if (result == 1) {
-            //사용 가능
-            idIsTrue = true;
-            idMessageBox.innerHTML = `<span style="color: green;">사용 가능한 아이디 입니다.</span>`;
-        } else if (result == 0) {
-            //사용 불가능
-            idIsTrue = false;
-            idMessageBox.innerHTML = `<span style="color: red;">존재하는 아이디 입니다.</span>`;
-        }
-    }
-    async function nickNameDuplicateCheck(){
-        let url = '/member/nickNameDuplicateCheck';
-        let checkParam = {
-            nick_name: nick_name.value,
-        };
-        let result = await postRequest(url, checkParam);
-        if (result == 1) {
-            //사용 가능
-            nickNameIsTrue = true;
-            nickNameMessageBox.innerHTML = `<span style="color: green;">사용 가능한 닉네임 입니다.</span>`;
-        } else if (result == 0) {
-            //사용 불가능
-            nickNameIsTrue = false;
-            nickNameMessageBox.innerHTML = `<span style="color: red;">존재하는 닉네임 입니다.</span>`;
-        }
-    }
 
 
     async function join() {

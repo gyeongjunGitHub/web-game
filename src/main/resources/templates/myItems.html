@@ -250,7 +250,6 @@
                 <h2>닉네임 변경</h2>
                 <div id="nickNameMessageBox"></div>
                 <input type="text" placeholder="닉네임" id="nick_name"/>
-                <button onclick="nickNameDuplicateCheck()">중복체크</button>
                 <div class="modal_btn_wrap">
                     <button class="buy_ok_btn" onclick="updateNickName()">선택 완료</button>
                     <button class="buy_cancel_btn" onclick="shop_modal.style.display = 'none';">취소</button>
@@ -258,9 +257,11 @@
             `;
         }
     }
+    const nick_name = document.getElementById('nick_name');
+    nick_name.addEventListener('keyup', nickNameDuplicateCheck);
+
     async function nickNameDuplicateCheck(){
         let url = '/member/nickNameDuplicateCheck';
-        const nick_name = document.getElementById('nick_name');
         const nickNameMessageBox = document.getElementById('nickNameMessageBox');
         let checkParam = {
             nick_name: nick_name.value,

@@ -28,6 +28,8 @@ const matching_info = document.querySelector('.matching_info');
 const input = document.querySelector('.input');
 const btn = document.querySelector('.btn');
 
+
+
 //id 변수
 const memberListTable = document.getElementById('memberListTable');
 const chattingArea = document.getElementById('chattingArea');
@@ -44,6 +46,7 @@ const matchingStartBtn4 = document.getElementById('matchingStartBtn4');
 const matchingCancleBtn4 = document.getElementById('matchingCancleBtn4');
 matchingStartBtn4.style.display = 'none';
 matchingCancleBtn4.style.display = 'none';
+
 
 let myId = '';
 let myNickName = '';
@@ -77,9 +80,11 @@ let mouseState = {
 };
 var ws;
 
+let timerId;
 
 gameArea.style.display = 'none';
 finalScore_wrapBox.style.display = 'none';
+
 
 class Friend{
     #member_id;
@@ -220,7 +225,21 @@ async function receiveMessageHandler(msg) {
     if(msg.type == 'answer'){
         for(let i = 0; i < userList.length; i++){
             if(userList[i] == msg.data.sender){
+                userAnswerBoxList[i].style.display = 'block';
                 userAnswerBoxList[i].innerHTML = `${msg.data.answer}`;
+
+                //타이머 실행중이면 삭제 후 다시시작
+                if(timerId){
+                    clearTimeout(timerId);
+                    timerId = setTimeout(() => {
+                        userAnswerBoxList[i].style.display = 'none';
+                    }, 2000);
+                }else{
+                    timerId = setTimeout(() => {
+                        userAnswerBoxList[i].style.display = 'none';
+                    }, 2000);
+                }
+
             }
         }
         if(msg.data.answer == answer){
@@ -230,7 +249,6 @@ async function receiveMessageHandler(msg) {
                 }
             }
         }
-
     }
     if(msg.type == 'finalScore'){
         finalScore_wrapBox.style.display = 'flex';
@@ -272,6 +290,7 @@ async function receiveMessageHandler(msg) {
             }
             //채팅 금지
             sendBtn.removeEventListener('click', sendAnswer);
+            document.removeEventListener('keypress', sendAnswerKeyPress);
             //그리기 이벤트 리스너 추가
             addListener();
             //quiz 출력
@@ -289,6 +308,8 @@ async function receiveMessageHandler(msg) {
             }
             //채팅 활성화
             sendBtn.addEventListener('click', sendAnswer);
+            document.addEventListener('keypress', sendAnswerKeyPress);
+
             //그리기 이벤트 리스너 삭제
             removeListener();
             //quiz 출력
@@ -314,7 +335,7 @@ async function receiveMessageHandler(msg) {
 
             //채팅 금지
             sendBtn.removeEventListener('click', sendAnswer);
-
+            document.removeEventListener('keypress', sendAnswerKeyPress);
             //그리기 이벤트 리스너 추가
             addListener();
 
@@ -334,6 +355,7 @@ async function receiveMessageHandler(msg) {
             }
             //채팅 활성화
             sendBtn.addEventListener('click', sendAnswer);
+            document.addEventListener('keypress', sendAnswerKeyPress);
 
             //그리기 이벤트 리스너 삭제
             removeListener();
@@ -361,6 +383,7 @@ async function receiveMessageHandler(msg) {
 
         userProfile = [];
         for(let i = 0; i<userList.length; i++){
+            userAnswerBoxList[i].style.display = 'none';
             userScoreBoxList[i].style.backgroundColor = '';
             if(userList[i] == myId){
                 userScoreBoxList[i].style.backgroundColor = '#99e99f';
@@ -382,9 +405,8 @@ async function receiveMessageHandler(msg) {
                     <span>score : ${score[i]}</span>
                 `;
                 userPictureBoxList[i].innerHTML = `
-                    <img src="/images/${userProfile[i]}" width="120" height="120">
+                    <img src="/images/${userProfile[i]}" width="100" height="100">
                 `;
-                userAnswerBoxList[i].style.display = 'block';
             }else{
                 userAreaBoxList[i].style.display = 'none';
             }
@@ -721,6 +743,7 @@ async function chat(member) {
         inputFriendList(friendList);
 
         chattingArea.style.display = 'block';
+
         chatContentArea.scrollTop = chatContentArea.scrollHeight;
     } else {
         chattingArea.style.display = 'none';
@@ -928,6 +951,13 @@ function sendAnswer(){
     const data = new Data('answer', { "answer" : answerBox.value , "timeCount" : timeBox.innerHTML});
     answerBox.value = '';
     send(data);
+}
+function sendAnswerKeyPress(e){
+    if(e.keyCode == 13){ //enter press
+        const data = new Data('answer', { "answer" : answerBox.value , "timeCount" : timeBox.innerHTML});
+        answerBox.value = '';
+        send(data);
+    }
 }
 function blackBtnClickHandler() { color = 'black'; };
 function blueBtnClickHandler() { color = 'blue'; };
