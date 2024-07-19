@@ -410,10 +410,6 @@ public class SocketService {
         }
 
     }
-    public void removeGameRoom(WebSocketSession session) {
-/////////////////////////////////////이부분에서 에러발생 해결 해야함//////////////////////////////////////////
-
-    }
 
     public void setRequest1(SocketRequest socketRequest, String myId, WebSocketSession session) {
         Request1 result = socketRequest.typeRequest1(socketRequest);

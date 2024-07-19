@@ -98,9 +98,6 @@ public class SocketHandler extends TextWebSocketHandler {
         socketService.removeMatchingQueue(session, 2);
         socketService.removeMatchingQueue(session, 3);
 
-        //게임 중 일 경우 정보 삭제
-        socketService.removeGameRoom(session);
-
         socketService.removeSessionInfo(session);
         super.afterConnectionClosed(session, status);
     }

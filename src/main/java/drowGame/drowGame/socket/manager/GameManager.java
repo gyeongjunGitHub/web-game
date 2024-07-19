@@ -409,6 +409,11 @@ public class GameManager {
     }
     public void removeGameRoom(int roomId){
         gameRoomMap.remove(roomId);
+        for (WebSocketSession session : roomIdMap.keySet()){
+            if(roomIdMap.get(session) == roomId){
+                roomIdMap.remove(session);
+            }
+        }
     }
 
     public boolean isDuringGame(WebSocketSession mySession){
