@@ -414,7 +414,7 @@ public class GameManager {
         String nick_name = GameRoom.findMemberNickname(mySession, gameRoomMap.get(roomId));
         GameRoom.updateStatus(nick_name, gameRoomMap.get(roomId));
 
-        if(gameRoomOnlineMemberCount(roomId) >= 1){
+        if(gameRoomOnlineMemberCount(roomId) <= 1){
             gameRoomMap.get(roomId).getTimer().cancel();
             SocketRequest sr = new SocketRequest();
             sr.setType("alone");
