@@ -199,10 +199,10 @@ async function receiveMessageHandler(msg) {
         }
     }
     if(msg.type == 'leaveMember'){
-        console.log(msg);
         for(let i = 0; i < userNickNameList.length; i++){
             if(userNickNameList[i] == msg.data){
                 userScoreBoxList[i].style.backgroundColor = 'red';
+                userNameBoxList[i].innerHTML = '탈주';
             }
         }
     }

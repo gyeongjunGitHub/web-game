@@ -258,16 +258,24 @@ public class GameManager {
                 @Override
                 public void run() {
                     if (count >= 0) {
-                        for(WebSocketSession wss : sameRoomMemberSession){
-                            String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
-                            sendMessage(wss, roomIsFull);
+                        List<WebSocketSession> playerSession = getPlayerSession(roomId);
+                        List<Integer> statusList = getStatusList(roomId);
+                        for(int i = 0; i<playerSession.size(); i++){
+                            if(statusList.get(i) == 1){
+                                getStatusList(roomId);
+                                String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
+                                sendMessage(playerSession.get(i), roomIsFull);
+                            }
                         }
                         count--;
                     } else {
-                        if(cycle == maxCycle && currentTurn == gameRoomMemberCount(roomId)){
+                        if(cycle == maxCycle && currentTurn == GameRoom.getLastTurn(gameRoomMap.get(roomId))){
                             gameOverProc(roomId, session);
                         }else {
-                            nextTurnProc(roomId, turn, session);
+                            if(GameRoom.getStatus(getGameTurn(roomId), gameRoomMap.get(roomId)) == 0){
+                                increaseTurn(roomId);
+                            }
+                            nextTurnProc(roomId, getGameTurn(roomId), session);
                         }
                     }
                 }
