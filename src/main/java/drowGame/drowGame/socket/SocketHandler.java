@@ -32,7 +32,6 @@ public class SocketHandler extends TextWebSocketHandler {
             socketService.setRequest1(socketRequest, myId, session);
         }
         if(requestType.getRequest2().contains(requestName)){
-            System.out.println(requestName);
             socketService.sendMessageSameRoom(1,session, socketRequest);
         }
         if(requestName.equals("answer")){
@@ -70,7 +69,7 @@ public class SocketHandler extends TextWebSocketHandler {
             socketService.sendChatting(session, socketRequest);
         }
         if(requestName.equals("score")){
-            System.out.println(msg);
+
         }
     }
 

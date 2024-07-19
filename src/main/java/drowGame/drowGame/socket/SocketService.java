@@ -48,7 +48,6 @@ public class SocketService {
         sm.removeSessionMap(session);
         sm.removeMemberIdMap(session);
         sm.removeMemberNickNameMap(session);
-        System.out.println("세션 제거 완료");
     }
     public WebSocketSession duplicateLoginCheck(WebSocketSession session){
         String myId = memberSessionService.getMemberId((String) session.getAttributes().get("httpSessionId"));

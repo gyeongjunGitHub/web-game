@@ -34,7 +34,6 @@ public class MemberSessionService {
     public String getMemberIdByNickName(String nick_name){
         for(String key : memberSession.keySet()){
             MemberDTO memberDTO = memberSession.get(key);
-            System.out.println(memberDTO.getNick_name());
             if(memberDTO.getNick_name().equals(nick_name)){
                 return memberDTO.getId();
             }

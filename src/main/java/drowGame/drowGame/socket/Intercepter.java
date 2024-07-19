@@ -23,7 +23,7 @@ public class Intercepter implements HandshakeInterceptor {
 //                System.out.println("-----------------------------------------------------------------------");
                 attributes.put("httpSessionId", session.getId());
             }else{
-                System.out.println("세션이 존재하지 않습니다.");
+                //System.out.println("세션이 존재하지 않습니다.");
             }
         }
         return true;

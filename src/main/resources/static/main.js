@@ -493,10 +493,13 @@ async function receiveMessageHandler(msg) {
         inputFriendList(friendList);
     }
     if(msg.type == 'myId') {
-        myIdArea.innerHTML = `${msg.data}`;
+
         myId = msg.data;
     }
-    if(msg.type == 'myNickName'){ myNickName = msg.data; }
+    if(msg.type == 'myNickName'){
+        myIdArea.innerHTML = `${msg.data}`;
+        myNickName = msg.data;
+    }
     if(msg.type == 'login'){
         for(let i = 0; i<friendList.length; i++){
             if(msg.data == friendList[i].friend_id){

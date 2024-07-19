@@ -43,7 +43,6 @@ public class MemberService {
             if (byId.getPassword().equals(memberDTO.getPassword())) {
                 //세션에 추가
                 if(byId == null){
-                    System.out.println(byId + "널;;");
                 }
                 memberSessionService.addSession(httpSession.getId(), byId);
 
