@@ -68,8 +68,8 @@ public class SocketHandler extends TextWebSocketHandler {
         if (requestName.equals("sendMessage")) {
             socketService.sendChatting(session, socketRequest);
         }
-        if(requestName.equals("score")){
-
+        if(requestName.equals("ttabong")){
+            socketService.ttabong(session, socketRequest.getData().toString());
         }
     }
 

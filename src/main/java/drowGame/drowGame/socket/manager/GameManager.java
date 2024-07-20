@@ -32,13 +32,10 @@ public class GameManager {
     private final ConcurrentLinkedQueue<String> matchingQueue3Member = new ConcurrentLinkedQueue<>();
     // 생성된 game room 담을 map
     private final ConcurrentHashMap<Integer, GameRoom> gameRoomMap = new ConcurrentHashMap<>();
-
     // member 의 rooId 값을 찾기 위해 WebSocketSession, roomId 저장
     private final ConcurrentHashMap<WebSocketSession, Integer> roomIdMap = new ConcurrentHashMap<>();
-
     // roomId generator
     private final AtomicInteger roomIdGenerator = new AtomicInteger();
-
     public List<String> getQueueSize(int inGameMemberSize){
         if(inGameMemberSize == 2){
             List<String> queueMember = new ArrayList<>();
@@ -58,14 +55,14 @@ public class GameManager {
     }
     public boolean addMatchingQueue2Member(String Id){
         this.matchingQueue2Member.add(Id);
-        if (this.matchingQueue2Member.size() == 2){
+        if (this.matchingQueue2Member.size() >= 2){
             return true;
         }
         return false;
     }
     public boolean addMatchingQueue3Member(String Id){
         this.matchingQueue3Member.add(Id);
-        if (this.matchingQueue3Member.size() == 3){
+        if (this.matchingQueue3Member.size() >= 3){
             return true;
         }
         return false;
@@ -184,7 +181,6 @@ public class GameManager {
     }
     public void startGameRoundTimer(WebSocketSession session){
         int round_time = gameSettingRepository.findByName("round_time").getValue();
-
         int roomId = getGameRoomId(session);
         int currentTurn = getGameTurn(roomId);
 
@@ -415,7 +411,6 @@ public class GameManager {
             }
         }
     }
-
     public boolean isDuringGame(WebSocketSession mySession){
         if(roomIdMap.get(mySession) == null){
             return false;
@@ -455,6 +450,26 @@ public class GameManager {
 
         //clear 전송
         sr.setType("clear");
+        sendMessageSameRoom(0, session, sr);
+    }
+    public void ttabong(WebSocketSession session, String nick_name){
+        int roomId = getGameRoomId(session);
+
+        List<String> playerNickName = gameRoomMap.get(roomId).getPlayer_nick_name();
+
+        int index = 1000;
+        int score = 5;
+        for(int i = 0; i<gameRoomMemberCount(roomId); i++){
+            if (nick_name.equals(playerNickName.get(i))){
+                index = i;
+            }
+        }
+        //score set
+        gameRoomMap.get(roomId).getScore().set(index, gameRoomMap.get(roomId).getScore().get(index) + score);
+
+        SocketRequest sr = new SocketRequest();
+        sr.setType("score");
+        sr.setData(gameRoomMap.get(roomId).getScore());
         sendMessageSameRoom(0, session, sr);
     }
 }

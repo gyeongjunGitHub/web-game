@@ -29,6 +29,7 @@ public class GameRoom {
     private QuizDTO quizDTO;
     private int cycle;
 
+
     public static String findMemberNickname(WebSocketSession session, GameRoom gameRoom){
         int index = 0;
         for(int i = 0; i<gameRoom.getPlayer_session().size(); i++){

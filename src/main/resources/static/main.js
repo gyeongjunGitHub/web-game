@@ -137,7 +137,7 @@ async function searchMember() {
             if (result.id != null) {
                 searchResult.innerHTML = `
                     <div class="result-name">${result.nick_name}</div>
-                    <button class="plus-btn" onclick="addFriendRequest('${result.id}')">+</button>
+                    <button class="plus-btn" id = "addFriendBtn" onclick="addFriendRequest('${result.id}')">+</button>
                 `;
             }
         }
@@ -284,8 +284,12 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(i == msg.data.yourTurn -1){
                     userNameBoxList[i].style.color = 'blue';
+                    userAreaBoxList[i].style.borderColor = 'blue';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
                 }else{
                     userNameBoxList[i].style.color = 'black';
+                    userAreaBoxList[i].style.borderColor = 'black';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
                 }
             }
             //채팅 금지
@@ -302,8 +306,12 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(i == msg.data.yourTurn -1){
                     userNameBoxList[i].style.color = 'blue';
+                    userAreaBoxList[i].style.borderColor = 'blue';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span><button onclick="ttabong(${[i]})">👍</button>`;
                 }else{
                     userNameBoxList[i].style.color = 'black';
+                    userAreaBoxList[i].style.borderColor = 'black';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
                 }
             }
             //채팅 활성화
@@ -327,8 +335,12 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(i == msg.data.yourTurn -1){
                     userNameBoxList[i].style.color = 'blue';
+                    userAreaBoxList[i].style.borderColor = 'blue';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
                 }else{
                     userNameBoxList[i].style.color = 'black';
+                    userAreaBoxList[i].style.borderColor = 'black';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
                 }
             }
 
@@ -349,8 +361,12 @@ async function receiveMessageHandler(msg) {
             for(let i = 0; i<userList.length; i++){
                 if(i == msg.data.yourTurn -1){
                     userNameBoxList[i].style.color = 'blue';
+                    userAreaBoxList[i].style.borderColor = 'blue';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span><button onclick="ttabong(${i})">👍</button>`;
                 }else{
                     userNameBoxList[i].style.color = 'black';
+                    userAreaBoxList[i].style.borderColor = 'black';
+                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
                 }
             }
             //채팅 활성화
@@ -398,9 +414,7 @@ async function receiveMessageHandler(msg) {
                 userNameBoxList[i].innerHTML = `
                     <span>${userNickNameList[i]}</span>
                 `;
-                if(myId != userList[i]){
-                    userNameBoxList[i].innerHTML += `<button onclick="ttabong('${userNickNameList[i]}')">👍</button>`;
-                }
+
                 userScoreBoxList[i].innerHTML = `
                     <span>score : ${score[i]}</span>
                 `;
@@ -547,9 +561,10 @@ async function receiveMessageHandler(msg) {
     }
 }
 //따봉!!
-function ttabong(nick_name){
-    console.log(nick_name);
-
+function ttabong(i){
+    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
+    const data = new Data('ttabong', userNickNameList[i]);
+    send(data);
 }
 //친구추가 요청 처리 함수
 function addFriendProc(msg){
@@ -620,6 +635,11 @@ function matching4(request){
 function addFriendRequest(id) {
     const data = new Data('addFriendRequest', { receiver : id });
     send(data);
+    document.getElementById('addFriendBtn').style.display = 'none';
+    searchResult.innerHTML = `
+        <div class="result-name">${id}</div>
+        <div style="color: green; font-size:10px;">요청 전송 완료.</div>
+    `;
 }
 // 친구 추가 요청 응답 전송 -> 수락 및 거절 이후 화면 처리 필요
 function addFriendResponse(response, receiver){

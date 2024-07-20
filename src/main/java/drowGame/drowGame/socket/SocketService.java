@@ -176,7 +176,9 @@ public class SocketService {
     }
     public void sendMessage(WebSocketSession wss, String message){
         try{
-            wss.sendMessage(new TextMessage(message));
+            if(wss != null){
+                wss.sendMessage(new TextMessage(message));
+            }
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -420,5 +422,9 @@ public class SocketService {
 
     public void answerCheck(WebSocketSession session, Request1 result) {
         gm.answerCheck(session, result.getAnswer(), result.getTimeCount());
+    }
+
+    public void ttabong(WebSocketSession session, String nick_name) {
+        gm.ttabong(session, nick_name);
     }
 }
