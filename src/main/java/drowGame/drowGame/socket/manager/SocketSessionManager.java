@@ -9,12 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class SocketSessionManager {
     //웹 소켓 세션 담을 맵
-    @Getter
-    private final ConcurrentHashMap<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>();
-    //웹 소켓 세션 Id, Member Id
-    @Getter
-    private final ConcurrentHashMap<String, String> memberIdMap = new ConcurrentHashMap<>();
-    @Getter final ConcurrentHashMap<String, String> memberNickNameMap = new ConcurrentHashMap<>();
+    @Getter private final ConcurrentHashMap<String, WebSocketSession> sessionMap = new ConcurrentHashMap<>();
+    @Getter private final ConcurrentHashMap<String, String> memberIdMap = new ConcurrentHashMap<>();
+    @Getter private final ConcurrentHashMap<String, String> memberNickNameMap = new ConcurrentHashMap<>();
     public void addSessionMap(String sessionId, WebSocketSession session){
         this.sessionMap.put(sessionId, session);
     }

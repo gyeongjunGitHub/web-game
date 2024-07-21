@@ -38,7 +38,7 @@ java 17.ver, html, js, web-socket, jpa
 
 [ERD]
 
-![alt text](image-35.png)
+![alt text](image-45.png)
 
 ------------------------------------------------------------------------------
 

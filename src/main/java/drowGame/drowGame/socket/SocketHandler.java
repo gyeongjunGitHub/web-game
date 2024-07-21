@@ -2,7 +2,6 @@ package drowGame.drowGame.socket;
 
 import drowGame.drowGame.service.MemberSessionService;
 import drowGame.drowGame.socket.data.Request1;
-import drowGame.drowGame.socket.data.RequestType;
 import drowGame.drowGame.socket.data.SocketRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -19,8 +18,7 @@ import java.util.TimerTask;
 public class SocketHandler extends TextWebSocketHandler {
     private final SocketService socketService;
     private final MemberSessionService memberSessionService;
-    //Request
-    private final RequestType requestType = new RequestType();
+
     @Override
     public void handleTextMessage(WebSocketSession session, TextMessage message){
         String msg = message.getPayload();
@@ -28,10 +26,11 @@ public class SocketHandler extends TextWebSocketHandler {
         SocketRequest socketRequest = socketService.socketRequestMapping(msg);
         String requestName = socketRequest.getType();
 
-        if(requestType.getRequest1().contains(requestName)){
+        if(requestName.equals("gameOver")){
             socketService.setRequest1(socketRequest, myId, session);
         }
-        if(requestType.getRequest2().contains(requestName)){
+        if(requestName.equals("rollBack") || requestName.equals("clear") || requestName.equals("push")
+            || requestName.equals("sendCoordinate")){
             socketService.sendMessageSameRoom(1,session, socketRequest);
         }
         if(requestName.equals("answer")){

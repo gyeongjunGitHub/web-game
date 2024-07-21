@@ -266,8 +266,6 @@ public class MemberService {
             }
 
         }
-
-
     }
     @Transactional
     public void setBasicProfile(MemberDTO memberDTO){
@@ -329,11 +327,11 @@ public class MemberService {
                 byId.setNick_name(nick_name);
             }
 
-            //friend 테이블 수정
-            List<FriendEntity> byFriendId = friendRepository.findByFriendId(myId);
-            for(FriendEntity f : byFriendId){
-                f.setFriend_nick_name(nick_name);
-            }
+//            //friend 테이블 수정
+//            List<FriendEntity> byFriendId = friendRepository.findByFriendId(myId);
+//            for(FriendEntity f : byFriendId){
+//                f.setFriend_nick_name(nick_name);
+//            }
 
             //myItem 테이블 수정
             List<MyItemsEntity> myItems = memberRepository.getMyItems(myId);
