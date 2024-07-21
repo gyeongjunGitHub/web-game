@@ -38,4 +38,9 @@ public class MemberRepository {
                 .setParameter("member_id", myId)
                 .getResultList();
     }
+
+    public List<MemberEntity> findAll() {
+        return em.createQuery("select m from MemberEntity m", MemberEntity.class)
+                .getResultList();
+    }
 }

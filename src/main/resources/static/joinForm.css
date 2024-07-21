@@ -1,0 +1,109 @@
+html {
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    div {
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 600px;
+      width: 70%;
+      padding: 30px 30px 20px;
+      border: 1px solid green;
+      text-align: center;
+    }
+    .title {
+      color: green;
+      font-weight: 400;
+      margin-bottom: 40px;
+    }
+    .input-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 50px;
+    }
+    .check-btn {
+      float: right;
+    }
+    #messageBox {
+      color: gray;
+      float: left;
+    }
+    .check-box {
+      width: 100%;
+      max-width: 300px;
+    }
+    .check-box::after {
+      content: '';
+      display: block;
+      clear: both;
+    }
+    .check-btn {
+      border: none;
+      background: none;
+      padding: 0;
+      margin: 0;
+      color: blueviolet;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: -5px;
+      cursor: pointer;
+    }
+    .check-btn:hover {
+      color: orange;
+    }
+    #id,
+    #password,
+    #nick_name,
+    #name,
+    #email {
+      box-sizing: border-box;
+      display: inline-block;
+      max-width: 300px;
+      width: 100%;
+      font-size: 1rem;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid green;
+    }
+
+    .radio-box {
+      margin-top: 10px;
+    }
+    .join-btn {
+      margin-bottom: 30px;
+      padding: 10px 20px;
+      background-color: #777;
+      border: none;
+      border-radius: 10px;
+      color: white;
+    }
+    .join-btn:hover {
+      cursor: pointer;
+      background-color: rgb(216, 163, 63);
+    }
+    .login {
+      text-decoration: none;
+      color: black;
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .login:hover {
+      color: red;
+    }
+    .warn {
+      font-size: 0.8rem;
+      color: chocolate;
+      width: 100%;
+      max-width: 300px;
+      text-align: start;
+    }

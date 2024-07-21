@@ -1,0 +1,71 @@
+html {
+      width: 100%;
+      height: 100%;
+    }
+    body {
+      margin: 0;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    div {
+      box-sizing: border-box;
+    }
+    .container {
+      max-width: 500px;
+      width: 70%;
+      padding: 30px 30px 20px;
+      border: 1px solid green;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .title {
+      color: green;
+      font-weight: 400;
+      margin-bottom: 40px;
+    }
+    #id,
+    #password {
+      display: block;
+      max-width: 300px;
+      width: 80%;
+      font-size: 1rem;
+      padding: 10px;
+      margin: 10px 0;
+      border: 1px solid green;
+    }
+    #id:focus,
+    #password:focus {
+      border: none;
+      outline: 1px solid orange;
+    }
+    .login-btn {
+      margin-top: 30px;
+      margin-bottom: 10px;
+      padding: 10px 20px;
+      background-color: #777;
+      border: none;
+      border-radius: 10px;
+      color: white;
+    }
+    .login-btn:hover {
+      cursor: pointer;
+      background-color: rgb(216, 163, 63);
+    }
+    .join-box {
+      width: 100%;
+      text-align: right;
+    }
+    .join-box a {
+      font-size: 12px;
+      text-decoration: none;
+      color: black;
+    }
+    .join-box a:hover {
+      color: red;
+    }
+    #messageBox{
+        margin-bottom: 10px;
+    }

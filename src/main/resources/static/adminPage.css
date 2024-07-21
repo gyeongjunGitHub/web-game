@@ -1,0 +1,249 @@
+body {
+      margin: 0;
+    }
+    ul {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+    .side_menu_box {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      transform: translateY(-50%);
+    }
+    .side_menu_box > li {
+      width: 150px;
+      text-align: center;
+      padding: 10px 0 10px 10px;
+      margin: 10px 0;
+      box-shadow: rgba(0, 0, 0, 0.15) 1.95px 1.95px 2.6px;
+      border-top-right-radius: 5px;
+      border-bottom-right-radius: 5px;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.5s;
+    }
+    .side_menu_box > li:hover {
+      transform: scale(1.1);
+      background-color: rgb(70, 134, 70);
+      color: white;
+    }
+    .nav {
+      box-shadow: 0 1px 6px 0 rgba(32, 33, 36, 0.28);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      padding: 15px;
+      font-size: 13px;
+    }
+    .nav > * {
+      color: gray;
+    }
+    .nav > *::after {
+      content: '|';
+      padding: 0 10px;
+    }
+    .nav a {
+      text-decoration: none;
+      color: gray;
+      font-size: 13px;
+    }
+    .page_tit {
+      text-align: center;
+    }
+    .admin_container {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      max-width: 1200px;
+      margin: 30px auto;
+    }
+    .profile {
+      display: block;
+      padding: 20px;
+      margin-right: 20px;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid #ddd;
+    }
+    .profile_img_box,
+    .item_img_box {
+      width: 200px;
+      height: 200px;
+      margin: 0 auto;
+      border: 1px solid green;
+    }
+    .register {
+      display: none;
+      width: 500px;
+      padding: 10px 0 0;
+      border: 2px solid #ddd;
+      text-align: center;
+    }
+    .register > h2 {
+      margin-bottom: 50px;
+    }
+
+    .item_inform_box > div {
+      margin-bottom: 10px;
+    }
+    .item_inform_box > input:not(:last-child) {
+      width: 200px;
+      padding: 5px 10px;
+      border: 1px solid rgba(9, 120, 9, 0.806);
+      margin-bottom: 30px;
+      position: relative;
+    }
+
+    button {
+      width: 100%;
+      padding: 10px 0;
+    }
+    .register_btn {
+      margin-top: 20px;
+      border: none;
+    }
+    .shop {
+          max-width: 1000px;
+        }
+        .shop_item_wrap {
+          width: 100%;
+          padding-left: 0;
+          margin: 0;
+          display: none;
+          grid-template-columns: repeat(3, 250px);
+          grid-template-rows: repeat(2, 1fr);
+          gap: 15px;
+          list-style: none;
+        }
+
+        .shop_item {
+          padding: 20px;
+          border: 1px solid rgb(26, 76, 26);
+        }
+        .shop_tit {
+          margin: 50px 0 20px;
+          text-align: center;
+        }
+        .item_img > img {
+          display: block;
+          width: 120px;
+          height: 120px;
+          margin: 0 auto;
+        }
+        .item_tit {
+          margin: 20px 0 5px;
+
+          font-weight: 600;
+        }
+        .item_price {
+          margin: 0;
+          color: gray;
+        }
+        .buy_btn {
+          width: 100%;
+          padding: 10px 0;
+          margin-top: 20px;
+          background-color: rgba(54, 80, 54, 0.527);
+          border: none;
+          border-radius: 10px;
+          font-size: 16px;
+          font-weight: 600;
+          cursor: pointer;
+        }
+        .shop_modal{
+        width:100vw;
+        height:100vh;
+        display:none;
+        justify-content:center;
+        align-items:center;
+        background-color:#00000070;
+        position:absolute;
+        top:0;
+        }
+        .shop_content{
+        background-color:white;
+        width:800px;
+        padding:20px;
+
+        }
+        .shop_content>h2{
+        margin-bottom:50px;
+        text-align:center;
+        font-size:30px;
+        }
+       .item_inform{
+       width:70%;
+       margin:0 auto;
+       padding:10px 30px;
+       background-color:#eee;
+       font-size:20px;
+       }
+       .item_name,.item_price{
+        display:flex;
+        padding:10px 0;
+       }
+       .item_name>span:first-child,
+       .item_price>span:first-child{
+       display:block;
+        width:30%;
+
+       }
+       .modal_btn_wrap{
+
+       text-align:center;
+       }
+       .buy_ok_btn{
+       background-color:rgba(54, 80, 54, 0.527);
+       }
+       .buy_cancel_btn{
+       background-color:#ae6975;
+       }
+        .buy_ok_btn,.buy_cancel_btn{
+        display:inline-block;
+        width:15%;
+        padding:5px 0;
+        margin:30px 0 10px;
+
+        border:none;
+        color:white;
+        font-size:20px;
+        cursor:pointer;
+        }
+        .img_box{
+        text-align:center;
+        margin-bottom:20px;
+        }
+    .game_setting{
+        display: none;
+    }
+    .member_info{
+        display: none;
+    }
+
+    table {
+            border: 1px solid black; /* 테이블의 외곽선 */
+            border-collapse: collapse; /* 테이블 셀의 경계선을 겹치게 */
+            width: 100%; /* 테이블이 부모 요소의 전체 너비를 차지하도록 */
+        }
+        th, td {
+            border: 1px solid black; /* 셀의 경계선 */
+            padding: 8px; /* 셀 안의 내용에 여백 추가 */
+            text-align: center; /* 셀 내용 왼쪽 정렬 */
+        }
+        th {
+            background-color: #f2f2f2; /* 헤더 셀의 배경색 */
+            font-weight: bold; /* 헤더 셀의 글씨 굵게 */
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9; /* 짝수 행의 배경색 */
+        }
+        tr:hover {
+            background-color: #f1f1f1; /* 마우스 오버 시 행의 배경색 */
+        }
+
+    input[type="text"] {
+            width: 100px; /* 인풋 필드의 너비를 100px로 설정 */
+            box-sizing: border-box; /* 테두리와 패딩을 너비에 포함시킴 */
+        }

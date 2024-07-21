@@ -125,4 +125,16 @@ public class MemberController {
     public void setIsRead(@RequestParam(name = "member_id")String member_id, HttpSession httpSession){
         memberService.setIsRead(httpSession, member_id);
     }
+
+    @GetMapping("/getAllMember")
+    @ResponseBody
+    public ResponseEntity<List<MemberDTO>> getAllMember(){
+        return ResponseEntity.ok(memberService.getAllMember());
+    }
+
+    @PostMapping("/updateMemberInfo")
+    @ResponseBody
+    public boolean updateMemberInfo(@RequestBody MemberDTO memberDTO){
+        return memberService.updateMemberInfo(memberDTO);
+    }
 }

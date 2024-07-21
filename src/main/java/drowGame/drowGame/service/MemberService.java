@@ -373,4 +373,33 @@ public class MemberService {
         byNickName.setRanking_point(byNickName.getRanking_point() + ranking_pint);
         byNickName.setGame_point(byNickName.getGame_point() + game_point);
     }
+
+    public List<MemberDTO> getAllMember() {
+        List<MemberEntity> all = memberRepository.findAll();
+        List<MemberDTO> memberDTOList = new ArrayList<>();
+        for (MemberEntity m : all){
+            MemberDTO memberDTO = new MemberDTO(m);
+            memberDTOList.add(memberDTO);
+        }
+        return memberDTOList;
+    }
+
+    @Transactional
+    public boolean updateMemberInfo(MemberDTO memberDTO) {
+        Optional<MemberEntity> byId = memberRepository.findById(memberDTO.getId());
+        if (byId.isPresent()){
+            try {
+                MemberEntity memberEntity = byId.get();
+                memberEntity.setRanking_point(memberDTO.getRanking_point());
+                memberEntity.setGame_point(memberDTO.getGame_point());
+                memberEntity.setRole(memberDTO.getRole());
+                return true;
+            }catch (Exception e){
+                e.printStackTrace();
+                return false;
+            }
+        }else {
+            return false;
+        }
+    }
 }
