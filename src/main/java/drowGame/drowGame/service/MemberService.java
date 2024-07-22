@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -306,6 +307,7 @@ public class MemberService {
     }
     public List<MyItemsDTO> getMyItems(HttpSession httpSession) {
         String myId = memberSessionService.getMemberId(httpSession.getId());
+
         List<MyItemsEntity> myItemsEntityList = memberRepository.getMyItems(myId);
         List<MyItemsDTO> myItems = new ArrayList<>();
         for(MyItemsEntity m : myItemsEntityList){
