@@ -72,7 +72,7 @@ public class MemberService {
         memberEntity.setGender(memberDTO.getGender());
         memberEntity.setEmail(memberDTO.getEmail());
         memberEntity.setRanking_point(0);
-        memberEntity.setGame_point(0);
+        memberEntity.setGame_point(2000);
         memberEntity.setRole("ROLE_USER");
 
         String result = memberRepository.memberSave(memberEntity);
@@ -325,6 +325,10 @@ public class MemberService {
             if (byIdOptional.isPresent()){
                 MemberEntity byId = byIdOptional.get();
                 byId.setNick_name(nick_name);
+
+                MemberDTO memberDTO = new MemberDTO(byId);
+                //세션에 등록되어있는 닉네임 수정
+                memberSessionService.addSession(httpSession.getId(), memberDTO);
             }
 
 //            //friend 테이블 수정
