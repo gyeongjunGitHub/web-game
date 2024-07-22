@@ -14,19 +14,23 @@ import java.util.Timer;
 @Setter
 public class GameRoom {
 
-    //game room 멤버 세션 정보
+    //세션 정보
     private List<WebSocketSession> player_session;
+    //닉네임
     private List<String> player_nick_name;
-    //game room 멤버 턴 정보
+    //유저 별 순서
     private List<Integer> turnList;
-    //game room 멤버 점수 정보
+    //점수
     private List<Double> score;
-    //member status
+    //on/offline 상태
     private List<Integer> status;
-
+    //현재 몇 번째 순서인지
     private int turn;
+    //Timer
     private Timer timer;
+    //quiz 정보
     private QuizDTO quizDTO;
+    //cycle
     private int cycle;
 
 

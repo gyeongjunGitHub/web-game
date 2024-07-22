@@ -30,8 +30,10 @@ public class GameManager {
     private final ConcurrentLinkedQueue<String> matchingQueue2Member = new ConcurrentLinkedQueue<>();
     // 3인 게임 매칭 큐
     private final ConcurrentLinkedQueue<String> matchingQueue3Member = new ConcurrentLinkedQueue<>();
+
     // 생성된 game room 담을 map
     private final ConcurrentHashMap<Integer, GameRoom> gameRoomMap = new ConcurrentHashMap<>();
+    
     // member 의 rooId 값을 찾기 위해 WebSocketSession, roomId 저장
     private final ConcurrentHashMap<WebSocketSession, Integer> roomIdMap = new ConcurrentHashMap<>();
     // roomId generator
