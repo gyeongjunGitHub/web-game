@@ -24,10 +24,8 @@ http://54.180.115.155:8080/
 
 [게임 화면]
 
-![image](https://github.com/user-attachments/assets/c6f5b748-0434-4a03-9fd2-bf68997d97e5)
-
-![alt text](image-44.png) 
-![alt text](image-43.png)
+![image-44](https://github.com/user-attachments/assets/d384004d-ba04-4dff-9cab-097a1951487c)
+![image-43](https://github.com/user-attachments/assets/cba43cd0-dd12-4d5d-8a00-87b669f21574)
 
 
 ------------------------------------------------------------------------------
@@ -41,13 +39,13 @@ java 17.ver, html, js, web-socket, jpa
 
 [시스템 구성도]
 
-![alt text](image-2.png)
+![image-2](https://github.com/user-attachments/assets/ca67d53b-5b73-488c-b2e8-6d45d8a253ed)
 
 ------------------------------------------------------------------------------
 
 [ERD]
 
-![alt text](image-45.png)
+![image-45](https://github.com/user-attachments/assets/5ef5bda2-a09b-4efa-93a8-2ddf0d0a7f5c)
 
 ------------------------------------------------------------------------------
 
@@ -81,7 +79,7 @@ java 17.ver, html, js, web-socket, jpa
 
 위 기능을 수행하여주는 GameManager 클래스를 만들어 관리하였습니다.
 
-![alt text](image-37.png)
+![image-37](https://github.com/user-attachments/assets/8946ec71-7823-4fcb-913f-d33e0398e35a)
 
 
 [매칭 시작/취소]
@@ -95,7 +93,8 @@ java 17.ver, html, js, web-socket, jpa
 매칭 도중 취소하면 Queue에서 제거하였습니다.
 
 
-![alt text](image-47.png)
+![image-47](https://github.com/user-attachments/assets/8e4aa525-c5a2-45fb-ac39-076107178648)
+
 
 [GameRoom 클래스 생성/제거]
 
@@ -104,7 +103,8 @@ java 17.ver, html, js, web-socket, jpa
 매칭 된 유저들 끼리 소통하기 위해 GameRoom클래스를 만들어 관리하였습니다.
 
 
-![alt text](image-48.png)
+![image-48](https://github.com/user-attachments/assets/16ce56a0-fab2-4e30-97a3-39b710d08464)
+
 
 매칭에 성공하면 AtomicInteger을 사용한 roomIdGenerator를 통해 GameRoom을 식별 할 수 있는 roomId를 생성합니다.
 
@@ -113,7 +113,8 @@ java 17.ver, html, js, web-socket, jpa
 roomId생성과 GameRoom생성하여 정보 저장까지 완료하면 gameRoomMap<rommId, GameRoom>에 추가하여 관리합니다.
 
 
-![alt text](image-49.png)
+![image-49](https://github.com/user-attachments/assets/ea424735-7018-41b2-b111-1c3f5df38c52)
+
 
 [인게임 기능]
 
@@ -147,17 +148,18 @@ gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 이후 gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 
 
-![alt text](image-39.png)
+![image-39](https://github.com/user-attachments/assets/6f0df5ed-0d11-4105-8eea-d965c6644e48)
+
 
 ------------------------------------------------------------------------------
 
 [채팅 시스템]
 
-![alt text](image-40.png)
+![image-40](https://github.com/user-attachments/assets/84158dad-e51e-494f-b599-0c71c36b3486)
 
-![alt text](image-20.png)
+![image-20](https://github.com/user-attachments/assets/c5cfb839-fd35-4ce1-b4cc-8cf15134dc9f)
 
-![alt text](image-21.png) 
+![image-21](https://github.com/user-attachments/assets/58d14807-d965-480c-a930-d5fca1a7e902)
 
 친구추가를 마친 후 친구의 닉네임 공간을 클릭하면 우측하단에 채팅 공간이 생성되고
 
@@ -165,19 +167,19 @@ gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 
 먼저 소캣에 연결된 유저가 채팅을 전송하면 
 
-![alt text](image-22.png) 
+![image-22](https://github.com/user-attachments/assets/4ea8f7c0-aa85-4ef9-b03d-8c62060f0788)
 
 보낸사람, 받는사람, 내용, 시간, 확인여부를(default=0) DB에 저장합니다.
 
-![alt text](image-50.png)
+![image-50](https://github.com/user-attachments/assets/202ea1d5-c5a0-4f3d-8bf4-2c8461761cda)
 
 채팅을 받는 사람이 현재 소캣에 연결되어 있다면
 
-![alt text](image-23.png)
+![image-23](https://github.com/user-attachments/assets/649e6155-24f3-43ce-9cc9-2075509e7e43)
 
 닉네임 옆에 숫자를 표시하여 채팅수신 여부를 확일 할 수 있습니다.
 
-![alt text](image-24.png) 
+![image-24](https://github.com/user-attachments/assets/02dea88e-4803-45fe-9b17-eb81a37402e9)
 
 채팅을 확인하면 확인여부를 1로 변경하고 알림 숫자가 사라집니다.
 
@@ -189,13 +191,13 @@ gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 
 체크하는 방식으로 수정 할 예정.(수정완료.)
 
-![alt text](image-4.png)
+![image-4](https://github.com/user-attachments/assets/46a13a65-e945-47c6-ac59-b625f62fcab9)
 
 ------------------------------------------------------------------------------
 
 [로그인 화면]
 
-![alt text](image-5.png)
+![image-5](https://github.com/user-attachments/assets/dfa119db-6512-4429-994a-e9f75f559655)
 
 ------------------------------------------------------------------------------
 
@@ -219,7 +221,7 @@ gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 
 - 게임 매칭
 
-![alt text](image-42.png)
+![image-42](https://github.com/user-attachments/assets/e7909e44-c2da-47e9-85ef-51a399c283a9)
 
 ------------------------------------------------------------------------------
 
@@ -227,19 +229,19 @@ gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 
 - 게임 포인트로 아이템 구매
 
-![alt text](image-7.png)
+![image-7](https://github.com/user-attachments/assets/7eff9ffe-8b9a-4f50-9f55-b55bcc9ab4b9)
 
-![alt text](image-8.png)
+![image-8](https://github.com/user-attachments/assets/9446d45c-8e6f-43cd-90d1-cee3360efc19)
 
 ------------------------------------------------------------------------------
 
 [내 아이템] 화면입니다. 아이템을 사용하면 개수가 차감됩니다.
 
-![alt text](image-9.png) 
+![image-9](https://github.com/user-attachments/assets/046043f4-80ad-4727-b304-0072546b7092)
 
-![alt text](image-12.png)
+![image-12](https://github.com/user-attachments/assets/1e112f3b-d153-4871-ba4b-d70a473e0161)
 
-![alt text](image-13.png) 
+![image-13](https://github.com/user-attachments/assets/80c8cabc-3f3e-4480-bd1f-9965b7714bff)
 
 ------------------------------------------------------------------------------
 
@@ -247,15 +249,15 @@ gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 
 회원정보 수정 기능은 이후 만들 예정입니다.
 
-![alt text](image-14.png)
+![image-14](https://github.com/user-attachments/assets/7b34a8ef-6ab9-4334-bce4-48f0b262498e)
 
 ------------------------------------------------------------------------------
 
 [친구추가]
 
-![alt text](image-19.png) 
+![image-19](https://github.com/user-attachments/assets/2ec5862e-6af4-4125-acbd-211047a531f6)
 
-![alt text](image-18.png)
+![image-18](https://github.com/user-attachments/assets/944d155f-51d8-4353-a07a-932e85c9ffa9)
 
 ------------------------------------------------------------------------------
 
@@ -263,26 +265,27 @@ gameRoomMap<rommId, GameRoom>에 저장된 정보를 제거합니다.
 
 권한이 ROLE_ADMIN일 경우만 접근 가능합니다.
 
-![alt text](image-25.png)
+![image-25](https://github.com/user-attachments/assets/579aa0f6-3bfa-4454-bf95-fdebcf496fd0)
 
 -프로필 사진 선택 : 회원가입 시 기본 프로필 사진 이미지를 설정할 수 있습니다.
 
 -상점 아이템 등록 : 관리자가 상점에 아이템을 등록 할 수 있습니다.
 
-![alt text](image-26.png)
+![image-26](https://github.com/user-attachments/assets/a89c319f-d3bf-4226-b269-14c986669ad3)
 
 -상점 아이템 삭제 : 관리자가 상점에 아이템을 삭제 할 수 있습니다.
 
 
-![alt text](image-27.png) 
+![image-27](https://github.com/user-attachments/assets/7ea0eb37-1f24-4130-8188-a03e26ef528c)
 
-![alt text](image-28.png)
+![image-28](https://github.com/user-attachments/assets/cd93a49c-af6b-447a-bf6c-d1897b143e2f)
 
-![alt text](image-29.png) 
+![image-29](https://github.com/user-attachments/assets/fe43b589-0da6-468f-a1ac-7fa2b6c9be09)
+
 
 -게임 설정 세팅 : 관리자가 게임 라운드의 시간 제한을 설정 할 수 있습니다.
 
-![alt text](image-30.png)
+![image-30](https://github.com/user-attachments/assets/be1e5d0b-f333-4785-b2c4-08f4c980f240)
 
 ------------------------------------------------------------------------------
 
