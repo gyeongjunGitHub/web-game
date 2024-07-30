@@ -37,7 +37,6 @@ public class SocketService {
     private final MemberSessionService memberSessionService;
     private final FriendRepository friendRepository;
     private final ChattingRepository chattingRepository;
-    private final QuizRepository quizRepository;
 
     public void addSessionInfo(WebSocketSession session) {
         sm.addSessionMap(session.getId(), session);
@@ -264,7 +263,7 @@ public class SocketService {
 
         if(inGameMemberSize == 2){
             // 매칭 큐 인원 충족 시
-            if(gm.addMatchingQueue2Member(myId)){
+            if(gm.addMatchingQueue(myId, inGameMemberSize)){
                 List<WebSocketSession> player_session = new ArrayList<>();
                 List<String> members = new ArrayList<>();
                 List<String> memebersNickName = new ArrayList<>();
@@ -315,7 +314,7 @@ public class SocketService {
         ////////////////////////////////////여기 수정중////////////////////////////////
         if (inGameMemberSize == 3){
             // 매칭 큐 인원 충족 시
-            if(gm.addMatchingQueue3Member(myId)) {
+            if(gm.addMatchingQueue(myId, inGameMemberSize)) {
 
                 List<WebSocketSession> player_session = new ArrayList<>();
                 List<String> members = new ArrayList<>();
@@ -364,7 +363,6 @@ public class SocketService {
                 }
             }
         }
-
     }
     public void gameStart(WebSocketSession session){
         gm.startGameRoundTimer(session);
@@ -390,7 +388,7 @@ public class SocketService {
     public void removeMatchingQueue(WebSocketSession session, int inGameMemberSize) {
         String myId = sm.getMyId(session);
         if(inGameMemberSize == 2){
-            gm.removeMatchingQueue2Member(myId);
+            gm.removeMatchingQueue(myId, inGameMemberSize);
             List<String> queueMember = gm.getQueueSize(inGameMemberSize);
             int count = queueMember.size();
             for(String s : queueMember){
@@ -400,7 +398,7 @@ public class SocketService {
             }
         }
         if(inGameMemberSize == 3){
-            gm.removeMatchingQueue3Member(myId);
+            gm.removeMatchingQueue(myId, inGameMemberSize);
             List<String> queueMember = gm.getQueueSize(inGameMemberSize);
             int count = queueMember.size();
             for(String s : queueMember){

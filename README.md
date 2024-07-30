@@ -24,6 +24,8 @@ http://54.180.115.155:8080/
 
 [게임 화면]
 
+![image](https://github.com/user-attachments/assets/c6f5b748-0434-4a03-9fd2-bf68997d97e5)
+
 ![alt text](image-44.png) 
 ![alt text](image-43.png)
 

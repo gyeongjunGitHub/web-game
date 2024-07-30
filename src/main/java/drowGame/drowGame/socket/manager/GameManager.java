@@ -26,18 +26,13 @@ public class GameManager {
     private final MemberService memberService;
     private final GameSettingRepository gameSettingRepository;
 
-    // 2인 게임 매칭 큐
-    private final ConcurrentLinkedQueue<String> matchingQueue2Member = new ConcurrentLinkedQueue<>();
-    // 3인 게임 매칭 큐
-    private final ConcurrentLinkedQueue<String> matchingQueue3Member = new ConcurrentLinkedQueue<>();
+    private final ConcurrentLinkedQueue<String> matchingQueue2Member = new ConcurrentLinkedQueue<>(); // 2인 게임 매칭 큐
+    private final ConcurrentLinkedQueue<String> matchingQueue3Member = new ConcurrentLinkedQueue<>(); // 3인 게임 매칭 큐
+    private final ConcurrentHashMap<Integer, GameRoom> gameRoomMap = new ConcurrentHashMap<>(); // 생성된 game room 담을 map
+    private final ConcurrentHashMap<WebSocketSession, Integer> roomIdMap = new ConcurrentHashMap<>(); // member 의 rooId 값을 찾기 위해 WebSocketSession, roomId 저장
+    private final AtomicInteger roomIdGenerator = new AtomicInteger(); // roomId generator
 
-    // 생성된 game room 담을 map
-    private final ConcurrentHashMap<Integer, GameRoom> gameRoomMap = new ConcurrentHashMap<>();
-    
-    // member 의 rooId 값을 찾기 위해 WebSocketSession, roomId 저장
-    private final ConcurrentHashMap<WebSocketSession, Integer> roomIdMap = new ConcurrentHashMap<>();
-    // roomId generator
-    private final AtomicInteger roomIdGenerator = new AtomicInteger();
+    // 매칭 큐 size
     public List<String> getQueueSize(int inGameMemberSize){
         if(inGameMemberSize == 2){
             List<String> queueMember = new ArrayList<>();
@@ -55,26 +50,39 @@ public class GameManager {
         }
         return null;
     }
-    public boolean addMatchingQueue2Member(String Id){
-        this.matchingQueue2Member.add(Id);
-        if (this.matchingQueue2Member.size() >= 2){
-            return true;
+
+    // 큐에 추가
+    public boolean addMatchingQueue(String Id, int inGameMemberSize){
+        if(inGameMemberSize == 2){
+            this.matchingQueue2Member.add(Id);
+            if (this.matchingQueue2Member.size() >= 2){
+                return true;
+            }
+            return false;
+        }
+        if(inGameMemberSize == 3){
+            this.matchingQueue3Member.add(Id);
+            if (this.matchingQueue3Member.size() >= 3){
+                return true;
+            }
+            return false;
         }
         return false;
     }
-    public boolean addMatchingQueue3Member(String Id){
-        this.matchingQueue3Member.add(Id);
-        if (this.matchingQueue3Member.size() >= 3){
-            return true;
+    // 큐에서 제거
+    public void removeMatchingQueue(String myId, int inGameMemberSize){
+        if(inGameMemberSize == 2){
+            matchingQueue2Member.removeIf(s -> s.equals(myId));
         }
-        return false;
+        if(inGameMemberSize == 3){
+            matchingQueue3Member.removeIf(s -> s.equals(myId));
+        }
     }
-    public void removeMatchingQueue2Member(String myId){
-        matchingQueue2Member.removeIf(s -> s.equals(myId));
+
+    public void zz(){
+
     }
-    public void removeMatchingQueue3Member(String myId){
-        matchingQueue3Member.removeIf(s -> s.equals(myId));
-    }
+
     public String pollMatchingQueue2Member(){
         return this.matchingQueue2Member.poll();
     }
