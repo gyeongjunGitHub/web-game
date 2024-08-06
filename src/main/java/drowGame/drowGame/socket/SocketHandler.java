@@ -74,7 +74,6 @@ public class SocketHandler extends TextWebSocketHandler {
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
-        System.out.println("소캣 연결 시작");
         super.afterConnectionEstablished(session);
         //중복 로그인 체크
         WebSocketSession isDuplicateLogin = socketService.duplicateLoginCheck(session);
@@ -85,7 +84,6 @@ public class SocketHandler extends TextWebSocketHandler {
         socketService.addSessionInfo(session);
         socketService.sendLoginMemberList(session);
         socketService.sendFriendInfo(session);
-        System.out.println("소캣 연결");
     }
 
 
@@ -100,6 +98,5 @@ public class SocketHandler extends TextWebSocketHandler {
 
         socketService.removeSessionInfo(session);
         super.afterConnectionClosed(session, status);
-        System.out.println("소캣연결 종료");
     }
 }

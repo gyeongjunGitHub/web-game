@@ -56,7 +56,7 @@ java 17.ver, html, js, web-socket, jpa
 
 게임을 시작하려면 여러가지 기능이 필요합니다.
 
--매칭 시작/취소
+-매칭 기능
 
 -GameRoom 생성/제거
 
@@ -82,9 +82,9 @@ java 17.ver, html, js, web-socket, jpa
 ![image-37](https://github.com/user-attachments/assets/8946ec71-7823-4fcb-913f-d33e0398e35a)
 
 
-[매칭 시작/취소]
+[매칭 기능]
 
-매칭 시스템은 멀티 스레드 환경을 고려하여 멀티 스레드 환경을 고려하여 ConcurrentLinkedQueue 사용하였습니다.
+매칭 기능은 멀티 스레드 환경을 고려하여 멀티 스레드 환경을 고려하여 ConcurrentLinkedQueue 사용하였습니다.
 
 소캣에 연결되어있는 유저가 매칭요청을 보내면 Queue에 추가하고 게임 인원수를 만족하면
 

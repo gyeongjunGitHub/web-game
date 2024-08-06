@@ -118,16 +118,6 @@ public class MemberService {
         }
         return resultDTO;
     }
-    public MemberDTO findById(String id) {
-        Optional<MemberEntity> byId = memberRepository.findById(id);
-        if(byId.isPresent()){
-            MemberDTO memberDTO = new MemberDTO(byId.get());
-            return memberDTO;
-        }else {
-            MemberDTO memberDTO = new MemberDTO();
-            return memberDTO;
-        }
-    }
     public MemberDTO findByNickName(String nick_name){
         return new MemberDTO(memberRepository.findByNickName(nick_name));
     }
@@ -151,20 +141,6 @@ public class MemberService {
             resultDTO.setResult(0); //친구 아님
         }
         return resultDTO;
-    }
-    public String goMyPage(HttpSession httpSession, Model model) {
-        String myId = memberSessionService.getMemberId(httpSession.getId());
-        if (myId == null){
-            return "loginForm";
-        }else{
-            Optional<MemberEntity> byId = memberRepository.findById(myId);
-            if(byId.isPresent()){
-                MemberEntity memberEntity = byId.get();
-                MemberDTO memberDTO = new MemberDTO(memberEntity);
-                model.addAttribute("myInfo", memberDTO);
-            }
-            return "myPage";
-        }
     }
     public MemberDTO getMemberInfo(HttpSession httpSession) {
         String memberId = memberSessionService.getMemberId(httpSession.getId());
