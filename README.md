@@ -36,7 +36,9 @@ java 17.ver, Spring Boot(3.2.6 ver), MySQL, JavaScript, JPA, AWS EC2, AWS RDS, W
 
 - 관리자 페이지 / 마이페이지 구현
 
-- 실시간 스케치 기능 및 게임 로직 구현
+- 간단한 매칭 기능(인원수만 충족하면 매칭성공 알고리즘 x)
+
+- 실시간 스케치 기능 및 GameManager 클레스를 통한 게임 로직 구현
 
 - 상점 페이지, 아이템 구매 기능 구현
 
@@ -69,6 +71,24 @@ java 17.ver, Spring Boot(3.2.6 ver), MySQL, JavaScript, JPA, AWS EC2, AWS RDS, W
 [회원가입]
 
 ![image](https://github.com/user-attachments/assets/831139c1-648a-43d3-bc73-6254aeec26bb)
+
+-------------------------------------------------------------------------------------------------------------
+
+[관리자페이지 / 마이페이지]
+
+![image](https://github.com/user-attachments/assets/df0302ac-947e-4b00-971c-581e18fe2cef)
+
+-------------------------------------------------------------------------------------------------------------
+
+[게임시스템]
+
+![image](https://github.com/user-attachments/assets/5f6374f6-7fa1-465b-b18a-bed5a084939b)
+
+![image](https://github.com/user-attachments/assets/cc312e91-b91d-4336-8521-9379b8e74a36)
+
+![image](https://github.com/user-attachments/assets/ddbce86e-1130-4dbb-8aec-4da411664615)
+
+![image](https://github.com/user-attachments/assets/9ea8cb48-4517-4e3c-a12a-7f0d85c31b0f)
 
 -------------------------------------------------------------------------------------------------------------
 
