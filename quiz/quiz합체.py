@@ -63,7 +63,7 @@ for i in range(len(my_text_file)):
     for j in range(len(quiz1[i])):
       quiz = quiz1[i][j]
       answer = answer1[i][j]
-      query = "INSERT INTO newquiz (quiz,answer) VALUES(%s, %s)"
+      query = "INSERT INTO quiz (quiz,answer) VALUES(%s, %s)"
       data = (quiz, answer)
       mycursor.execute(query,data)
     
