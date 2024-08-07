@@ -1,4 +1,4 @@
-Project name : Scatch Master  
+#Project name : Scatch Master  
 
 설명 : 사용자가 주어진 단어를 그림으로 설명하고, 다른 사용자가 그림과 단어의 초성을보고 정답을 맞추는 게임입니다.
 (최소 2인, 최대 3인)😊😊
