@@ -26,49 +26,65 @@ public class SocketHandler extends TextWebSocketHandler {
         SocketRequest socketRequest = socketService.socketRequestMapping(msg);
         String requestName = socketRequest.getType();
 
-        if(requestName.equals("gameOver")){
-            socketService.setRequest1(socketRequest, myId, session);
-        }
-        if(requestName.equals("rollBack") || requestName.equals("clear") || requestName.equals("push")
-            || requestName.equals("sendCoordinate")){
-            socketService.sendMessageSameRoom(1,session, socketRequest);
-        }
-        if(requestName.equals("answer")){
-            Request1 result = socketRequest.typeRequest1(socketRequest);
-            result.setSender(myId);
-            socketRequest.setData(result);
-            socketService.sendMessageSameRoom(0, session, socketRequest);
-            socketService.answerCheck(session, result);
-        }
-        if(requestName.equals("startRound")) {
-            socketService.startRound(session);
-        }
-        if (requestName.equals("start")) {
-            socketService.gameStart(session);
-        }
-        if(requestName.equals("addFriendRequest")){
-            socketService.addFriendRequest(session, socketRequest);
-        }
-        if (requestName.equals("addFriendResponse")){
-            socketService.addFriend(socketRequest, session);
-        }
-        if (requestName.equals("matchingStartDrowGame")) {
-            socketService.startMatching(session, socketRequest, 2);
-        }
-        if(requestName.equals("matchingCancleDrowGame")){
-            socketService.removeMatchingQueue(session, 2);
-        }
-        if(requestName.equals("matchingStartDrowGame3")){
-            socketService.startMatching(session, socketRequest, 3);
-        }
-        if(requestName.equals("matchingCancleDrowGame3")){
-            socketService.removeMatchingQueue(session, 3);
-        }
-        if (requestName.equals("sendMessage")) {
-            socketService.sendChatting(session, socketRequest);
-        }
-        if(requestName.equals("ttabong")){
-            socketService.ttabong(session, socketRequest.getData().toString());
+        switch (requestName){
+            case "gameOver":
+                socketService.setRequest1(socketRequest, myId, session);
+                break;
+
+            case "rollBack":
+            case "clear":
+            case "push":
+            case "sendCoordinate":
+                socketService.sendMessageSameRoom(1,session, socketRequest);
+                break;
+
+            case "answer":
+                Request1 result = socketRequest.typeRequest1(socketRequest);
+                result.setSender(myId);
+                socketRequest.setData(result);
+                socketService.sendMessageSameRoom(0, session, socketRequest);
+                socketService.answerCheck(session, result);
+                break;
+
+            case "startRound":
+                socketService.startRound(session);
+                break;
+
+            case "start":
+                socketService.gameStart(session);
+                break;
+
+            case "sendMessage":
+                socketService.sendChatting(session, socketRequest);
+                break;
+
+            case "ttabong":
+                socketService.ttabong(session, socketRequest.getData().toString());
+                break;
+
+            case "addFriendRequest":
+                socketService.addFriendRequest(session, socketRequest);
+                break;
+
+            case "addFriendResponse":
+                socketService.addFriend(socketRequest, session);
+                break;
+
+            case "matchingStartDrowGame":
+                socketService.startMatching(session, socketRequest, 2);
+                break;
+
+            case "matchingCancleDrowGame":
+                socketService.removeMatchingQueue(session, 2);
+                break;
+
+            case "matchingStartDrowGame3":
+                socketService.startMatching(session, socketRequest, 3);
+                break;
+
+            case "matchingCancleDrowGame3":
+                socketService.removeMatchingQueue(session, 3);
+                break;
         }
     }
 

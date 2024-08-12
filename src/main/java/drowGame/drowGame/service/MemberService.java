@@ -259,17 +259,14 @@ public class MemberService {
             profilePictureRepository.saveProfilePicture(profilePictureEntity);
         }
     }
-
     public ProfilePictureDTO getBasicFile(){
         ProfilePictureEntity byId = profilePictureRepository.findById("admin");
         return new ProfilePictureDTO(byId);
     }
-
     public ProfilePictureDTO getProfilePicture(String id) {
         ProfilePictureEntity byId = profilePictureRepository.findById(id);
         return new ProfilePictureDTO(byId);
     }
-
     public int getMyGamePoint(HttpSession httpSession) {
         String myId = memberSessionService.getMemberId(httpSession.getId());
         int myGamePoint = 0;
@@ -292,7 +289,6 @@ public class MemberService {
         }
         return myItems;
     }
-
     @Transactional
     public boolean updateNickName(HttpSession httpSession, String nick_name) {
         String myId = memberSessionService.getMemberId(httpSession.getId());
@@ -328,7 +324,6 @@ public class MemberService {
             return false;
         }
     }
-
     public List<ChattingDTO> getChatting(HttpSession httpSession, String memberId) {
         String myId = memberSessionService.getMemberId(httpSession.getId());
         List<ChattingEntity> chatting = chattingRepository.getChatting(myId, memberId);
@@ -355,7 +350,6 @@ public class MemberService {
         byNickName.setRanking_point(byNickName.getRanking_point() + ranking_pint);
         byNickName.setGame_point(byNickName.getGame_point() + game_point);
     }
-
     public List<MemberDTO> getAllMember() {
         List<MemberEntity> all = memberRepository.findAll();
         List<MemberDTO> memberDTOList = new ArrayList<>();
@@ -365,7 +359,6 @@ public class MemberService {
         }
         return memberDTOList;
     }
-
     @Transactional
     public boolean updateMemberInfo(MemberDTO memberDTO) {
         Optional<MemberEntity> byId = memberRepository.findById(memberDTO.getId());

@@ -21,10 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 @Service
@@ -53,7 +50,7 @@ public class SocketService {
         for(String s : sm.getMemberIdMap().keySet()){
             if(myId.equals(sm.getMemberIdMap().get(s))){
                 Data data = new Data();
-                data.setType("duplicateLogin");
+                data.setType("/member/duplicateLogin");
                 sendMessage(sm.getSessionMap().get(s), dtoToJson(data));
                 return sm.getSessionMap().get(s); //중복 로그인
             }
@@ -73,7 +70,7 @@ public class SocketService {
             if(sm.getMemberIdMap().containsValue(friend.getFriend_id())){
                 friend.setStatus("online");
             }
-            data.setType("friend");
+            data.setType("/friend");
             data.setData(friend);
             dataList.add(dtoToJson(data));
         }
@@ -134,7 +131,7 @@ public class SocketService {
                     // List 로 바꿔 보내기
                     if (!sm.getMemberId(loginMemberKey).equals(sm.getMemberId(membersKey))) {
                         Data data = new Data();
-                        data.setType("login");
+                        data.setType("/member/login");
                         data.setData(sm.getMemberId(membersKey));
                         sendMessage(wss, dtoToJson(data));
                     }
@@ -145,15 +142,15 @@ public class SocketService {
                     // List 로 바꿔 보내기
                     if (!myId.equals(sm.getMemberId(membersKey))){
                         Data data = new Data();
-                        data.setType("login");
+                        data.setType("/member/login");
                         data.setData(sm.getMemberId(membersKey));
                         sendMessage(wss, dtoToJson(data));
                     }else{
                         Data data = new Data();
-                        data.setType("myId");
+                        data.setType("/member/myId");
                         data.setData(myId);
                         sendMessage(wss, dtoToJson(data));
-                        data.setType("myNickName");
+                        data.setType("/member/myNickName");
                         data.setData(sm.getMemberNickName(membersKey));
                         sendMessage(wss, dtoToJson(data));
                     }
@@ -182,8 +179,10 @@ public class SocketService {
             e.printStackTrace();
         }
     }
+
     @Transactional
-    public void sendChatting(WebSocketSession session, SocketRequest socketRequest){
+    public void sendChatting(WebSocketSession session, SocketRequest socketRequest) {
+
         String myId = sm.getMyId(session);
         ChattingDTO chatting = socketRequest.typeChatting(socketRequest);
         chatting.setSender(myId);
@@ -194,8 +193,8 @@ public class SocketService {
         WebSocketSession[] sessions = new WebSocketSession[2];
         sessions[0] = findReceiverSession(saveResult.getReceiver());
         sessions[1] = findReceiverSession(myId);
-        for(WebSocketSession wss : sessions){
-            if(wss != null){
+        for (WebSocketSession wss : sessions) {
+            if (wss != null) {
                 sendMessage(wss, dtoToJson(saveResult));
             }
         }

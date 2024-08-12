@@ -184,6 +184,34 @@ function wsEvt() {
 }
 //메시지 처리 핸들러 함수
 async function receiveMessageHandler(msg) {
+    if(msg.type != undefined){
+        let firstMappingParam = msg.type.split("/")[1];
+        let secondMappingParam = msg.type.split("/")[2];
+        if(firstMappingParam == 'member'){
+            if(secondMappingParam == 'login'){
+                for(let i = 0; i<friendList.length; i++){
+                    if(msg.data == friendList[i].friend_id){
+                        friendList[i].status = 'online';
+                        document.querySelector('.user-menu').innerHTML = '';
+                        inputFriendList(friendList)
+                    }
+                }
+            }
+            if(secondMappingParam == 'myId'){
+                myId = msg.data;
+            }
+            if(secondMappingParam == 'myNickName'){
+                myIdArea.innerHTML = `${msg.data}`;
+                myNickName = msg.data;
+            }
+            if(secondMappingParam == 'duplicateLogin'){
+                alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
+                location.href = '/';
+            }
+        }
+
+    }
+
     if(msg.type == 'newTurn'){
         console.log(msg.data.yourTurn);
         myTurn = msg.data.yourTurn;
@@ -503,7 +531,7 @@ async function receiveMessageHandler(msg) {
         }
     }
     if (Array.isArray(msg)) {
-        if(msg[0].type == 'friend'){
+        if(msg[0].type.split("/")[1] == 'friend'){
             chattingIsReadFalseCount = [];
             chattingDataList = [];
             friendList = [];
@@ -528,23 +556,6 @@ async function receiveMessageHandler(msg) {
         document.querySelector('.user-menu').innerHTML = '';
         inputFriendList(friendList);
     }
-    if(msg.type == 'myId') {
-
-        myId = msg.data;
-    }
-    if(msg.type == 'myNickName'){
-        myIdArea.innerHTML = `${msg.data}`;
-        myNickName = msg.data;
-    }
-    if(msg.type == 'login'){
-        for(let i = 0; i<friendList.length; i++){
-            if(msg.data == friendList[i].friend_id){
-                friendList[i].status = 'online';
-                document.querySelector('.user-menu').innerHTML = '';
-                inputFriendList(friendList)
-            }
-        }
-    }
     if (msg.type == "logout") {
         console.log(msg);
         for(let i = 0; i<friendList.length; i++){
@@ -555,10 +566,7 @@ async function receiveMessageHandler(msg) {
             }
         }
     }
-    if(msg.type == 'duplicateLogin'){
-        alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
-        location.href = '/';
-    }
+
 }
 //따봉!!
 function ttabong(i){
