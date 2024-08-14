@@ -5,8 +5,6 @@ import drowGame.drowGame.dto.ChattingDTO;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.List;
-
 @Getter @Setter
 public class SocketRequest {
     private String type;
@@ -18,7 +16,7 @@ public class SocketRequest {
             String json = objectMapper.writeValueAsString(socketRequest.getData());
             return objectMapper.readValue(json, AddFriend.class);
         }catch (Exception e){
-            System.out.println("실패");
+            e.printStackTrace();
         }
         return null;
     }
@@ -28,7 +26,7 @@ public class SocketRequest {
             String json = objectMapper.writeValueAsString(socketRequest.getData());
             return objectMapper.readValue(json, AddFriendResponse.class);
         }catch (Exception e){
-            System.out.println("실패");
+            e.printStackTrace();
         }
         return null;
     }
@@ -38,17 +36,17 @@ public class SocketRequest {
             String json = objectMapper.writeValueAsString(socketRequest.getData());
             return objectMapper.readValue(json, NextTurn.class);
         }catch (Exception e){
-            System.out.println("실패");
+            e.printStackTrace();
         }
         return null;
     }
-    public Request1 typeRequest1(SocketRequest socketRequest){
+    public Answer typeRequest1(SocketRequest socketRequest){
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             String json = objectMapper.writeValueAsString(socketRequest.getData());
-            return objectMapper.readValue(json, Request1.class);
+            return objectMapper.readValue(json, Answer.class);
         }catch (Exception e){
-            System.out.println("실패");
+            e.printStackTrace();
         }
         return null;
     }
@@ -58,7 +56,7 @@ public class SocketRequest {
             String json = objectMapper.writeValueAsString(socketRequest.getData());
             return objectMapper.readValue(json, ChattingDTO.class);
         }catch (Exception e){
-            System.out.println("실패");
+            e.printStackTrace();
         }
         return null;
     }

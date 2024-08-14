@@ -7,8 +7,7 @@ import drowGame.drowGame.entity.QuizEntity;
 import drowGame.drowGame.repository.GameSettingRepository;
 import drowGame.drowGame.repository.QuizRepository;
 import drowGame.drowGame.service.MemberService;
-import drowGame.drowGame.socket.GameRoom;
-import drowGame.drowGame.socket.data.MatchingInfo;
+import drowGame.drowGame.socket.data.GameRoom;
 import drowGame.drowGame.socket.data.SocketRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -164,8 +163,10 @@ public class GameManager {
                     for(int i = 0; i<playerSession.size(); i++){
                         if(statusList.get(i) == 1){
                             getStatusList(roomId);
-                            String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
-                            sendMessage(playerSession.get(i), roomIsFull);
+                            SocketRequest sr = new SocketRequest();
+                            sr.setType("/game/timeCount");
+                            sr.setData(count);
+                            sendMessage(playerSession.get(i), dtoToJson(sr));
                         }
                     }
                     count--;
@@ -176,7 +177,7 @@ public class GameManager {
 
                     //Quiz, turn 정보 전송
                     SocketRequest sr = new SocketRequest();
-                    sr.setType("quizData");
+                    sr.setType("/game/quizData");
                     QuizDTO quiz = getQuizDTO();
 
                     gameRoomMap.get(roomId).setQuizDTO(quiz);
@@ -209,8 +210,10 @@ public class GameManager {
                     for(int i = 0; i<playerSession.size(); i++){
                         if(statusList.get(i) == 1){
                             getStatusList(roomId);
-                            String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
-                            sendMessage(playerSession.get(i), roomIsFull);
+                            SocketRequest sr = new SocketRequest();
+                            sr.setType("/game/timeCount");
+                            sr.setData(count);
+                            sendMessage(playerSession.get(i), dtoToJson(sr));
                         }
                     }
                     count--;
@@ -251,7 +254,7 @@ public class GameManager {
             gameRoomMap.get(roomId).getScore().set(index, gameRoomMap.get(roomId).getScore().get(index) + score);
 
             SocketRequest sr = new SocketRequest();
-            sr.setType("score");
+            sr.setType("/game/score");
             sr.setData(gameRoomMap.get(roomId).getScore());
             sendMessageSameRoom(0, session, sr);
 
@@ -269,8 +272,10 @@ public class GameManager {
                         for(int i = 0; i<playerSession.size(); i++){
                             if(statusList.get(i) == 1){
                                 getStatusList(roomId);
-                                String roomIsFull = "{\"timeCount\" : \"" + count + "\"}";
-                                sendMessage(playerSession.get(i), roomIsFull);
+                                SocketRequest sr = new SocketRequest();
+                                sr.setType("/game/timeCount");
+                                sr.setData(count);
+                                sendMessage(playerSession.get(i), dtoToJson(sr));
                             }
                         }
                         count--;
@@ -368,7 +373,7 @@ public class GameManager {
         gameRoomMap.get(roomId).setTimer(new Timer());
 
         SocketRequest sr = new SocketRequest();
-        sr.setType("finalScore");
+        sr.setType("/game/finalScore");
         List<GameRoom.FinalScore> finalScoreList = GameRoom.finalScore(gameRoomMap.get(roomId));
         sr.setData(finalScoreList);
         sendMessageSameRoom(0, session, sr);
@@ -435,7 +440,7 @@ public class GameManager {
         if(gameRoomOnlineMemberCount(roomId) <= 1){
             gameRoomMap.get(roomId).getTimer().cancel();
             SocketRequest sr = new SocketRequest();
-            sr.setType("alone");
+            sr.setType("/game/alone");
             sendMessageSameRoom(1, mySession, sr);
             removeGameRoom(roomId);
         }
@@ -447,7 +452,7 @@ public class GameManager {
 
         //Quiz, turn 정보 전송
         SocketRequest sr = new SocketRequest();
-        sr.setType("nextTurn");
+        sr.setType("/game/nextTurn");
         QuizDTO quiz = getQuizDTO();
 
         gameRoomMap.get(roomId).setQuizDTO(quiz);
@@ -459,7 +464,7 @@ public class GameManager {
         sendMessageSameRoom(0, session, sr);
 
         //clear 전송
-        sr.setType("clear");
+        sr.setType("/game/clear");
         sendMessageSameRoom(0, session, sr);
     }
     public void ttabong(WebSocketSession session, String nick_name){
@@ -478,7 +483,7 @@ public class GameManager {
         gameRoomMap.get(roomId).getScore().set(index, gameRoomMap.get(roomId).getScore().get(index) + score);
 
         SocketRequest sr = new SocketRequest();
-        sr.setType("score");
+        sr.setType("/game/score");
         sr.setData(gameRoomMap.get(roomId).getScore());
         sendMessageSameRoom(0, session, sr);
     }

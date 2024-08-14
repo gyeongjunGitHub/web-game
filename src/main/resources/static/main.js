@@ -187,7 +187,9 @@ async function receiveMessageHandler(msg) {
     if(msg.type != undefined){
         let firstMappingParam = msg.type.split("/")[1];
         let secondMappingParam = msg.type.split("/")[2];
-        if(firstMappingParam == 'member'){
+
+        if(firstMappingParam == 'member')
+        {
             if(secondMappingParam == 'login'){
                 for(let i = 0; i<friendList.length; i++){
                     if(msg.data == friendList[i].friend_id){
@@ -208,326 +210,349 @@ async function receiveMessageHandler(msg) {
                 alert('다른 곳 에서 로그인 시도. 로그아웃 됩니다.');
                 location.href = '/';
             }
-        }
-
-    }
-
-    if(msg.type == 'newTurn'){
-        console.log(msg.data.yourTurn);
-        myTurn = msg.data.yourTurn;
-    }
-    if(msg.matchingUserCount_2 != undefined){
-        matching_info.innerHTML = `<p>매칭중 ..</p>(${msg.matchingUserCount_2}/2)`;
-    }
-    if(msg.matchingUserCount_3 != undefined){
-        matching_info.innerHTML = `<p>매칭중 ..</p>(${msg.matchingUserCount_3}/3)`;
-    }
-    if(msg.timeCount != undefined){
-        timeBox.innerHTML = `${msg.timeCount}`;
-    }
-    if(msg.type == 'addFriendResponse'){
-        if(msg.data == 'true'){
-            document.querySelector('.user-menu').innerHTML = '';
-            inputFriendList(friendList);
-        }
-    }
-    if(msg.type == 'leaveMember'){
-        for(let i = 0; i < userNickNameList.length; i++){
-            if(userNickNameList[i] == msg.data){
-                userScoreBoxList[i].style.backgroundColor = 'red';
-                userNameBoxList[i].innerHTML = '탈주';
-            }
-        }
-    }
-    if(msg.type == 'alone'){
-        alert('게임 인원이 부족하여 종료됩니다.');
-        matchingArea.style.display = 'flex';
-        gameArea.style.display = 'none';
-        finalScore_wrapBox.style.display = 'none';
-        matchingStartBtn.style.display = 'block';
-        matchingStartBtn3.style.display = 'block';
-        matchingCancleBtn.style.display = 'none';
-        matchingCancleBtn3.style.display = 'none';
-        matching_info.style.display = 'none';
-    }
-    if(msg.type == 'answer'){
-        for(let i = 0; i < userList.length; i++){
-            if(userList[i] == msg.data.sender){
-                userAnswerBoxList[i].style.display = 'block';
-                userAnswerBoxList[i].innerHTML = `${msg.data.answer}`;
-
-                //타이머 실행중이면 삭제 후 다시시작
-                if(timerId){
-                    clearTimeout(timerId);
-                    timerId = setTimeout(() => {
-                        userAnswerBoxList[i].style.display = 'none';
-                    }, 2000);
-                }else{
-                    timerId = setTimeout(() => {
-                        userAnswerBoxList[i].style.display = 'none';
-                    }, 2000);
-                }
-
-            }
-        }
-        if(msg.data.answer == answer){
-            for(let i = 0; i<userList.length; i++){
-                if(msg.data.sender == userList[i]){
-                    quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
-                }
-            }
-        }
-    }
-    if(msg.type == 'finalScore'){
-        finalScore_wrapBox.style.display = 'flex';
-        timeBox.innerHTML ='';
-        finalScore_name_box.innerHTML ='';
-        finalScore_score_box.innerHTML ='';
-        for(let i = 0; msg.data.length; i++){
-            console.log(msg.data[i].nick_name);
-            finalScore_name_box.innerHTML += `
-                <div class="finalScore_name_txt">${msg.data[i].nick_name}</div>
-            `;
-            finalScore_score_box.innerHTML += `
-                <div class="finalScore_score_num">${msg.data[i].score.toFixed(2)}</div>
-            `;
-        }
-    }
-    if(msg.type == 'score'){
-        score = msg.data;
-        for(let i = 0; i<userList.length; i++){
-            userScoreBoxList[i].innerHTML = `
-                <span>score : ${msg.data[i].toFixed(2)}</span>
-            `;
-        }
-
-    }
-    if(msg.type == 'quizData'){
-        //퀴즈, 정답
-        quiz = msg.data.quiz;
-        answer = msg.data.answer;
-
-        //내 차례
-        if(msg.data.yourTurn == myTurn){
-            for(let i = 0; i<userList.length; i++){
-                if(i == msg.data.yourTurn -1){
-                    userNameBoxList[i].style.color = 'blue';
-                    userAreaBoxList[i].style.borderColor = 'blue';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
-                }else{
-                    userNameBoxList[i].style.color = 'black';
-                    userAreaBoxList[i].style.borderColor = 'black';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
-                }
-            }
-            //채팅 금지
-            sendBtn.removeEventListener('click', sendAnswer);
-            document.removeEventListener('keypress', sendAnswerKeyPress);
-            //그리기 이벤트 리스너 추가
-            addListener();
-            //quiz 출력
-            quizBox.innerHTML = `${answer}`;
-
-            const data = new Data('start');
-            send(data);
-        }else{
-            for(let i = 0; i<userList.length; i++){
-                if(i == msg.data.yourTurn -1){
-                    userNameBoxList[i].style.color = 'blue';
-                    userAreaBoxList[i].style.borderColor = 'blue';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span><button onclick="ttabong(${[i]})">👍</button>`;
-                }else{
-                    userNameBoxList[i].style.color = 'black';
-                    userAreaBoxList[i].style.borderColor = 'black';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
-                }
-            }
-            //채팅 활성화
-            sendBtn.addEventListener('click', sendAnswer);
-            document.addEventListener('keypress', sendAnswerKeyPress);
-
-            //그리기 이벤트 리스너 삭제
-            removeListener();
-            //quiz 출력
-            quizBox.innerHTML = `${quiz}`;
-        }
-    }
-    if(msg.type == 'nextTurn'){
-
-        //퀴즈, 정답
-        quiz = msg.data.quiz;
-        answer = msg.data.answer;
-
-        //자기 자신의 턴 일 경우
-        if(msg.data.yourTurn == myTurn){
-            for(let i = 0; i<userList.length; i++){
-                if(i == msg.data.yourTurn -1){
-                    userNameBoxList[i].style.color = 'blue';
-                    userAreaBoxList[i].style.borderColor = 'blue';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
-                }else{
-                    userNameBoxList[i].style.color = 'black';
-                    userAreaBoxList[i].style.borderColor = 'black';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
-                }
-            }
-
-
-            //채팅 금지
-            sendBtn.removeEventListener('click', sendAnswer);
-            document.removeEventListener('keypress', sendAnswerKeyPress);
-            //그리기 이벤트 리스너 추가
-            addListener();
-
-            //quiz 출력
-            quizBox.innerHTML = `${answer}`;
-
-            const data = new Data('startRound');
-            send(data);
-
-        }else{
-            for(let i = 0; i<userList.length; i++){
-                if(i == msg.data.yourTurn -1){
-                    userNameBoxList[i].style.color = 'blue';
-                    userAreaBoxList[i].style.borderColor = 'blue';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span><button onclick="ttabong(${i})">👍</button>`;
-                }else{
-                    userNameBoxList[i].style.color = 'black';
-                    userAreaBoxList[i].style.borderColor = 'black';
-                    userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
-                }
-            }
-            //채팅 활성화
-            sendBtn.addEventListener('click', sendAnswer);
-            document.addEventListener('keypress', sendAnswerKeyPress);
-
-            //그리기 이벤트 리스너 삭제
-            removeListener();
-
-            //quiz 출력
-            quizBox.innerHTML = `${quiz}`;
-
-        }
-    }
-    if(msg.type == 'rollBack'){ rollBack_no_send(); }
-    if(msg.type == 'push'){
-        superRam.push(ram);
-        ram = [];
-    }
-    if(msg.type == 'clear'){ clear_no_send(); }
-    if(msg.type == 'sendCoordinate'){
-        draw(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4]);
-        ram.push({ x: msg.data[0], y: msg.data[1], lastX: msg.data[2], lastY: msg.data[3], color: msg.data[4] });
-    }
-    if((msg.type == 'matchingStartDrowGame' || msg.type == 'matchingStartDrowGame3') && msg.data.response == 'success'){
-        score = [0, 0, 0, 0];
-        myTurn = msg.data.yourTurn;
-        userList = msg.data.roomUsers;
-        userNickNameList = msg.data.roomUsersNickName;
-
-        userProfile = [];
-        for(let i = 0; i<userList.length; i++){
-            userAnswerBoxList[i].style.display = 'none';
-            userScoreBoxList[i].style.backgroundColor = '';
-            if(userList[i] == myId){
-                userScoreBoxList[i].style.backgroundColor = '#99e99f';
-            }
-
-            const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
-            userProfile.push(result.stored_file_name);
-        }
-        for(let i = 0; i<4; i++){
-            if(i<userNickNameList.length){
-                userAnswerBoxList[i].innerHTML = '';
-                userNameBoxList[i].innerHTML = `
-                    <span>${userNickNameList[i]}</span>
-                `;
-
-                userScoreBoxList[i].innerHTML = `
-                    <span>score : ${score[i]}</span>
-                `;
-                userPictureBoxList[i].innerHTML = `
-                    <img src="/images/${userProfile[i]}" width="100" height="100">
-                `;
-            }else{
-                userAreaBoxList[i].style.display = 'none';
-            }
-        }
-
-        matchingArea.style.display = 'none';
-        gameArea.style.display = 'block';
-        quizBox.innerHTML = `잠시 후 게임이 시작됩니다.`;
-    }
-    if(msg.type == 'addFriendRequest'){ addFriendProc(msg); }
-    if (msg.type == 'sendMessage') {
-        if (chattingAreaIsTrue){
-            if(msg.sender == getMember() && msg.receiver == myId){
-                //c.getReceiver().equals(myId)
-                getRequest(`/member/setIsRead?member_id=${getMember()}`);
-                msg.receiver_is_read = true;
-                for(let i = 0; i < friendList.length; i++){
-                    if(msg.sender == friendList[i].friend_id){
-                        chattingDataList[i].push(msg);
-                        chatContentArea.innerHTML = '';
-                        inputChattingData(chattingDataList[i]);
-                    }
-                }
-            }
-            else if(msg.sender == myId && msg.receiver == getMember()){
-                for(let i = 0; i < friendList.length; i++){
-                    if(msg.receiver == friendList[i].friend_id){
-                        chattingDataList[i].push(msg);
-                        chatContentArea.innerHTML = '';
-                        inputChattingData(chattingDataList[i]);
-                    }
-                }
-            }
-            else{
+            if(secondMappingParam == 'logout')
+            {
                 for(let i = 0; i<friendList.length; i++){
-                    if(msg.sender == myId && msg.receiver == friendList[i].friend_id){
-                        chattingDataList[i].push(msg);
+                    if(msg.data == friendList[i].friend_id){
+                        friendList[i].status = 'offline';
+                        document.querySelector('.user-menu').innerHTML = '';
+                        inputFriendList(friendList);
                     }
-                    if(msg.sender == friendList[i].friend_id && msg.receiver == myId){
-                        chattingDataList[i].push(msg);
+                }
+            }
+            if(secondMappingParam == 'addFriendRequest')
+            {
+                addFriendProc(msg);
+            }
+        }
+        if(firstMappingParam == 'matching')
+        {
+            if(secondMappingParam == 'userCount_2')
+            {
+                matching_info.innerHTML = `<p>매칭중 ..</p>(${msg.data}/2)`;
+            }
+            if(secondMappingParam == 'userCount_3')
+            {
+                matching_info.innerHTML = `<p>매칭중 ..</p>(${msg.data}/3)`;
+            }
+            if(secondMappingParam == 'success')
+            {
+                score = [0, 0, 0, 0];
+                myTurn = msg.data.yourTurn;
+                userList = msg.data.roomUsers;
+                userNickNameList = msg.data.roomUsersNickName;
+
+                userProfile = [];
+                for(let i = 0; i<userList.length; i++){
+                    userAnswerBoxList[i].style.display = 'none';
+                    userScoreBoxList[i].style.backgroundColor = '';
+                    if(userList[i] == myId){
+                        userScoreBoxList[i].style.backgroundColor = '#99e99f';
+                    }
+
+                    const result = await getRequest(`/member/getProfile?id=${userList[i]}`);
+                    userProfile.push(result.stored_file_name);
+                }
+                for(let i = 0; i<4; i++){
+                    if(i<userNickNameList.length){
+                        userAnswerBoxList[i].innerHTML = '';
+                        userNameBoxList[i].innerHTML = `
+                            <span>${userNickNameList[i]}</span>
+                        `;
+
+                        userScoreBoxList[i].innerHTML = `
+                            <span>score : ${score[i]}</span>
+                        `;
+                        userPictureBoxList[i].innerHTML = `
+                            <img src="/images/${userProfile[i]}" width="100" height="100">
+                        `;
+                    }else{
+                        userAreaBoxList[i].style.display = 'none';
                     }
                 }
 
-                chattingIsReadFalseCount = [];
-                for(let i = 0; i<chattingDataList.length; i++){
-                    let count = 0;
-                    for(let j = 0; j<chattingDataList[i].length; j++){
-                        if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
-                            count++;
+                matchingArea.style.display = 'none';
+                gameArea.style.display = 'block';
+                quizBox.innerHTML = `잠시 후 게임이 시작됩니다.`;
+            }
+        }
+        if(firstMappingParam == 'game')
+        {
+            if(secondMappingParam == 'rollBack')
+            {
+                rollBack_no_send();
+            }
+            if(secondMappingParam == 'clear')
+            {
+                clear_no_send();
+            }
+            if(secondMappingParam == 'push')
+            {
+                superRam.push(ram);
+                ram = [];
+            }
+            if(secondMappingParam == 'sendCoordinate')
+            {
+                draw(msg.data[0], msg.data[1], msg.data[2], msg.data[3], msg.data[4]);
+                ram.push({ x: msg.data[0], y: msg.data[1], lastX: msg.data[2], lastY: msg.data[3], color: msg.data[4] });
+            }
+            if(secondMappingParam == 'answer')
+            {
+                for(let i = 0; i < userList.length; i++){
+                    if(userList[i] == msg.data.sender){
+                        userAnswerBoxList[i].style.display = 'block';
+                        userAnswerBoxList[i].innerHTML = `${msg.data.answer}`;
+
+                        //타이머 실행중이면 삭제 후 다시시작
+                        if(timerId){
+                            clearTimeout(timerId);
+                            timerId = setTimeout(() => {
+                                userAnswerBoxList[i].style.display = 'none';
+                            }, 2000);
+                        }else{
+                            timerId = setTimeout(() => {
+                                userAnswerBoxList[i].style.display = 'none';
+                            }, 2000);
                         }
                     }
-                    chattingIsReadFalseCount.push(count);
                 }
-                document.querySelector('.user-menu').innerHTML = '';
-                inputFriendList(friendList);
-            }
-        }
-        else{
-            for(let i = 0; i<friendList.length; i++){
-                if(msg.sender == myId && msg.receiver == friendList[i].friend_id){
-                    chattingDataList[i].push(msg);
-                }
-                if(msg.sender == friendList[i].friend_id && msg.receiver == myId){
-                    chattingDataList[i].push(msg);
-                }
-            }
-
-            chattingIsReadFalseCount = [];
-            for(let i = 0; i<chattingDataList.length; i++){
-                let count = 0;
-                for(let j = 0; j<chattingDataList[i].length; j++){
-                    if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
-                        count++;
+                if(msg.data.answer == answer){
+                    for(let i = 0; i<userList.length; i++){
+                        if(msg.data.sender == userList[i]){
+                            quizBox.innerHTML = `${userNickNameList[i]}님 정답!!! -> ${answer}`;
+                        }
                     }
                 }
-                chattingIsReadFalseCount.push(count);
             }
-            document.querySelector('.user-menu').innerHTML = '';
-            inputFriendList(friendList);
+            if(secondMappingParam == 'score')
+            {
+                score = msg.data;
+                for(let i = 0; i<userList.length; i++){
+                    userScoreBoxList[i].innerHTML = `
+                        <span>score : ${msg.data[i].toFixed(2)}</span>
+                    `;
+                }
+            }
+            if(secondMappingParam == 'finalScore')
+            {
+                finalScore_wrapBox.style.display = 'flex';
+                timeBox.innerHTML ='';
+                finalScore_name_box.innerHTML ='';
+                finalScore_score_box.innerHTML ='';
+                for(let i = 0; msg.data.length; i++){
+                    console.log(msg.data[i].nick_name);
+                    finalScore_name_box.innerHTML += `
+                        <div class="finalScore_name_txt">${msg.data[i].nick_name}</div>
+                    `;
+                    finalScore_score_box.innerHTML += `
+                        <div class="finalScore_score_num">${msg.data[i].score.toFixed(2)}</div>
+                    `;
+                }
+            }
+            if(secondMappingParam == 'timeCount')
+            {
+                timeBox.innerHTML = `${msg.data}`;
+            }
+            if(secondMappingParam == 'quizData'){
+                //퀴즈, 정답
+                quiz = msg.data.quiz;
+                answer = msg.data.answer;
+
+                //내 차례
+                if(msg.data.yourTurn == myTurn){
+                    for(let i = 0; i<userList.length; i++){
+                        if(i == msg.data.yourTurn -1){
+                            userNameBoxList[i].style.color = 'blue';
+                            userAreaBoxList[i].style.borderColor = 'blue';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
+                        }else{
+                            userNameBoxList[i].style.color = 'black';
+                            userAreaBoxList[i].style.borderColor = 'black';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
+                        }
+                    }
+                    //채팅 금지
+                    sendBtn.removeEventListener('click', sendAnswer);
+                    document.removeEventListener('keypress', sendAnswerKeyPress);
+                    //그리기 이벤트 리스너 추가
+                    addListener();
+                    //quiz 출력
+                    quizBox.innerHTML = `${answer}`;
+
+                    const data = new Data('/game/start');
+                    send(data);
+                }else{
+                    for(let i = 0; i<userList.length; i++){
+                        if(i == msg.data.yourTurn -1){
+                            userNameBoxList[i].style.color = 'blue';
+                            userAreaBoxList[i].style.borderColor = 'blue';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span><button onclick="ttabong(${[i]})">👍</button>`;
+                        }else{
+                            userNameBoxList[i].style.color = 'black';
+                            userAreaBoxList[i].style.borderColor = 'black';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
+                        }
+                    }
+                    //채팅 활성화
+                    sendBtn.addEventListener('click', sendAnswer);
+                    document.addEventListener('keypress', sendAnswerKeyPress);
+
+                    //그리기 이벤트 리스너 삭제
+                    removeListener();
+                    //quiz 출력
+                    quizBox.innerHTML = `${quiz}`;
+                }
+            }
+            if(secondMappingParam == 'nextTurn'){
+                //퀴즈, 정답
+                quiz = msg.data.quiz;
+                answer = msg.data.answer;
+
+                //자기 자신의 턴 일 경우
+                if(msg.data.yourTurn == myTurn){
+                    for(let i = 0; i<userList.length; i++){
+                        if(i == msg.data.yourTurn -1){
+                            userNameBoxList[i].style.color = 'blue';
+                            userAreaBoxList[i].style.borderColor = 'blue';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
+                        }else{
+                            userNameBoxList[i].style.color = 'black';
+                            userAreaBoxList[i].style.borderColor = 'black';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
+                        }
+                    }
+                    //채팅 금지
+                    sendBtn.removeEventListener('click', sendAnswer);
+                    document.removeEventListener('keypress', sendAnswerKeyPress);
+                    //그리기 이벤트 리스너 추가
+                    addListener();
+
+                    //quiz 출력
+                    quizBox.innerHTML = `${answer}`;
+
+                    const data = new Data('/game/startRound');
+                    send(data);
+
+                }else{
+                    for(let i = 0; i<userList.length; i++){
+                        if(i == msg.data.yourTurn -1){
+                            userNameBoxList[i].style.color = 'blue';
+                            userAreaBoxList[i].style.borderColor = 'blue';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span><button onclick="ttabong(${i})">👍</button>`;
+                        }else{
+                            userNameBoxList[i].style.color = 'black';
+                            userAreaBoxList[i].style.borderColor = 'black';
+                            userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
+                        }
+                    }
+                    //채팅 활성화
+                    sendBtn.addEventListener('click', sendAnswer);
+                    document.addEventListener('keypress', sendAnswerKeyPress);
+
+                    //그리기 이벤트 리스너 삭제
+                    removeListener();
+
+                    //quiz 출력
+                    quizBox.innerHTML = `${quiz}`;
+
+                }
+            }
+            if(secondMappingParam == 'leaveMember')
+            {
+                for(let i = 0; i < userNickNameList.length; i++){
+                    if(userNickNameList[i] == msg.data){
+                        userScoreBoxList[i].style.backgroundColor = 'red';
+                        userNameBoxList[i].innerHTML = '탈주';
+                    }
+                }
+            }
+            if(secondMappingParam == 'alone')
+            {
+                alert('게임 인원이 부족하여 종료됩니다.');
+                matchingArea.style.display = 'flex';
+                gameArea.style.display = 'none';
+                finalScore_wrapBox.style.display = 'none';
+                matchingStartBtn.style.display = 'block';
+                matchingStartBtn3.style.display = 'block';
+                matchingCancleBtn.style.display = 'none';
+                matchingCancleBtn3.style.display = 'none';
+                matching_info.style.display = 'none';
+            }
+        }
+        if(firstMappingParam == 'chatting')
+        {
+            if(secondMappingParam == 'sendChatting')
+            {
+                if (chattingAreaIsTrue){
+                    if(msg.sender == getMember() && msg.receiver == myId){
+                        //c.getReceiver().equals(myId)
+                        getRequest(`/member/setIsRead?member_id=${getMember()}`);
+                        msg.receiver_is_read = true;
+                        for(let i = 0; i < friendList.length; i++){
+                            if(msg.sender == friendList[i].friend_id){
+                                chattingDataList[i].push(msg);
+                                chatContentArea.innerHTML = '';
+                                inputChattingData(chattingDataList[i]);
+                            }
+                        }
+                    }
+                    else if(msg.sender == myId && msg.receiver == getMember()){
+                        for(let i = 0; i < friendList.length; i++){
+                            if(msg.receiver == friendList[i].friend_id){
+                                chattingDataList[i].push(msg);
+                                chatContentArea.innerHTML = '';
+                                inputChattingData(chattingDataList[i]);
+                            }
+                        }
+                    }
+                    else{
+                        for(let i = 0; i<friendList.length; i++){
+                            if(msg.sender == myId && msg.receiver == friendList[i].friend_id){
+                                chattingDataList[i].push(msg);
+                            }
+                            if(msg.sender == friendList[i].friend_id && msg.receiver == myId){
+                                chattingDataList[i].push(msg);
+                            }
+                        }
+
+                        chattingIsReadFalseCount = [];
+                        for(let i = 0; i<chattingDataList.length; i++){
+                            let count = 0;
+                            for(let j = 0; j<chattingDataList[i].length; j++){
+                                if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
+                                    count++;
+                                }
+                            }
+                            chattingIsReadFalseCount.push(count);
+                        }
+                        document.querySelector('.user-menu').innerHTML = '';
+                        inputFriendList(friendList);
+                    }
+                }
+                else{
+                    for(let i = 0; i<friendList.length; i++){
+                        if(msg.sender == myId && msg.receiver == friendList[i].friend_id){
+                            chattingDataList[i].push(msg);
+                        }
+                        if(msg.sender == friendList[i].friend_id && msg.receiver == myId){
+                            chattingDataList[i].push(msg);
+                        }
+                    }
+
+                    chattingIsReadFalseCount = [];
+                    for(let i = 0; i<chattingDataList.length; i++){
+                        let count = 0;
+                        for(let j = 0; j<chattingDataList[i].length; j++){
+                            if(chattingDataList[i][j].receiver == myId && chattingDataList[i][j].receiver_is_read == false){
+                                count++;
+                            }
+                        }
+                        chattingIsReadFalseCount.push(count);
+                    }
+                    document.querySelector('.user-menu').innerHTML = '';
+                    inputFriendList(friendList);
+                }
+            }
         }
     }
     if (Array.isArray(msg)) {
@@ -556,22 +581,11 @@ async function receiveMessageHandler(msg) {
         document.querySelector('.user-menu').innerHTML = '';
         inputFriendList(friendList);
     }
-    if (msg.type == "logout") {
-        console.log(msg);
-        for(let i = 0; i<friendList.length; i++){
-            if(msg.data == friendList[i].friend_id){
-                friendList[i].status = 'offline';
-                document.querySelector('.user-menu').innerHTML = '';
-                inputFriendList(friendList);
-            }
-        }
-    }
-
 }
 //따봉!!
 function ttabong(i){
     userNameBoxList[i].innerHTML = `<span>${userNickNameList[i]}</span>`;
-    const data = new Data('ttabong', userNickNameList[i]);
+    const data = new Data('/game/ttabong', userNickNameList[i]);
     send(data);
 }
 //친구추가 요청 처리 함수
@@ -591,7 +605,7 @@ function addFriendProc(msg){
 // 매칭 함수
 function matching(request) {
     if (request == 'drowGameStart') {
-        const data = new Data('matchingStartDrowGame');
+        const data = new Data('/matching/start/2');
         send(data);
         matchingStartBtn.style.display = 'none';
         matchingStartBtn3.style.display = 'none';
@@ -599,7 +613,7 @@ function matching(request) {
         matching_info.style.display = 'block';
     }
     if (request == 'drowGameCancle') {
-        const data = new Data('matchingCancleDrowGame');
+        const data = new Data('/matching/cancel/2');
         send(data);
 
         matchingStartBtn.style.display = 'block';
@@ -610,7 +624,7 @@ function matching(request) {
 }
 function matching3(request){
     if(request == 'drowGameStart3'){
-        const data = new Data('matchingStartDrowGame3');
+        const data = new Data('/matching/start/3');
         send(data);
         matchingStartBtn.style.display = 'none';
         matchingStartBtn3.style.display = 'none';
@@ -618,7 +632,7 @@ function matching3(request){
         matching_info.style.display = 'block';
     }
     if (request == 'drowGameCancle3') {
-        const data = new Data('matchingCancleDrowGame3');
+        const data = new Data('/matching/cancel/3');
         send(data);
         matchingStartBtn.style.display = 'block';
         matchingStartBtn3.style.display = 'block';
@@ -626,22 +640,10 @@ function matching3(request){
         matching_info.style.display = 'none';
     }
 }
-function matching4(request){
-    if(request == 'drowGameStart4'){
-        const data = new Data('matchingStartDrowGame4');
-        matchingStartBtn4.style.display = 'none';
-        matchingCancleBtn4.style.display = 'block';
-    }
-    if (request == 'drowGameCancle4') {
-        const data = new Data('matchingCancleDrowGame4');
 
-        matchingStartBtn4.style.display = 'block';
-        matchingCancleBtn4.style.display = 'none';
-    }
-}
 // 친구 추가 요청 전송
 function addFriendRequest(id) {
-    const data = new Data('addFriendRequest', { receiver : id });
+    const data = new Data('/member/addFriendRequest', { receiver : id });
     send(data);
     document.getElementById('addFriendBtn').style.display = 'none';
     searchResult.innerHTML = `
@@ -651,7 +653,7 @@ function addFriendRequest(id) {
 }
 // 친구 추가 요청 응답 전송 -> 수락 및 거절 이후 화면 처리 필요
 function addFriendResponse(response, receiver){
-    const data = new Data('addFriendResponse', { 'receiver' : receiver , 'response' : response });
+    const data = new Data('/member/addFriendResponse', { 'receiver' : receiver , 'response' : response });
     send(data);
     acceptArea.style.display='none';
 }
@@ -811,7 +813,7 @@ function inputChattingData(chattingData){
 }
 //메시지 set
 function sendMessage() {
-    const data = new Data('sendMessage', { 'receiver' : getMember(), 'content' : message.value});
+    const data = new Data('/chatting/sendChatting', { 'receiver' : getMember(), 'content' : message.value});
     send(data);
     message.value = '';
 }
@@ -891,7 +893,7 @@ function mouseHandler(event){
             superRam.push(ram);
 
             //push 요청 전송
-            const data = new Data('push');
+            const data = new Data('/game/push');
             send(data);
             mouseState.isout=true;
         }
@@ -904,7 +906,7 @@ function mouseMoveHandler(event){
 
 
     //좌표전송
-    const data = new Data('sendCoordinate', [xy[0], xy[1], lastXY.lastX, lastXY.lastY, color]);
+    const data = new Data('/game/sendCoordinate', [xy[0], xy[1], lastXY.lastX, lastXY.lastY, color]);
     send(data);
 
     setLastXY(xy[0], xy[1]);
@@ -946,7 +948,7 @@ function clear(){
     ctx.clearRect(0,0,canvas.width, canvas.height);
     superRam=[];
     //clear 요청 전송
-    const data = new Data('clear');
+    const data = new Data('/game/clear');
     send(data);
 }
 function clear_no_send(){
@@ -963,7 +965,7 @@ function rollBack(){
     }
 
     //rollBack 요청 전송
-    const data = new Data('rollBack');
+    const data = new Data('/game/rollBack');
     ws.send(JSON.stringify(data));
 }
 function rollBack_no_send(){
@@ -976,13 +978,13 @@ function rollBack_no_send(){
     }
 }
 function sendAnswer(){
-    const data = new Data('answer', { "answer" : answerBox.value , "timeCount" : timeBox.innerHTML});
+    const data = new Data('/game/answer', { "answer" : answerBox.value , "timeCount" : timeBox.innerHTML});
     answerBox.value = '';
     send(data);
 }
 function sendAnswerKeyPress(e){
     if(e.keyCode == 13){ //enter press
-        const data = new Data('answer', { "answer" : answerBox.value , "timeCount" : timeBox.innerHTML});
+        const data = new Data('/game/answer', { "answer" : answerBox.value , "timeCount" : timeBox.innerHTML});
         answerBox.value = '';
         send(data);
     }
